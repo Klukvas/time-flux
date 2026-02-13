@@ -120,7 +120,7 @@ export function DayFormModal({
   const handleAddMedia = useCallback(
     async (files: File[]) => {
       const newItems: MediaItem[] = files.map((f) => ({
-        id: crypto.randomUUID(),
+        id: Math.random().toString(36).slice(2) + Date.now().toString(36),
         file: f,
         previewUrl: URL.createObjectURL(f),
         mimeType: f.type,
