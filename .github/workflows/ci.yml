@@ -286,9 +286,6 @@ jobs:
             # Restart services (recreates only changed containers)
             docker compose up -d
 
-            # Run database migrations
-            docker compose exec -T backend npx prisma migrate deploy
-
             # Remove old unused images
             docker image prune -f
 
