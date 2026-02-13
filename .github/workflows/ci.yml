@@ -30,6 +30,31 @@ env:
 
 jobs:
   # ===========================================================================
+  # Job 0: Detect which paths changed
+  # ===========================================================================
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'be/**'
+              - 'docker-compose.yml'
+            frontend:
+              - 'fe/**'
+              - 'docker-compose.yml'
+
+  # ===========================================================================
   # Job 1: Backend Unit Tests
   # ===========================================================================
   backend-test:
@@ -101,8 +126,11 @@ jobs:
   docker-build-and-push:
     name: Docker Build & Push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    needs: [backend-test, frontend-lint]
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch')
+    needs: [backend-test, frontend-lint, changes]
 
     steps:
       - name: Checkout repository
@@ -192,16 +220,41 @@ jobs:
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      needs.docker-build-and-push.result == 'success'
     needs: [docker-build-and-push]
 
     steps:
+      - name: Debug SSH connection
+        run: |
+          echo "=== SSH Key Diagnostics ==="
+          echo "SSH_PRIVATE_KEY is set: ${{ secrets.SSH_PRIVATE_KEY != '' }}"
+          echo "SERVER_HOST is set: ${{ secrets.SERVER_HOST != '' }}"
+          echo "SERVER_USERNAME is set: ${{ secrets.SERVER_USERNAME != '' }}"
+          echo "Key length: ${#KEY} chars"
+          echo "Key first line: $(echo "$KEY" | head -1)"
+          echo "Key last line: $(echo "$KEY" | tail -1)"
+          echo "Key line count: $(echo "$KEY" | wc -l)"
+
+          echo "=== Attempting raw SSH connection ==="
+          mkdir -p ~/.ssh
+          echo "$KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh -vvv -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes \
+            ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "echo SSH_OK" 2>&1 || true
+          rm -f ~/.ssh/deploy_key
+        env:
+          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
-          username: deploy
+          username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          debug: true
           script: |
             cd /opt/lifespan
 

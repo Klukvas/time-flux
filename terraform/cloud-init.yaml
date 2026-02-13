@@ -1,5 +1,8 @@
 #cloud-config
 
+ssh_authorized_keys:
+  - ${ssh_public_key}
+
 users:
   - name: deploy
     groups: sudo
@@ -45,8 +48,8 @@ runcmd:
   - ufw allow 443/tcp
   - ufw --force enable
 
-  # Harden SSH — disable root login and password authentication
-  - sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+  # Harden SSH — allow root login via key only
+  - sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
   - sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
   - sed -i 's/^#\?ChallengeResponseAuthentication.*/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
   - sed -i 's/^#\?UsePAM.*/UsePAM no/' /etc/ssh/sshd_config

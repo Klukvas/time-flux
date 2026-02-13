@@ -19,5 +19,5 @@ variable "location" {
 variable "ssh_public_key_path" {
   description = "Path to the SSH public key file"
   type        = string
-  default     = "~/.ssh/id_ed25519.pub"
+  default     = "~/.ssh/gha_deploy.pub"
 }
