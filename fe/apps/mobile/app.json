@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "LifeSpan",
+    "slug": "lifespan",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "lifespan",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.lifespan.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#3b82f6"
+      },
+      "package": "app.lifespan.mobile"
+    },
+    "plugins": ["expo-router", "expo-secure-store"]
+  }
+}

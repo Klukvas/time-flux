@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String?      @map("password_hash")
+  googleId     String?      @unique @map("google_id")
+  provider     AuthProvider @default(LOCAL)
+  avatarUrl    String?      @map("avatar_url")
+  timezone            String   @default("UTC")
+  onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  categories    Category[]
+  dayStates     DayState[]
+  eventGroups   EventGroup[]
+  days          Day[]
+  dayMedia      DayMedia[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  color     String
+  isSystem  Boolean  @default(false) @map("is_system")
+  order     Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventGroups  EventGroup[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("categories")
+}
+
+model DayState {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  color     String
+  isSystem  Boolean  @default(false) @map("is_system")
+  order     Int      @default(0)
+  score     Int      @default(5) @db.SmallInt
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  days     Day[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("day_states")
+}
+
+model EventGroup {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  categoryId  String   @map("category_id")
+  title       String   @db.VarChar(200)
+  description String?  @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  periods  EventPeriod[]
+
+  @@index([userId])
+  @@index([userId, categoryId])
+  @@map("event_groups")
+}
+
+model EventPeriod {
+  id           String    @id @default(uuid())
+  eventGroupId String    @map("event_group_id")
+  startDate    DateTime  @map("start_date") @db.Timestamptz
+  endDate      DateTime? @map("end_date") @db.Timestamptz
+  comment      String?   @db.VarChar(300)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  eventGroup EventGroup @relation(fields: [eventGroupId], references: [id], onDelete: Cascade)
+
+  @@index([eventGroupId])
+  @@index([eventGroupId, startDate])
+  @@index([eventGroupId, endDate])
+  @@map("event_periods")
+}
+
+model Day {
+  id          String     @id @default(uuid())
+  userId      String     @map("user_id")
+  date        DateTime   @db.Date
+  dayStateId  String?    @map("day_state_id")
+  mainMediaId String?    @unique @map("main_media_id")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dayState   DayState?  @relation(fields: [dayStateId], references: [id], onDelete: SetNull)
+  mainMedia  DayMedia?  @relation("MainMedia", fields: [mainMediaId], references: [id], onDelete: SetNull)
+  media      DayMedia[] @relation("DayMedia")
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@index([userId, dayStateId])
+  @@map("days")
+}
+
+model DayMedia {
+  id          String   @id @default(uuid())
+  dayId       String   @map("day_id")
+  userId      String   @map("user_id")
+  s3Key       String   @map("s3_key")
+  fileName    String   @map("file_name")
+  contentType String   @map("content_type")
+  size        Int
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  day         Day      @relation("DayMedia", fields: [dayId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mainForDay  Day?     @relation("MainMedia")
+
+  @@index([dayId])
+  @@index([userId])
+  @@map("day_media")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}

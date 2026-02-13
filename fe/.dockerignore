@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+.env
+.env.*
+*.log
+coverage
+.git
+apps/mobile

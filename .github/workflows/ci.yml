@@ -1,0 +1,217 @@
+# =============================================================================
+# LifeSpan CI/CD Pipeline
+# =============================================================================
+# Triggers: push to main, pull requests to main
+# Jobs:     backend-test, frontend-lint, docker-build-and-push, deploy
+# Registry: Docker Hub
+# =============================================================================
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-flight runs for the same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Least-privilege permissions
+permissions:
+  contents: read
+
+env:
+  BACKEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/lifespan-backend
+  FRONTEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/lifespan-frontend
+
+jobs:
+  # ===========================================================================
+  # Job 1: Backend Unit Tests
+  # ===========================================================================
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: be
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: be/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test -- --ci --coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: be/coverage/
+          retention-days: 7
+
+  # ===========================================================================
+  # Job 2: Frontend Lint
+  # ===========================================================================
+  frontend-lint:
+    name: Frontend Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fe
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: fe/package-lock.json
+
+      # Install all workspace dependencies from the monorepo root
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint -w apps/web
+
+  # ===========================================================================
+  # Job 3: Docker Build & Push (main branch only)
+  # ===========================================================================
+  docker-build-and-push:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [backend-test, frontend-lint]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Docker Buildx for multi-stage / cache support
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # -------------------------------------------------------------------
+      # Metadata: generates image tags (latest + commit SHA)
+      # -------------------------------------------------------------------
+      - name: Backend image metadata
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.BACKEND_IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=,format=short
+
+      - name: Frontend image metadata
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.FRONTEND_IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=,format=short
+
+      # -------------------------------------------------------------------
+      # Build & push backend
+      # -------------------------------------------------------------------
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./be
+          file: ./be/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # -------------------------------------------------------------------
+      # Build & push frontend
+      # -------------------------------------------------------------------
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./fe
+          file: ./fe/apps/web/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # -------------------------------------------------------------------
+      # Security scan with Trivy
+      # -------------------------------------------------------------------
+      - name: Scan backend image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.BACKEND_IMAGE }}:latest
+          format: table
+          exit-code: 0         # Warn only, don't fail the pipeline
+          severity: CRITICAL,HIGH
+
+      - name: Scan frontend image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.FRONTEND_IMAGE }}:latest
+          format: table
+          exit-code: 0
+          severity: CRITICAL,HIGH
+
+  # ===========================================================================
+  # Job 4: Deploy to Production Server
+  # ===========================================================================
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [docker-build-and-push]
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/lifespan
+
+            # Pull latest images
+            docker compose pull
+
+            # Restart services (recreates only changed containers)
+            docker compose up -d
+
+            # Run database migrations
+            docker compose exec -T backend npx prisma migrate deploy
+
+            # Remove old unused images
+            docker image prune -f
+
+            # Verify all containers are running
+            docker compose ps

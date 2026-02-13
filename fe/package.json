@@ -1,0 +1,15 @@
+{
+  "name": "lifespan-frontend",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "web:dev": "npm run dev -w apps/web",
+    "web:build": "npm run build -w apps/web",
+    "mobile:start": "npm run start -w apps/mobile",
+    "mobile:ios": "npm run ios -w apps/mobile",
+    "mobile:android": "npm run android -w apps/mobile"
+  }
+}

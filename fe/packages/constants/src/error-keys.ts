@@ -1,0 +1,30 @@
+import type { ErrorCode } from '@lifespan/api';
+
+/** Maps backend error codes to i18n translation keys. */
+export const ERROR_TRANSLATION_KEYS: Record<ErrorCode, string> = {
+  USER_NOT_FOUND: 'errors.user_not_found',
+  EVENT_GROUP_NOT_FOUND: 'errors.event_group_not_found',
+  EVENT_GROUP_IN_USE: 'errors.event_group_in_use',
+  EVENT_PERIOD_NOT_FOUND: 'errors.event_period_not_found',
+  ACTIVE_PERIOD_EXISTS: 'errors.active_period_exists',
+  EVENT_NOT_FOUND: 'errors.event_not_found',
+  EVENT_ALREADY_CLOSED: 'errors.event_already_closed',
+  INVALID_DATE_RANGE: 'errors.invalid_date_range',
+  CATEGORY_NOT_FOUND: 'errors.category_not_found',
+  DAY_STATE_NOT_FOUND: 'errors.day_state_not_found',
+  DAY_NOT_FOUND: 'errors.day_not_found',
+  MEDIA_NOT_FOUND: 'errors.media_not_found',
+  INVALID_FILE_TYPE: 'errors.invalid_file_type',
+  FILE_TOO_LARGE: 'errors.file_too_large',
+  FUTURE_DATE: 'errors.future_date',
+  PERIOD_OVERLAP: 'errors.period_overlap',
+  CATEGORY_IN_USE: 'errors.category_in_use',
+  DAY_STATE_IN_USE: 'errors.day_state_in_use',
+  VALIDATION_ERROR: 'errors.validation_error',
+  UNAUTHORIZED: 'errors.unauthorized',
+  FORBIDDEN: 'errors.forbidden',
+  GOOGLE_AUTH_FAILED: 'errors.google_auth_failed',
+  USER_CREATION_FAILED: 'errors.user_creation_failed',
+  INTERNAL_ERROR: 'errors.internal_error',
+  HTTP_ERROR: 'errors.http_error',
+};
