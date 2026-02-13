@@ -94,6 +94,8 @@ export function DayPage({ date }: DayPageProps) {
     [overlappingPeriods],
   );
 
+  const [videoThumbnails, setVideoThumbnails] = useState<Record<string, string>>({});
+
   const allMediaItems = useMemo(() => {
     const persisted = (existingMedia ?? []).map((m) => {
       const item = toMediaItem(m);
@@ -105,8 +107,6 @@ export function DayPage({ date }: DayPageProps) {
     });
     return [...persisted, ...localMediaItems];
   }, [existingMedia, localMediaItems, videoThumbnails]);
-
-  const [videoThumbnails, setVideoThumbnails] = useState<Record<string, string>>({});
 
   // Initialize state from existing media
   useEffect(() => {

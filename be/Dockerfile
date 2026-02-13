@@ -5,8 +5,9 @@ FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-# Copy dependency manifests
+# Copy dependency manifests and Prisma config
 COPY package.json package-lock.json* ./
+COPY prisma.config.ts ./
 COPY prisma ./prisma/
 
 # Install production + dev dependencies (need dev for build step)
