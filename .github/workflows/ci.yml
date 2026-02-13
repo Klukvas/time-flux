@@ -228,26 +228,42 @@ jobs:
     needs: [docker-build-and-push]
 
     steps:
-      - name: Debug SSH connection
-        run: |
-          echo "=== SSH Key Diagnostics ==="
-          echo "SSH_PRIVATE_KEY is set: ${{ secrets.SSH_PRIVATE_KEY != '' }}"
-          echo "SERVER_HOST is set: ${{ secrets.SERVER_HOST != '' }}"
-          echo "SERVER_USERNAME is set: ${{ secrets.SERVER_USERNAME != '' }}"
-          echo "Key length: ${#KEY} chars"
-          echo "Key first line: $(echo "$KEY" | head -1)"
-          echo "Key last line: $(echo "$KEY" | tail -1)"
-          echo "Key line count: $(echo "$KEY" | wc -l)"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-          echo "=== Attempting raw SSH connection ==="
-          mkdir -p ~/.ssh
-          echo "$KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh -vvv -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes \
-            ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} "echo SSH_OK" 2>&1 || true
-          rm -f ~/.ssh/deploy_key
-        env:
-          KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Create production .env file
+        run: |
+          cat > .env.prod << 'ENVEOF'
+          BACKEND_IMAGE=${{ secrets.DOCKER_USERNAME }}/lifespan-backend
+          FRONTEND_IMAGE=${{ secrets.DOCKER_USERNAME }}/lifespan-frontend
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
+          S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}
+          S3_REGION=${{ secrets.S3_REGION }}
+          S3_BUCKET=${{ secrets.S3_BUCKET }}
+          S3_ACCESS_KEY_ID=${{ secrets.S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+          NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+          ENVEOF
+          # Remove leading whitespace from heredoc
+          sed -i 's/^          //' .env.prod
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.prod.yml,.env.prod"
+          target: /opt/lifespan
+          overwrite: true
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
@@ -255,9 +271,12 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          debug: true
           script: |
             cd /opt/lifespan
+
+            # Rename files
+            mv -f .env.prod .env
+            mv -f docker-compose.prod.yml docker-compose.yml
 
             # Pull latest images
             docker compose pull
