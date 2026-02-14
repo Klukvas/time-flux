@@ -9,6 +9,7 @@ import { getPeriodsForDate, getUserMessage } from '@lifespan/domain';
 import {
   useCreateDayMedia,
   useCreateDayStateFromRecommendation,
+  useCreatePeriod,
   useDayMedia,
   useDayStates,
   useDeleteDayMedia,
@@ -69,6 +70,7 @@ export function DayPage({ date }: DayPageProps) {
   const upsertDay = useUpsertDay();
   const createDayMedia = useCreateDayMedia();
   const deleteDayMedia = useDeleteDayMedia();
+  const createPeriod = useCreatePeriod();
   const { upload } = usePresignedUpload();
 
   const [selectedDayStateId, setSelectedDayStateId] = useState<string | null>(null);
@@ -266,7 +268,13 @@ export function DayPage({ date }: DayPageProps) {
   };
 
   const handleChapterSelect = (eventGroupId: string) => {
-    router.push(`/chapters/${eventGroupId}`);
+    createPeriod.mutate(
+      { groupId: eventGroupId, data: { startDate: date } },
+      {
+        onSuccess: () => toast.success(t('day_form.chapter_added')),
+        onError: (err) => toast.error(getUserMessage(extractApiError(err))),
+      },
+    );
   };
 
   const today = isToday(date);

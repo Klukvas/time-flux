@@ -237,6 +237,7 @@ const uk: TranslationDictionary = {
     comment_placeholder: 'Як пройшов день?',
     day_updated: 'День оновлено',
     mood_cleared: 'Настрій очищено',
+    chapter_added: 'Розділ розпочато',
     back_to_timeline: 'Хронологія',
     pick_date: 'Вибрати день',
     calendar_cancel: 'Скасувати',

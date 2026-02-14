@@ -237,6 +237,7 @@ const en: TranslationDictionary = {
     comment_placeholder: 'How was your day?',
     day_updated: 'Day updated',
     mood_cleared: 'Mood cleared',
+    chapter_added: 'Chapter started',
     back_to_timeline: 'Timeline',
     pick_date: 'Pick a day',
     calendar_cancel: 'Cancel',
