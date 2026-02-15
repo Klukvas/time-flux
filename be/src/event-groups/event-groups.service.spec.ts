@@ -369,19 +369,15 @@ describe('EventGroupsService — Period Business Logic', () => {
       ).rejects.toThrow(InvalidDateRangeError);
     });
 
-    it('should allow same start and end date (single-day period)', async () => {
-      repo.findActivePeriodForGroup.mockResolvedValue(null);
-      repo.findClosedPeriodsForGroup.mockResolvedValue([]);
-      repo.createPeriod.mockResolvedValue(makePeriod('p-single', '2024-03-15', '2024-03-15') as any);
-      repo.findGroupByIdAndUserId
-        .mockResolvedValueOnce(mockGroup as any)
-        .mockResolvedValueOnce({ ...mockGroup, periods: [makePeriod('p-single', '2024-03-15', '2024-03-15')] } as any);
+    it('should reject same start and end date (zero-length period)', async () => {
+      repo.findGroupByIdAndUserId.mockResolvedValueOnce(mockGroup as any);
 
-      const result = await service.createPeriod(userId, groupId, {
-        startDate: '2024-03-15',
-        endDate: '2024-03-15',
-      });
-      expect(result.periods).toHaveLength(1);
+      await expect(
+        service.createPeriod(userId, groupId, {
+          startDate: '2024-03-15',
+          endDate: '2024-03-15',
+        }),
+      ).rejects.toThrow(InvalidDateRangeError);
     });
   });
 
