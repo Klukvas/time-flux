@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useOnboarding, useTimeline, useWeekTimeline } from '@lifespan/hooks';
+import { useOnboarding, useTimeline, useTranslation, useWeekTimeline } from '@lifespan/hooks';
 import {
   buildWeekGrid,
   groupTimelineHorizontal,
@@ -20,11 +20,13 @@ import {
   isToday,
   todayISO,
 } from '@lifespan/utils';
+import { DateTime } from 'luxon';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import { DayCircle } from '@/components/ui/day-circle';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { OnThisDaySection } from '@/components/timeline/on-this-day';
+import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
 import type { TimelineMode } from '@/stores/view-store';
 
@@ -33,11 +35,23 @@ const MODE_OPTIONS: { value: TimelineMode; label: string }[] = [
   { value: 'week', label: 'Week' },
 ];
 
+/** Derive registration date (YYYY-MM-DD) from user's createdAt ISO string, in their timezone. */
+function getRegistrationDate(createdAt: string | undefined, timezone: string): string | undefined {
+  if (!createdAt) return undefined;
+  return DateTime.fromISO(createdAt).setZone(timezone).toISODate() ?? undefined;
+}
+
 export function TimelineView() {
   const router = useRouter();
   const timelineMode = useViewStore((s) => s.timelineMode);
   const setTimelineMode = useViewStore((s) => s.setTimelineMode);
   const onboarding = useOnboarding();
+  const user = useAuthStore((s) => s.user);
+
+  const registrationDate = useMemo(
+    () => getRegistrationDate(user?.createdAt, user?.timezone ?? 'UTC'),
+    [user?.createdAt, user?.timezone],
+  );
 
   const [currentDate, setCurrentDate] = useState(todayISO());
   const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>({});
@@ -57,9 +71,15 @@ export function TimelineView() {
     }
   }, [onboarding.step]);
 
+  // Clamp week navigation so user can't go before registration week
   const navigateWeek = (offset: number) => {
     setActiveMemoryDate(null);
-    setCurrentDate(addDays(currentDate, offset * 7));
+    const next = addDays(currentDate, offset * 7);
+    if (registrationDate && next < registrationDate) {
+      setCurrentDate(registrationDate);
+    } else {
+      setCurrentDate(next);
+    }
   };
 
   const goToToday = () => setCurrentDate(todayISO());
@@ -115,29 +135,25 @@ export function TimelineView() {
           {/* Date range filter for Horizontal mode */}
           {timelineMode === 'horizontal' && (
             <div className="flex flex-wrap items-center gap-2">
-              <label className="flex items-center gap-1.5">
-                <span className="text-xs text-content-tertiary">From</span>
-                <input
-                  type="date"
-                  className="rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-base sm:text-sm text-content"
-                  value={dateRange.from ?? ''}
-                  onChange={(e) =>
-                    setDateRange((p) => ({ ...p, from: e.target.value || undefined }))
-                  }
-                />
-              </label>
+              <input
+                type="date"
+                className="rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-base sm:text-sm text-content"
+                value={dateRange.from ?? ''}
+                min={registrationDate}
+                onChange={(e) =>
+                  setDateRange((p) => ({ ...p, from: e.target.value || undefined }))
+                }
+              />
               <span className="text-content-tertiary">—</span>
-              <label className="flex items-center gap-1.5">
-                <span className="text-xs text-content-tertiary">To</span>
-                <input
-                  type="date"
-                  className="rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-base sm:text-sm text-content"
-                  value={dateRange.to ?? ''}
-                  onChange={(e) =>
-                    setDateRange((p) => ({ ...p, to: e.target.value || undefined }))
-                  }
-                />
-              </label>
+              <input
+                type="date"
+                className="rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-base sm:text-sm text-content"
+                value={dateRange.to ?? ''}
+                min={registrationDate}
+                onChange={(e) =>
+                  setDateRange((p) => ({ ...p, to: e.target.value || undefined }))
+                }
+              />
               {(dateRange.from || dateRange.to) && (
                 <Button variant="ghost" size="sm" onClick={() => setDateRange({})}>
                   Clear
@@ -150,10 +166,18 @@ export function TimelineView() {
 
       {/* Mode content */}
       {timelineMode === 'horizontal' && (
-        <HorizontalMode dateRange={dateRange} onDayClick={navigateToDayPage} />
+        <HorizontalMode
+          dateRange={dateRange}
+          onDayClick={navigateToDayPage}
+          registrationDate={registrationDate}
+        />
       )}
       {timelineMode === 'week' && (
-        <WeekMode currentDate={currentDate} onDayClick={navigateToDayPage} />
+        <WeekMode
+          currentDate={currentDate}
+          onDayClick={navigateToDayPage}
+          registrationDate={registrationDate}
+        />
       )}
     </div>
   );
@@ -177,15 +201,17 @@ function getMainImageUrl(media: DayMedia[], mainMediaId?: string | null): string
 function HorizontalMode({
   dateRange,
   onDayClick,
+  registrationDate,
 }: {
   dateRange: { from?: string; to?: string };
   onDayClick: DayClickHandler;
+  registrationDate?: string;
 }) {
   const { data, isLoading, error } = useTimeline(dateRange);
 
   const horizontalWeeks = useMemo(
-    () => (data ? groupTimelineHorizontal(data) : []),
-    [data],
+    () => (data ? groupTimelineHorizontal(data, registrationDate) : []),
+    [data, registrationDate],
   );
 
   if (isLoading) return <Spinner />;
@@ -197,7 +223,11 @@ function HorizontalMode({
         <p className="mb-4 text-sm text-content-secondary">
           Showing {formatDate(data.from)} — {formatDate(data.to)}
         </p>
-        <HorizontalTimeline weeks={horizontalWeeks} onDayClick={onDayClick} />
+        <HorizontalTimeline
+          weeks={horizontalWeeks}
+          onDayClick={onDayClick}
+          registrationDate={registrationDate}
+        />
       </div>
     );
   }
@@ -208,10 +238,14 @@ function HorizontalMode({
 function HorizontalTimeline({
   weeks,
   onDayClick,
+  registrationDate,
 }: {
   weeks: HorizontalTimelineWeek[];
   onDayClick: DayClickHandler;
+  registrationDate?: string;
 }) {
+  const { t } = useTranslation();
+
   if (weeks.length === 0) {
     return (
       <EmptyState
@@ -238,7 +272,13 @@ function HorizontalTimeline({
 
       {/* Week rows */}
       <div className="space-y-6">
-        {weeks.map((week) => (
+        {weeks.map((week) => {
+          const colCount = week.days.length;
+          const isPartialWeek = colCount < 7;
+          // For partial first week, offset columns to align to the right (end of week)
+          const colOffset = isPartialWeek ? 7 - colCount : 0;
+
+          return (
           <div key={week.weekStart}>
             {/* Period bars above day circles */}
             {week.periods.length > 0 && (
@@ -251,7 +291,7 @@ function HorizontalTimeline({
                     key={wp.period.id}
                     className="absolute rounded-full truncate px-2 text-xs font-medium"
                     style={{
-                      left: `${(wp.startCol / 7) * 100}%`,
+                      left: `${((wp.startCol + colOffset) / 7) * 100}%`,
                       width: `${(wp.span / 7) * 100}%`,
                       top: `${idx * 22}px`,
                       backgroundColor: hexToRgba(wp.period.category.color, 0.2),
@@ -271,8 +311,14 @@ function HorizontalTimeline({
             <div className="relative grid grid-cols-7 gap-1 sm:gap-2">
               <div className="absolute top-1/2 left-[7%] right-[7%] h-px bg-edge-light -translate-y-2" />
 
+              {/* Empty spacer cells for partial first week */}
+              {isPartialWeek && Array.from({ length: colOffset }).map((_, i) => (
+                <div key={`spacer-${i}`} />
+              ))}
+
               {week.days.map((day) => {
                 const disabled = isBeyondTomorrow(day.date);
+                const isRegistrationDay = registrationDate === day.date;
                 return (
                 <div key={day.date} className="relative flex flex-col items-center gap-1">
                   <DayCircle
@@ -295,18 +341,24 @@ function HorizontalTimeline({
                   >
                     {day.dayNumber}
                   </span>
+                  {isRegistrationDay && (
+                    <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium text-accent">
+                      {t('timeline.journey_begins')}
+                    </span>
+                  )}
                 </div>
                 );
               })}
             </div>
 
             {/* Week date range label */}
-            <div className="mt-1 text-right text-xs text-content-tertiary">
+            <div className={`mt-1 text-right text-xs text-content-tertiary ${week.days.length < 7 ? 'mt-5' : ''}`}>
               {formatDate(week.weekStart, 'MMM d')} —{' '}
               {formatDate(week.weekEnd, 'MMM d')}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
       </div>
     </div>
@@ -318,13 +370,23 @@ function HorizontalTimeline({
 function WeekMode({
   currentDate,
   onDayClick,
+  registrationDate,
 }: {
   currentDate: string;
   onDayClick: DayClickHandler;
+  registrationDate?: string;
 }) {
   const { data: weekData, isLoading } = useWeekTimeline({ date: currentDate });
 
-  const weekDays = useMemo(() => (weekData ? buildWeekGrid(weekData) : []), [weekData]);
+  const weekDays = useMemo(() => {
+    if (!weekData) return [];
+    const grid = buildWeekGrid(weekData);
+    // Filter out days before registration
+    if (registrationDate) {
+      return grid.filter((day) => day.date >= registrationDate);
+    }
+    return grid;
+  }, [weekData, registrationDate]);
 
   if (isLoading) return <Spinner />;
 

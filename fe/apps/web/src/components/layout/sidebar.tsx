@@ -80,7 +80,7 @@ export function Sidebar({ highlightedItem }: SidebarProps) {
 
   return (
     <aside
-      className={`flex h-screen flex-col border-r border-edge bg-surface-card transition-[width] duration-200 ease-in-out ${
+      className={`sticky top-0 flex h-dvh flex-col border-r border-edge bg-surface-card transition-[width] duration-200 ease-in-out ${
         collapsed ? 'w-16' : 'w-64'
       }`}
     >

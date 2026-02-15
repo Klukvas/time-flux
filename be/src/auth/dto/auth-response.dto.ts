@@ -15,6 +15,9 @@ export class AuthUserDto {
 
   @ApiProperty()
   onboardingCompleted: boolean;
+
+  @ApiProperty()
+  createdAt: string;
 }
 
 export class AuthResponseDto {

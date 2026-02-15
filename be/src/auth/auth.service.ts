@@ -50,7 +50,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      user: { id: user.id, email: user.email, timezone: user.timezone, onboardingCompleted: user.onboardingCompleted },
+      user: { id: user.id, email: user.email, timezone: user.timezone, onboardingCompleted: user.onboardingCompleted, createdAt: user.createdAt.toISOString() },
     };
   }
 
@@ -73,7 +73,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      user: { id: user.id, email: user.email, timezone: user.timezone, onboardingCompleted: user.onboardingCompleted },
+      user: { id: user.id, email: user.email, timezone: user.timezone, onboardingCompleted: user.onboardingCompleted, createdAt: user.createdAt.toISOString() },
     };
   }
 
@@ -140,6 +140,7 @@ export class AuthService {
           avatarUrl: result.user.avatarUrl,
           timezone: result.user.timezone,
           onboardingCompleted: result.user.onboardingCompleted,
+          createdAt: result.user.createdAt.toISOString(),
         },
       };
     } catch (error) {
@@ -182,6 +183,7 @@ export class AuthService {
         avatarUrl: stored.user.avatarUrl,
         timezone: stored.user.timezone,
         onboardingCompleted: stored.user.onboardingCompleted,
+        createdAt: stored.user.createdAt.toISOString(),
       },
     };
   }
@@ -198,6 +200,7 @@ export class AuthService {
       email: user.email,
       timezone: user.timezone,
       onboardingCompleted: user.onboardingCompleted,
+      createdAt: user.createdAt.toISOString(),
     };
   }
 

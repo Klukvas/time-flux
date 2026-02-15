@@ -17,6 +17,7 @@ export interface AuthUser {
   avatarUrl?: string | null;
   timezone: string;
   onboardingCompleted: boolean;
+  createdAt: string;
 }
 
 export interface AuthResponse {

@@ -136,67 +136,94 @@ export function mapPeriodsToDays(periods: TimelinePeriod[], dates: string[]): Ma
   return map;
 }
 
-/** Group timeline data into horizontal week rows. */
-export function groupTimelineHorizontal(data: TimelineResponse): HorizontalTimelineWeek[] {
+/** Group timeline data into horizontal week rows.
+ *  When `registrationDate` is provided, the first week starts from that date
+ *  (partial week) and no days before it are rendered. */
+export function groupTimelineHorizontal(
+  data: TimelineResponse,
+  registrationDate?: string,
+): HorizontalTimelineWeek[] {
   const dayMap = new Map<string, Day>();
   for (const d of data.days) dayMap.set(d.date, d);
 
-  // Collect all unique dates from days and periods
-  const allDates = new Set<string>();
-  for (const d of data.days) allDates.add(d.date);
-  for (const p of data.periods) {
-    allDates.add(p.startDate);
-    if (p.endDate) allDates.add(p.endDate);
-  }
+  // Determine the effective start of the range
+  const rangeStart = registrationDate ?? data.from;
+  const rangeEnd = data.to;
 
-  if (allDates.size === 0) return [];
+  if (!rangeStart || !rangeEnd || rangeStart > rangeEnd) return [];
 
-  // Find date range
-  const sorted = Array.from(allDates).sort();
-  const rangeStart = sorted[0];
-  const rangeEnd = sorted[sorted.length - 1];
-
-  // Expand to full weeks (Mon-Sun)
-  const start = new Date(rangeStart);
-  const startMon = new Date(start);
-  startMon.setDate(start.getDate() - ((start.getDay() + 6) % 7));
-
+  // Expand end to Sunday of its week
   const end = new Date(rangeEnd);
   const endSun = new Date(end);
   endSun.setDate(end.getDate() + (7 - ((end.getDay() || 7))));
 
+  // For the start: if we have a registration date, start there (partial week);
+  // otherwise align to Monday
+  const start = new Date(rangeStart);
+  let cursor: Date;
+  if (registrationDate) {
+    // Start from registration date — first week may be partial
+    cursor = new Date(start);
+  } else {
+    // Align to Monday of the first week
+    const startMon = new Date(start);
+    startMon.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    cursor = startMon;
+  }
+
   const weeks: HorizontalTimelineWeek[] = [];
-  const cursor = new Date(startMon);
+  let isFirstWeek = !!registrationDate;
 
   while (cursor <= endSun) {
     const weekDays: HorizontalTimelineDay[] = [];
     const weekDates: string[] = [];
 
-    for (let d = 0; d < 7; d++) {
-      const dateStr = formatISODate(cursor);
-      weekDates.push(dateStr);
-      const dayData = dayMap.get(dateStr);
-      weekDays.push({
-        date: dateStr,
-        dayNumber: cursor.getDate(),
-        dayState: dayData?.dayState ?? null,
-        mainMediaId: dayData?.mainMediaId ?? null,
-        media: dayData?.media ?? [],
-        hasData: !!dayData,
-      });
-      cursor.setDate(cursor.getDate() + 1);
+    if (isFirstWeek) {
+      // Partial first week: from registrationDate to end of that week (Sunday)
+      const dayOfWeek = (cursor.getDay() + 6) % 7; // 0=Mon..6=Sun
+      const daysRemaining = 7 - dayOfWeek;
+      for (let d = 0; d < daysRemaining; d++) {
+        const dateStr = formatISODate(cursor);
+        weekDates.push(dateStr);
+        const dayData = dayMap.get(dateStr);
+        weekDays.push({
+          date: dateStr,
+          dayNumber: cursor.getDate(),
+          dayState: dayData?.dayState ?? null,
+          mainMediaId: dayData?.mainMediaId ?? null,
+          media: dayData?.media ?? [],
+          hasData: !!dayData,
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      isFirstWeek = false;
+    } else {
+      // Normal full week (Mon-Sun)
+      for (let d = 0; d < 7; d++) {
+        const dateStr = formatISODate(cursor);
+        weekDates.push(dateStr);
+        const dayData = dayMap.get(dateStr);
+        weekDays.push({
+          date: dateStr,
+          dayNumber: cursor.getDate(),
+          dayState: dayData?.dayState ?? null,
+          mainMediaId: dayData?.mainMediaId ?? null,
+          media: dayData?.media ?? [],
+          hasData: !!dayData,
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
     }
 
     const weekStart = weekDates[0];
-    const weekEnd = weekDates[6];
+    const weekEnd = weekDates[weekDates.length - 1];
 
     // Find periods that overlap this week
     const weekPeriods: HorizontalTimelinePeriod[] = [];
     for (const period of data.periods) {
       const periodStart = period.startDate;
-      const periodEnd = period.endDate ?? rangeEnd; // ongoing = extend to range end
+      const periodEnd = period.endDate ?? rangeEnd;
 
-      // Check overlap with this week
       if (periodStart <= weekEnd && periodEnd >= weekStart) {
         const clampedStart = periodStart < weekStart ? weekStart : periodStart;
         const clampedEnd = periodEnd > weekEnd ? weekEnd : periodEnd;

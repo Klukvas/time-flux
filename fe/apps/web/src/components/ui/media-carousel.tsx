@@ -207,19 +207,19 @@ function FullScreenViewer({ items, initialIndex, onClose }: FullScreenViewerProp
       )}
 
       {/* Content */}
-      <div className="max-h-[85vh] max-w-[90vw]" onClick={(e) => e.stopPropagation()}>
+      <div className="max-h-[85dvh] max-w-[90vw]" onClick={(e) => e.stopPropagation()}>
         {isImageType(item.mimeType) && item.previewUrl ? (
           <img
             src={item.previewUrl}
             alt=""
-            className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
+            className="max-h-[85dvh] max-w-[90vw] rounded-lg object-contain"
           />
         ) : isVideoType(item.mimeType) && item.previewUrl ? (
           <video
             src={item.previewUrl}
             controls
             autoPlay
-            className="max-h-[85vh] max-w-[90vw] rounded-lg"
+            className="max-h-[85dvh] max-w-[90vw] rounded-lg"
           />
         ) : (
           <div className="flex h-64 w-64 items-center justify-center rounded-lg bg-surface-secondary text-content-tertiary">

@@ -30,7 +30,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         if (e.target === overlayRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-xl bg-surface-card p-4 shadow-xl sm:p-6 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-md rounded-xl bg-surface-card p-4 shadow-xl sm:p-6 max-h-[90dvh] overflow-y-auto">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-content">{title}</h2>
           <button

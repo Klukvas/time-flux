@@ -53,6 +53,7 @@ const uk: TranslationDictionary = {
       day: 'День',
       week: 'Тиждень',
     },
+    journey_begins: 'Ваша подорож починається',
   },
 
   week: {

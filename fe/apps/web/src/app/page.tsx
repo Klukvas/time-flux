@@ -32,14 +32,14 @@ export default function Home() {
 
   if (!ready || token) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-dvh items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-dvh bg-surface">
       <LandingHeader
         onLogin={() => setAuthModal('login')}
         onRegister={() => setAuthModal('register')}

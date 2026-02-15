@@ -25,9 +25,11 @@
 - DB CHECK constraint: LOCAL users must have a password hash
 
 ### Timeline
-- **Horizontal (All Time)** — full lifespan view rendered as week rows with day circles, period bars spanning across days, and date range filtering
-- **Week Mode** — 7-day card grid showing mini mood circles and up to 3 periods per day
+- **Horizontal (All Time)** — full lifespan view rendered as week rows with day circles, period bars spanning across days, and date range filtering; starts strictly from user's registration date (first week may be partial, no days before registration rendered), with "Your journey begins" marker on the first day
+- **Week Mode** — 7-day card grid showing mini mood circles and up to 3 periods per day; days before registration are filtered out
 - Click any day to navigate to the dedicated Day page (`/timeline/day/[date]`)
+- Date range filters clamped to registration date (min attribute on date inputs)
+- Week navigation clamped to not go before registration week
 
 ### Day Page
 - **Dedicated route:** `/timeline/day/YYYY-MM-DD` (web), `/timeline/day/[date]` (mobile)
@@ -228,7 +230,7 @@
 - **Monorepo** with npm workspaces for code sharing between web and mobile
 
 ### UI Components (33 custom)
-- Layout: DashboardShell, Sidebar (collapsible with navigation)
+- Layout: DashboardShell (document-level scroll, sticky mobile header), Sidebar (collapsible, sticky h-dvh on desktop)
 - Forms: Input, Button (primary/secondary/danger/ghost), ColorPicker, CategorySelect, Modal, SegmentedControl
 - Display: DayCircle (mood badge with color/image), EmptyState, ConfirmDialog
 - Day Page: CalendarPopover (react-day-picker with confirm/cancel popover), MediaCarousel (embla-carousel + fullscreen viewer), ChapterSelector (searchable dropdown)
@@ -244,6 +246,10 @@
 ### Responsive Design
 - Mobile-first Tailwind CSS
 - Adaptive grid layouts (1–3 columns based on viewport)
+- Document-level scrolling (no nested scroll containers) — enables iOS address bar collapse
+- All viewport heights use `dvh` (dynamic viewport height) for iOS Safari compatibility
+- Mobile header is `sticky top-0` instead of inside a fixed container
+- Desktop sidebar is `sticky top-0 h-dvh` — stays in place while document scrolls
 - Shared design tokens across web and mobile
 
 ---
@@ -312,7 +318,7 @@ LifeSpan/
 
 | Model | Key Fields |
 |-------|-----------|
-| **User** | email, passwordHash?, googleId?, provider (LOCAL/GOOGLE), avatarUrl?, timezone, onboardingCompleted |
+| **User** | email, passwordHash?, googleId?, provider (LOCAL/GOOGLE), avatarUrl?, timezone, onboardingCompleted, createdAt |
 | **Category** | userId, name, color, isSystem, order |
 | **DayState** | userId, name, color, isSystem, order, score (0-10) |
 | **EventGroup** | userId, categoryId, title, description? |

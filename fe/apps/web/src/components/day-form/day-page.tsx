@@ -39,7 +39,9 @@ import { MediaCarousel } from '@/components/ui/media-carousel';
 import { DayCircle } from '@/components/ui/day-circle';
 import { CalendarPopover } from '@/components/ui/calendar-popover';
 import { ChapterSelector } from '@/components/ui/chapter-selector';
+import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
+import { DateTime } from 'luxon';
 
 interface DayPageProps {
   date: string;
@@ -61,6 +63,20 @@ export function DayPage({ date }: DayPageProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const timelineMode = useViewStore((s) => s.timelineMode);
+  const user = useAuthStore((s) => s.user);
+
+  const registrationDate = useMemo(() => {
+    if (!user?.createdAt) return undefined;
+    return DateTime.fromISO(user.createdAt).setZone(user.timezone).toISODate() ?? undefined;
+  }, [user?.createdAt, user?.timezone]);
+
+  // Redirect to registration date if navigating before it
+  useEffect(() => {
+    if (registrationDate && date < registrationDate) {
+      router.replace(`/timeline/day/${registrationDate}`);
+    }
+  }, [date, registrationDate, router]);
+
   const { data: dayStates } = useDayStates();
   const { data: allGroups } = useEventGroups();
   const { data: recommendations } = useRecommendations();
@@ -256,6 +272,7 @@ export function DayPage({ date }: DayPageProps) {
 
   const navigateDay = (offset: number) => {
     const newDate = addDays(date, offset);
+    if (registrationDate && newDate < registrationDate) return;
     router.push(`/timeline/day/${newDate}`);
   };
 
@@ -302,7 +319,8 @@ export function DayPage({ date }: DayPageProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigateDay(-1)}
-              className="rounded-lg border border-edge px-3 py-1.5 text-sm text-content hover:bg-surface-secondary"
+              disabled={!!registrationDate && date <= registrationDate}
+              className="rounded-lg border border-edge px-3 py-1.5 text-sm text-content hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-default"
               title="Previous day"
             >
               &larr;
@@ -329,7 +347,7 @@ export function DayPage({ date }: DayPageProps) {
             <h1 className="text-2xl font-bold text-content">
               {formatDate(date, 'cccc, MMMM d, yyyy')}
             </h1>
-            <CalendarPopover value={date} onChange={handleDatePick} />
+            <CalendarPopover value={date} onChange={handleDatePick} minDate={registrationDate} />
           </div>
           {today && (
             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">

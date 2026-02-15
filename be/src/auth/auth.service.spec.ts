@@ -545,6 +545,7 @@ describe('AuthService', () => {
         avatarUrl: mockGoogleProfile.avatarUrl,
         timezone: 'UTC',
         onboardingCompleted: false,
+        createdAt: new Date(),
       };
 
       prisma.$transaction.mockImplementation(async (cb: any) => {
@@ -587,6 +588,7 @@ describe('AuthService', () => {
               timezone: 'UTC',
               onboardingCompleted: false,
               avatarUrl: null,
+              createdAt: new Date(),
             }),
           },
         };

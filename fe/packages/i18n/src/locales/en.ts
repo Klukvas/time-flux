@@ -53,6 +53,7 @@ const en: TranslationDictionary = {
       day: 'Day',
       week: 'Week',
     },
+    journey_begins: 'Your journey begins',
   },
 
   week: {

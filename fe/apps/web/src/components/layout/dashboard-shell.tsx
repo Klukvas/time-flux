@@ -20,8 +20,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     : null;
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Desktop sidebar — hidden on mobile */}
+    <div className="flex min-h-dvh">
+      {/* Desktop sidebar — hidden on mobile, sticky so it stays while document scrolls */}
       <div className="hidden md:block">
         <Sidebar highlightedItem={highlightedItem} />
       </div>
@@ -29,10 +29,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Mobile drawer overlay */}
       <MobileDrawer highlightedItem={highlightedItem} />
 
-      {/* Main content area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile top header */}
-        <header className="flex md:hidden h-14 shrink-0 items-center justify-between border-b border-edge bg-surface-card px-4">
+      {/* Main content area — document-level scrolling */}
+      <div className="flex flex-1 flex-col min-w-0">
+        {/* Mobile top header — sticky so it stays visible on scroll */}
+        <header className="sticky top-0 z-30 flex md:hidden h-14 shrink-0 items-center justify-between border-b border-edge bg-surface-card px-4">
           <button
             onClick={() => setMobileOpen(true)}
             className="rounded-lg p-2 text-content-secondary hover:bg-surface-secondary"
@@ -46,8 +46,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <div className="w-10" />
         </header>
 
-        {/* Scrollable main content */}
-        <main className="flex-1 overflow-y-auto">
+        {/* Main content — natural document flow */}
+        <main className="flex-1">
           <div className="mx-auto max-w-5xl p-4 md:p-6 lg:p-8">{children}</div>
         </main>
       </div>

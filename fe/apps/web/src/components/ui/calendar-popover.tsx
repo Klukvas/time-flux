@@ -10,9 +10,10 @@ import { Button } from './button';
 interface CalendarPopoverProps {
   value: string; // ISO date string YYYY-MM-DD
   onChange: (date: string) => void;
+  minDate?: string; // ISO date string YYYY-MM-DD — disables dates before this
 }
 
-export function CalendarPopover({ value, onChange }: CalendarPopoverProps) {
+export function CalendarPopover({ value, onChange, minDate }: CalendarPopoverProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [tempDate, setTempDate] = useState<string>(value);
@@ -83,7 +84,10 @@ export function CalendarPopover({ value, onChange }: CalendarPopoverProps) {
             selected={selectedJS}
             onSelect={handleSelect}
             defaultMonth={selectedJS}
-            disabled={{ after: todayJS }}
+            disabled={{
+              after: todayJS,
+              ...(minDate ? { before: DateTime.fromISO(minDate).toJSDate() } : {}),
+            }}
             showOutsideDays
             classNames={{
               root: 'rdp-lifespan text-content text-sm',
