@@ -26,6 +26,9 @@ describe('MemoriesService', () => {
       dayStateId: opts.dayStateId ?? null,
       dayState: opts.dayState ?? null,
       mainMediaId: null,
+      locationName: null,
+      latitude: null,
+      longitude: null,
       updatedAt: new Date(),
       media,
     };
