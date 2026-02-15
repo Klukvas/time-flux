@@ -115,23 +115,29 @@ export function TimelineView() {
           {/* Date range filter for Horizontal mode */}
           {timelineMode === 'horizontal' && (
             <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="date"
-                className="w-full rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-sm text-content sm:w-auto"
-                value={dateRange.from ?? ''}
-                onChange={(e) =>
-                  setDateRange((p) => ({ ...p, from: e.target.value || undefined }))
-                }
-              />
-              <span className="hidden text-content-tertiary sm:inline">to</span>
-              <input
-                type="date"
-                className="w-full rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-sm text-content sm:w-auto"
-                value={dateRange.to ?? ''}
-                onChange={(e) =>
-                  setDateRange((p) => ({ ...p, to: e.target.value || undefined }))
-                }
-              />
+              <label className="flex items-center gap-1.5">
+                <span className="text-xs text-content-tertiary">From</span>
+                <input
+                  type="date"
+                  className="rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-base sm:text-sm text-content"
+                  value={dateRange.from ?? ''}
+                  onChange={(e) =>
+                    setDateRange((p) => ({ ...p, from: e.target.value || undefined }))
+                  }
+                />
+              </label>
+              <span className="text-content-tertiary">—</span>
+              <label className="flex items-center gap-1.5">
+                <span className="text-xs text-content-tertiary">To</span>
+                <input
+                  type="date"
+                  className="rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-base sm:text-sm text-content"
+                  value={dateRange.to ?? ''}
+                  onChange={(e) =>
+                    setDateRange((p) => ({ ...p, to: e.target.value || undefined }))
+                  }
+                />
+              </label>
               {(dateRange.from || dateRange.to) && (
                 <Button variant="ghost" size="sm" onClick={() => setDateRange({})}>
                   Clear
@@ -218,10 +224,10 @@ function HorizontalTimeline({
   const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
-    <div className="overflow-x-auto">
-      <div className="min-w-[500px]">
+    <div>
+      <div>
       {/* Day headers */}
-      <div className="mb-3 grid grid-cols-7 gap-2 px-1">
+      <div className="mb-3 grid grid-cols-7 gap-1 sm:gap-2 px-1">
         {dayLabels.map((label) => (
           <div key={label} className="text-center text-xs font-medium text-content-tertiary">
             <span className="hidden sm:inline">{label}</span>
@@ -262,7 +268,7 @@ function HorizontalTimeline({
             )}
 
             {/* Day circles row with connecting line */}
-            <div className="relative grid grid-cols-7 gap-2">
+            <div className="relative grid grid-cols-7 gap-1 sm:gap-2">
               <div className="absolute top-1/2 left-[7%] right-[7%] h-px bg-edge-light -translate-y-2" />
 
               {week.days.map((day) => {

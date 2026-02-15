@@ -82,7 +82,7 @@ export function ChapterSelector({ activePeriodIds, onSelect, disabled }: Chapter
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('day_form.search_chapters')}
-              className="w-full rounded-lg border border-edge bg-surface px-3 py-1.5 text-sm text-content placeholder:text-content-tertiary focus:border-accent focus:outline-none"
+              className="w-full rounded-lg border border-edge bg-surface px-3 py-1.5 text-base text-content placeholder:text-content-tertiary focus:border-accent focus:outline-none"
             />
           </div>
 

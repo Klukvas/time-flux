@@ -268,11 +268,16 @@ export function DayFormModal({
               </button>
             )}
           </div>
-          {!dayStates?.length && (recommendations?.moods ?? []).length > 0 && (
+          {(() => {
+            const dsColors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
+            const visibleRecs = (recommendations?.moods ?? []).filter(
+              (r) => !dsColors.has(r.color.toLowerCase()),
+            );
+            return !dayStates?.length && visibleRecs.length > 0 ? (
             <div className="mt-2">
               <p className="mb-1.5 text-xs text-content-tertiary">{t('day_states.recommendations.title')}</p>
               <div className="flex flex-wrap gap-1.5">
-                {(recommendations?.moods ?? []).map((rec) => {
+                {visibleRecs.map((rec) => {
                   const name = t(`day_states.recommendations.${rec.key}`);
                   const isCreating = creatingMoodKey === rec.key;
                   return (
@@ -296,7 +301,8 @@ export function DayFormModal({
                 })}
               </div>
             </div>
-          )}
+            ) : null;
+          })()}
         </div>
 
         {/* Media Upload */}

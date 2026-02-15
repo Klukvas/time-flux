@@ -362,6 +362,46 @@ const en: TranslationDictionary = {
     recovery_rate: '{rate}% recovery rate',
   },
 
+  landing: {
+    hero: {
+      headline: 'Visualize your life. Understand your patterns.',
+      subtext: 'Track moods, chapters, and emotional cycles in a beautiful interactive timeline.',
+      cta_start: 'Start your timeline',
+      cta_demo: 'Explore demo',
+      badge_pattern: 'Burnout pattern detected',
+    },
+    social: {
+      days_recorded: 'days recorded',
+      active_users: 'active users',
+      return_weekly: 'return weekly',
+    },
+    vibe: {
+      title: 'Your life is made of chapters.',
+      work: 'Work',
+      work_sub: 'Career shifts, promotions, burnout & growth',
+      relationships: 'Relationships',
+      relationships_sub: 'Love, friendships, connections & endings',
+      health: 'Health',
+      health_sub: 'Energy, habits, recovery & breakthroughs',
+      travel: 'Travel',
+      travel_sub: 'Journeys, relocations & new perspectives',
+    },
+    memory: {
+      title: '1 year ago today',
+      mood: 'Feeling great',
+      text: 'First day of the new job. Everything felt possible.',
+    },
+    cta: {
+      headline: "You've lived over 9,000 days.",
+      subtext: 'How many do you remember?',
+      button: 'Begin now',
+    },
+    header: {
+      login: 'Sign in',
+      register: 'Get started',
+    },
+  },
+
   validation: {
     email: {
       required: 'Email is required.',

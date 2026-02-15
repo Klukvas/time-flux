@@ -86,7 +86,10 @@ export default function CategoriesScreen() {
   const handleAddAll = async () => {
     setAddingAll(true);
     try {
-      const remaining = (recommendations?.categories ?? []).filter((s) => !dismissedKeys.has(s.key));
+      const colors = new Set((categories ?? []).map((c) => c.color.toLowerCase()));
+      const remaining = (recommendations?.categories ?? []).filter(
+        (s) => !dismissedKeys.has(s.key) && !colors.has(s.color.toLowerCase()),
+      );
       for (const rec of remaining) {
         const name = t(`categories.recommendations.${rec.key}`);
         await createFromRecommendation.mutateAsync({ key: rec.key, name });
@@ -99,7 +102,10 @@ export default function CategoriesScreen() {
     }
   };
 
-  const visibleRecommendations = (recommendations?.categories ?? []).filter((s) => !dismissedKeys.has(s.key));
+  const existingColors = new Set((categories ?? []).map((c) => c.color.toLowerCase()));
+  const visibleRecommendations = (recommendations?.categories ?? []).filter(
+    (s) => !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  );
   const showRecommendations = !suggestionsDismissed && visibleRecommendations.length > 0;
 
   if (isLoading) return <Loading />;

@@ -430,7 +430,10 @@ export function DayPage({ date }: DayPageProps) {
             )}
           </div>
           {(() => {
-            const visibleRecs = (recommendations?.moods ?? []).filter((r) => !createdMoodKeys.has(r.key));
+            const dsColors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
+            const visibleRecs = (recommendations?.moods ?? []).filter(
+              (r) => !createdMoodKeys.has(r.key) && !dsColors.has(r.color.toLowerCase()),
+            );
             return visibleRecs.length > 0 && !dayStates?.length ? (
             <div className="mt-2">
               <p className="mb-1.5 text-xs text-content-tertiary">{t('day_states.recommendations.title')}</p>

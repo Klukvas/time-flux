@@ -32,7 +32,7 @@ export class EventAlreadyClosedError extends AppError {
 
 export class InvalidDateRangeError extends AppError {
   constructor(details?: Record<string, unknown>) {
-    super('INVALID_DATE_RANGE', HttpStatus.BAD_REQUEST, 'start_date must be before or equal to end_date', details);
+    super('INVALID_DATE_RANGE', HttpStatus.BAD_REQUEST, 'start_date must be strictly before end_date', details);
   }
 }
 

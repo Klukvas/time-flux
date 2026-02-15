@@ -149,7 +149,7 @@
 
 | Screen | Route | Description |
 |--------|-------|-------------|
-| Landing | `/` | Public page with LifeSpan branding, Login / Register modals |
+| Landing | `/` | Redesigned public landing page with 6 sections: Header (lang/theme switchers), Hero (mock timeline preview), Social Proof (animated counter stats), Chapters Vibe (4 themed cards), On This Day Preview (memory resurfacing), Final CTA |
 | Insights | `/dashboard` | Emotional analytics — mood overview, distribution, trends, category stats |
 | Timeline | `/timeline` | Main dashboard — 2 visualization modes (horizontal, week) |
 | Day Page | `/timeline/day/[date]` | Full day editing — mood, media, comment, chapters, memories |
@@ -227,11 +227,12 @@
 - **Shared packages:** API client (Axios), domain logic, hooks, i18n, theme tokens, utils, constants
 - **Monorepo** with npm workspaces for code sharing between web and mobile
 
-### UI Components (27 custom)
+### UI Components (33 custom)
 - Layout: DashboardShell, Sidebar (collapsible with navigation)
 - Forms: Input, Button (primary/secondary/danger/ghost), ColorPicker, CategorySelect, Modal, SegmentedControl
 - Display: DayCircle (mood badge with color/image), EmptyState, ConfirmDialog
 - Day Page: CalendarPopover (react-day-picker with confirm/cancel popover), MediaCarousel (embla-carousel + fullscreen viewer), ChapterSelector (searchable dropdown)
+- Landing: LandingHeader (logo + lang/theme switchers + auth buttons), HeroSection (headline + mock timeline), SocialProofSection (animated count-up stats), ChaptersVibeSection (4 themed vibe cards), OnThisDayPreview (memory card preview), FinalCTA (gradient CTA block)
 - Feature: MediaUploader, TimelineView, OnThisDaySection, ChaptersList, ChapterDetails, CategoriesList, DayStatesList, OnboardingOverlay
 
 ### Error Handling & Feedback

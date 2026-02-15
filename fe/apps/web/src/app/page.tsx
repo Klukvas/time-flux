@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { LoginForm } from '@/components/auth/login-form';
 import { RegisterForm } from '@/components/auth/register-form';
-import { Button } from '@/components/ui/button';
+import { LandingHeader } from '@/components/landing/landing-header';
+import { HeroSection } from '@/components/landing/hero-section';
+import { SocialProofSection } from '@/components/landing/social-proof-section';
+import { ChaptersVibeSection } from '@/components/landing/chapters-vibe-section';
+import { OnThisDayPreview } from '@/components/landing/on-this-day-preview';
+import { FinalCTA } from '@/components/landing/final-cta';
 
 export default function Home() {
   const router = useRouter();
@@ -34,25 +39,23 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4">
-      <div className="max-w-lg text-center">
-        <h1 className="text-5xl font-bold text-accent">LifeSpan</h1>
-        <p className="mt-4 text-xl text-content-secondary">
-          Your visual life timeline
-        </p>
-        <p className="mt-2 text-content-tertiary">
-          Track events, moods, and milestones. See your life story unfold on a beautiful timeline.
-        </p>
+    <div className="min-h-screen bg-surface">
+      <LandingHeader
+        onLogin={() => setAuthModal('login')}
+        onRegister={() => setAuthModal('register')}
+      />
 
-        <div className="mt-8 flex items-center justify-center gap-4">
-          <Button size="lg" onClick={() => setAuthModal('register')}>
-            Get Started
-          </Button>
-          <Button variant="secondary" size="lg" onClick={() => setAuthModal('login')}>
-            Sign In
-          </Button>
-        </div>
-      </div>
+      <main>
+        <HeroSection onStart={() => setAuthModal('register')} />
+        <SocialProofSection />
+        <ChaptersVibeSection />
+        <OnThisDayPreview />
+        <FinalCTA onStart={() => setAuthModal('register')} />
+      </main>
+
+      <footer className="border-t border-edge px-4 py-8 text-center text-xs text-content-tertiary">
+        LifeSpan &copy; {new Date().getFullYear()}
+      </footer>
 
       <LoginForm
         open={authModal === 'login'}

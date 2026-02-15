@@ -61,7 +61,10 @@ export function DayStatesList() {
   const handleAddAll = async () => {
     setAddingAll(true);
     try {
-      const remaining = (recommendations?.moods ?? []).filter((s) => !dismissedKeys.has(s.key));
+      const colors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
+      const remaining = (recommendations?.moods ?? []).filter(
+        (s) => !dismissedKeys.has(s.key) && !colors.has(s.color.toLowerCase()),
+      );
       for (const rec of remaining) {
         const name = t(`day_states.recommendations.${rec.key}`);
         await createFromRecommendation.mutateAsync({ key: rec.key, name });
@@ -75,7 +78,10 @@ export function DayStatesList() {
     }
   };
 
-  const visibleRecommendations = (recommendations?.moods ?? []).filter((s) => !dismissedKeys.has(s.key));
+  const existingColors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
+  const visibleRecommendations = (recommendations?.moods ?? []).filter(
+    (s) => !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  );
   const showRecommendations = !suggestionsDismissed && visibleRecommendations.length > 0;
 
   if (isLoading) {
