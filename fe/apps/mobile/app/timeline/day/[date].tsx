@@ -4,6 +4,7 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -19,10 +20,12 @@ import { extractApiError } from '@lifespan/api';
 import { getPeriodsForDate, getUserMessage } from '@lifespan/domain';
 import {
   useDayMedia,
+  useDays,
   useDayStates,
   useEventGroups,
   useMemoriesContext,
   useTranslation,
+  useUpdateDayLocation,
   useUpsertDay,
   useWeekTimeline,
 } from '@lifespan/hooks';
@@ -83,7 +86,11 @@ function DayContent({ date }: { date: string }) {
   const { data: allGroups } = useEventGroups();
   const { data: memoriesData } = useMemoriesContext('day', date);
   const { data: existingMedia } = useDayMedia(date);
+  const { data: daysData } = useDays({ from: date, to: date });
   const upsertDay = useUpsertDay();
+  const updateLocation = useUpdateDayLocation();
+
+  const dayRecord = daysData?.[0] ?? null;
 
   const [comment, setComment] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -140,6 +147,24 @@ function DayContent({ date }: { date: string }) {
       const iso = selectedDate.toISOString().slice(0, 10);
       router.replace(`/timeline/day/${iso}`);
     }
+  };
+
+  const handleOpenLocationPicker = () => {
+    const params: Record<string, string> = { date };
+    if (dayRecord?.latitude != null) params.lat = String(dayRecord.latitude);
+    if (dayRecord?.longitude != null) params.lng = String(dayRecord.longitude);
+    if (dayRecord?.locationName) params.name = dayRecord.locationName;
+    router.push({ pathname: '/timeline/day/location-picker', params });
+  };
+
+  const handleRemoveLocation = () => {
+    updateLocation.mutate(
+      { date, data: { locationName: null, latitude: null, longitude: null } },
+      {
+        onSuccess: () => Alert.alert('', t('day_form.location_removed')),
+        onError: (err) => Alert.alert('Error', getUserMessage(extractApiError(err))),
+      },
+    );
   };
 
   // Chapter selector filtering
@@ -314,6 +339,49 @@ function DayContent({ date }: { date: string }) {
           onClose={() => setMediaViewerIndex(null)}
         />
       )}
+
+      {/* Location */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('day_form.location')}</Text>
+        {dayRecord?.locationName ? (
+          <View style={styles.locationCard}>
+            <Text style={styles.locationPin}>📍</Text>
+            <Text style={styles.locationName} numberOfLines={1}>{dayRecord.locationName}</Text>
+            <View style={styles.locationActions}>
+              {dayRecord.latitude != null && dayRecord.longitude != null && (
+                <Pressable
+                  onPress={() =>
+                    Linking.openURL(
+                      `https://www.google.com/maps?q=${dayRecord.latitude},${dayRecord.longitude}`,
+                    )
+                  }
+                >
+                  <Text style={styles.locationActionLink}>{t('day_form.view_on_map')}</Text>
+                </Pressable>
+              )}
+              {!futureDisabled && (
+                <>
+                  <Pressable onPress={handleOpenLocationPicker}>
+                    <Text style={styles.locationActionText}>{t('day_form.change_location')}</Text>
+                  </Pressable>
+                  <Pressable onPress={handleRemoveLocation} disabled={updateLocation.isPending}>
+                    <Text style={styles.locationActionDanger}>{t('day_form.remove_location')}</Text>
+                  </Pressable>
+                </>
+              )}
+            </View>
+          </View>
+        ) : (
+          <View style={styles.locationEmpty}>
+            <Text style={styles.locationEmptyText}>{t('day_form.no_location')}</Text>
+            {!futureDisabled && (
+              <Pressable onPress={handleOpenLocationPicker}>
+                <Text style={styles.locationAddText}>+ {t('day_form.add_location')}</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+      </View>
 
       {/* Mood picker */}
       {!futureDisabled && (
@@ -735,6 +803,66 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.gray[500],
     marginBottom: spacing.sm,
+  },
+
+  // Location
+  locationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    backgroundColor: colors.white,
+    flexWrap: 'wrap',
+  },
+  locationPin: { fontSize: 16 },
+  locationName: {
+    flex: 1,
+    fontSize: fontSize.sm,
+    color: colors.gray[900],
+  },
+  locationActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginTop: spacing.xs,
+    width: '100%',
+  },
+  locationActionLink: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    color: colors.brand[500],
+  },
+  locationActionText: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    color: colors.gray[500],
+  },
+  locationActionDanger: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    color: '#DC2626',
+  },
+  locationEmpty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    borderStyle: 'dashed',
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+  },
+  locationEmptyText: {
+    flex: 1,
+    fontSize: fontSize.sm,
+    color: colors.gray[400],
+  },
+  locationAddText: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    color: colors.brand[500],
   },
 
   // Comment

@@ -6,7 +6,7 @@ export type { ThemeContextValue } from './theme-context';
 export { useLogin, useRegister } from './use-auth';
 export { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from './use-categories';
 export { useCreateDayState, useDayStates, useDeleteDayState, useUpdateDayState } from './use-day-states';
-export { useDays, useUpsertDay } from './use-days';
+export { useDays, useUpdateDayLocation, useUpsertDay } from './use-days';
 export { useCreateDayMedia, useDayMedia, useDeleteDayMedia } from './use-media';
 export {
   useClosePeriod,

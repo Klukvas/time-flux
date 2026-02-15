@@ -5,6 +5,7 @@ import { DayStatesRepository } from '../day-states/day-states.repository.js';
 import { AuthRepository } from '../auth/auth.repository.js';
 import { S3Service } from '../s3/s3.service.js';
 import { UpsertDayDto } from './dto/upsert-day.dto.js';
+import { UpdateDayLocationDto } from './dto/update-day-location.dto.js';
 import { DayQueryDto } from './dto/day-query.dto.js';
 import { DayStateNotFoundError, FutureDateError, InvalidDateRangeError } from '../common/errors/app.error.js';
 
@@ -37,6 +38,9 @@ export class DaysService {
       date: day.date.toISOString().split('T')[0],
       dayState: day.dayState,
       mainMediaId: day.mainMediaId ?? null,
+      locationName: day.locationName ?? null,
+      latitude: day.latitude ?? null,
+      longitude: day.longitude ?? null,
       media: await Promise.all((day.media ?? []).map((m: any) => this.formatMedia(m))),
     };
   }
@@ -75,6 +79,24 @@ export class DaysService {
     });
 
     this.logger.log(`upsert success dayId=${day.id} mediaCount=${day.media?.length ?? 0}`);
+    return this.formatDay(day);
+  }
+
+  async updateLocation(userId: string, dateStr: string, dto: UpdateDayLocationDto) {
+    this.logger.log(`updateLocation date=${dateStr} locationName=${dto.locationName}`);
+
+    const tz = await this.getUserTimezone(userId);
+    this.assertNotTooFarInFuture(dateStr, tz);
+
+    const date = new Date(dateStr + 'T00:00:00Z');
+
+    const day = await this.daysRepository.upsertLocation(userId, date, {
+      locationName: dto.locationName === undefined ? undefined : dto.locationName,
+      latitude: dto.latitude === undefined ? undefined : dto.latitude,
+      longitude: dto.longitude === undefined ? undefined : dto.longitude,
+    });
+
+    this.logger.log(`updateLocation success dayId=${day.id}`);
     return this.formatDay(day);
   }
 

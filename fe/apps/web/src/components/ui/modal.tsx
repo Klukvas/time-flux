@@ -7,9 +7,16 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  size?: 'md' | 'lg' | 'xl';
 }
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+const sizeClasses = {
+  md: 'max-w-md',
+  lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
+};
+
+export function Modal({ open, onClose, title, children, size = 'md' }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,7 +37,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         if (e.target === overlayRef.current) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-xl bg-surface-card p-4 shadow-xl sm:p-6 max-h-[90dvh] overflow-y-auto">
+      <div className={`w-full ${sizeClasses[size]} rounded-xl bg-surface-card p-4 shadow-xl sm:p-6 max-h-[90dvh] overflow-y-auto`}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-content">{title}</h2>
           <button

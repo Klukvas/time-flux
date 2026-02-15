@@ -7,9 +7,7 @@ import { extractApiError } from '@lifespan/api';
 import { getUserMessage, validateTitle, validateDescription } from '@lifespan/domain';
 import {
   useCategories,
-  useCreateCategoryFromRecommendation,
   useCreateEventGroup,
-  useRecommendations,
   useTranslation,
   useUpdateEventGroup,
 } from '@lifespan/hooks';
@@ -28,16 +26,13 @@ interface ChapterFormModalProps {
 export function ChapterFormModal({ open, onClose, group }: ChapterFormModalProps) {
   const { t } = useTranslation();
   const { data: categories } = useCategories();
-  const { data: recommendations } = useRecommendations();
   const createGroup = useCreateEventGroup();
   const updateGroup = useUpdateEventGroup();
-  const createCategoryFromRec = useCreateCategoryFromRecommendation();
 
   const [title, setTitle] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [creatingRecKey, setCreatingRecKey] = useState<string | null>(null);
 
   const isEditing = !!group;
 
@@ -53,19 +48,6 @@ export function ChapterFormModal({ open, onClose, group }: ChapterFormModalProps
     }
     setErrors({});
   }, [group, open, categories]);
-
-  const handleCreateCategoryFromRec = async (key: string) => {
-    setCreatingRecKey(key);
-    try {
-      const name = t(`categories.recommendations.${key}`);
-      const created = await createCategoryFromRec.mutateAsync({ key, name });
-      setCategoryId(created.id);
-    } catch {
-      // error handled by mutation
-    } finally {
-      setCreatingRecKey(null);
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,35 +121,6 @@ export function ChapterFormModal({ open, onClose, group }: ChapterFormModalProps
             noItemsText={t('chapters.form.no_categories')}
             error={errors.category}
           />
-          {!categories?.length && (recommendations?.categories ?? []).length > 0 && (
-            <div className="mt-2">
-              <p className="mb-1.5 text-xs text-content-tertiary">{t('categories.recommendations.title')}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {(recommendations?.categories ?? []).map((rec) => {
-                  const name = t(`categories.recommendations.${rec.key}`);
-                  const isCreating = creatingRecKey === rec.key;
-                  return (
-                    <button
-                      key={rec.key}
-                      type="button"
-                      onClick={() => handleCreateCategoryFromRec(rec.key)}
-                      disabled={!!creatingRecKey}
-                      className="flex items-center gap-1.5 rounded-full border border-edge px-2.5 py-1 text-xs text-content transition-colors hover:bg-surface-secondary disabled:opacity-50"
-                    >
-                      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: rec.color }} />
-                      {name}
-                      {isCreating && (
-                        <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
 
         <div>

@@ -1,5 +1,5 @@
 import type { AxiosInstance } from 'axios';
-import type { Day, DayQueryParams, UpsertDayRequest } from '../types';
+import type { Day, DayQueryParams, UpdateDayLocationRequest, UpsertDayRequest } from '../types';
 
 export function createDaysApi(client: AxiosInstance) {
   return {
@@ -8,5 +8,8 @@ export function createDaysApi(client: AxiosInstance) {
 
     upsert: (date: string, data: UpsertDayRequest) =>
       client.put<Day>(`/api/v1/days/${date}`, data).then((r) => r.data),
+
+    updateLocation: (date: string, data: UpdateDayLocationRequest) =>
+      client.patch<Day>(`/api/v1/days/${date}/location`, data).then((r) => r.data),
   };
 }

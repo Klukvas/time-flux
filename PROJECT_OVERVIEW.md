@@ -34,7 +34,7 @@
 ### Day Page
 - **Dedicated route:** `/timeline/day/YYYY-MM-DD` (web), `/timeline/day/[date]` (mobile)
 - Full standalone page replacing the previous DayFormModal navigation flow
-- **Sections:** Memories (from context API), Mood Picker (inline save), Media Carousel (horizontal scroll + fullscreen viewer), Comment (300 char limit), Active Chapters (overlapping periods), Save button
+- **Sections:** Memories (from context API), Mood Picker (inline save), Media Carousel (horizontal scroll + fullscreen viewer), Location (optional geolocation), Comment (300 char limit), Active Chapters (overlapping periods), Save button
 - **Back button** → navigates to `/timeline` preserving last selected timeline mode (stored in Zustand view store)
 - **Calendar date picker** — "Вибрати день" / "Pick a day" button opens calendar popover (web: `react-day-picker` with confirm/cancel flow, mobile: native `DateTimePicker`), future dates disabled, Luxon timezone-safe
 - **Media carousel** — horizontal scroll (`embla-carousel` on web, `FlatList` on mobile) with click-to-preview fullscreen viewer (keyboard nav + swipe, left/right arrows, ESC to close)
@@ -92,6 +92,19 @@
 - **Video thumbnail extraction**: for video-only days, first frame extracted via HTML5 video + canvas as JPEG data URL; used as day preview and allows setting video as cover
 - Presigned read URLs for secure access (24-hour expiry)
 - `Day.mainMediaId` now has proper FK to `DayMedia` (onDelete: SetNull)
+
+### Day Location (Geolocation)
+- Optional location attachment for any day (name + coordinates)
+- **Backend:** `PATCH /api/v1/days/:date/location` — upserts day with location fields (locationName, latitude, longitude)
+- All fields nullable — send nulls to clear location
+- Validates: future dates rejected, lat/lng ranges (-90/90, -180/180), location name max 120 chars
+- **Web:** Interactive Google Maps picker modal (`@vis.gl/react-google-maps`) with Places Autocomplete search, click-to-place pin, "Use Current Location" button, and editable location name
+- **Mobile:** Full-screen map picker screen (`react-native-maps` + `react-native-google-places-autocomplete`) with tap-to-place pin, search, current location, and `expo-location` reverse geocoding
+- Location displayed on Day page with "View on map" link (opens Google Maps), "Change", and "Remove" actions
+- Shared `reverseGeocode()` utility in `@lifespan/utils` for Google Geocoding API
+- Requires `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` + `NEXT_PUBLIC_GOOGLE_MAP_ID` env vars (web) and Google Maps API keys in `app.json` (mobile)
+- Google APIs required: Maps JavaScript API, Maps SDK for Android/iOS, Places API (New), Geocoding API
+- Fully backward compatible — existing days without location are unaffected
 
 ### Onboarding
 - Multi-step guided tour for first-time users
@@ -176,7 +189,8 @@
 | Categories | `/(tabs)/categories` | Categories grid tab |
 | Day States | `/(tabs)/day-states` | Day States grid tab |
 | Settings | `/(tabs)/settings` | Account info, theme, language, sign out |
-| Day | `/timeline/day/[date]` | Day screen — mood, media, comments, chapters, memories |
+| Day | `/timeline/day/[date]` | Day screen — mood, media, comments, chapters, location, memories |
+| Location Picker | `/timeline/day/location-picker` | Full-screen Google Maps picker (modal presentation) |
 | Chapter Detail | `/chapter/[id]` | Chapter detail — periods, analytics, media gallery |
 
 ### Modals & Dialogs
@@ -187,6 +201,7 @@
 - **ClosePeriodModal** — confirm closing an active period
 - **CategoryFormModal** — create or edit a category (name, color)
 - **DayStateFormModal** — create or edit a mood (name, color, score slider 0-10 with emoji)
+- **LocationFormModal** — interactive Google Maps picker with Places search, click-to-place pin, current location, editable name (web: `@vis.gl/react-google-maps`, mobile: separate `location-picker` screen)
 - **DayFormModal** — assign mood and upload media for a day (retained for potential quick-edit mode; default flow uses Day page)
 - **ConfirmDialog** — generic delete confirmation
 
@@ -323,12 +338,12 @@ LifeSpan/
 | **DayState** | userId, name, color, isSystem, order, score (0-10) |
 | **EventGroup** | userId, categoryId, title, description? |
 | **EventPeriod** | eventGroupId, startDate, endDate?, comment? |
-| **Day** | userId, date, dayStateId?, mainMediaId? |
+| **Day** | userId, date, dayStateId?, mainMediaId?, locationName?, latitude?, longitude? |
 | **DayMedia** | dayId, userId, s3Key, fileName, contentType, size |
 | **RefreshToken** | userId, tokenHash (SHA-256), expiresAt |
 | **AuthProvider** (enum) | LOCAL, GOOGLE |
 
-### Test Coverage (11 suites, 161 tests)
+### Test Coverage (12 suites, 168 tests)
 
 | Test File | Tests | What It Covers |
 |-----------|-------|----------------|
@@ -342,6 +357,7 @@ LifeSpan/
 | `media.service.spec.ts` | Future date validation, auto cover photo (first image, no override, skip video), day upsert before create, delete (clear cover, S3 before DB), timezone-aware validation |
 | `mood-score.spec.ts` | `buildMoodScoreMap` (ID→score, empty, score 0), `computeAverageMoodScore` (rounding, null cases, skip unknown, exclude negative, realistic dataset) |
 | `s3.service.spec.ts` | MIME whitelist (images, videos, dangerous types rejected, SVG blocked), extension mapping, 50 MB size limit |
+| `days.service.spec.ts` | Update location (name + coords), clear location (all null), reject future date, upsert if missing, name-only update, formatDay location fields |
 | `weekday-insights.spec.ts` | Weekday grouping, best/worst mood day, activity scoring, volatility (std dev), recovery index, burnout pattern detection |
 
 ---
@@ -396,6 +412,7 @@ Pipeline defined in `.github/workflows/ci.yml` with three parallel/gated jobs:
 | **backend-test** | push + PR to main | `npm ci` → `npm test --ci --coverage` in `be/` |
 | **frontend-lint** | push + PR to main | `npm ci` → `npm run lint -w apps/web` in `fe/` |
 | **docker-build-and-push** | push to main only | Builds + pushes backend & frontend Docker images |
+| **deploy** | after docker-build-and-push | Creates .env, SCPs to Hetzner, `docker compose up -d` |
 
 ### Docker Images
 
@@ -413,6 +430,26 @@ Images tagged with `latest` + short commit SHA, pushed to GHCR (configurable to 
 | `GITHUB_TOKEN` | GHCR push | Automatic (no setup needed) |
 | `DOCKER_USERNAME` | Docker Hub login | Only if `DOCKER_REGISTRY=docker.io` |
 | `DOCKER_PASSWORD` | Docker Hub login | Only if `DOCKER_REGISTRY=docker.io` |
+| `NEXT_PUBLIC_API_URL` | Backend API URL baked into frontend build | Docker build arg |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps API key baked into frontend build | Docker build arg |
+| `NEXT_PUBLIC_GOOGLE_MAP_ID` | Google Map ID for Advanced Markers | Docker build arg |
+| `SERVER_HOST` | Hetzner server IP | Deploy job SSH/SCP |
+| `SERVER_USERNAME` | SSH username | Deploy job SSH/SCP |
+| `SSH_PRIVATE_KEY` | SSH private key | Deploy job SSH/SCP |
+| `POSTGRES_USER` | PostgreSQL username | Production .env |
+| `POSTGRES_PASSWORD` | PostgreSQL password | Production .env |
+| `POSTGRES_DB` | PostgreSQL database name | Production .env |
+| `JWT_SECRET` | JWT signing secret | Production .env |
+| `JWT_EXPIRES_IN` | JWT expiration time | Production .env |
+| `S3_ENDPOINT` | S3-compatible storage endpoint | Production .env |
+| `S3_REGION` | S3 region | Production .env |
+| `S3_BUCKET` | S3 bucket name | Production .env |
+| `S3_ACCESS_KEY_ID` | S3 access key | Production .env |
+| `S3_SECRET_ACCESS_KEY` | S3 secret key | Production .env |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID | Production .env |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | Production .env |
+| `GOOGLE_CALLBACK_URL` | Google OAuth callback URL | Production .env |
+| `FRONTEND_URL` | Frontend URL for OAuth redirects | Production .env |
 
 ### Optimizations
 - Node dependency caching via `actions/setup-node`

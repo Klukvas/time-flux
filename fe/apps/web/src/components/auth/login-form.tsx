@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { extractApiError } from '@lifespan/api';
 import { getErrorTranslationKey, validateEmail, validatePassword } from '@lifespan/domain';
 import { useLogin, useTranslation } from '@lifespan/hooks';
+import { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } from '@lifespan/constants';
 import { useAuthStore } from '@/stores/auth-store';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
@@ -36,8 +37,12 @@ export function LoginForm({ open, onClose, onSwitchToRegister }: LoginFormProps)
     const passwordResult = validatePassword(password);
     if (!emailResult.valid || !passwordResult.valid) {
       setErrors({
-        email: emailResult.error ? t('validation.email.invalid') : undefined,
-        password: passwordResult.error ? t('validation.password.min_length', { min: 8 }) : undefined,
+        email: emailResult.errorCode
+          ? t(`validation.email.${emailResult.errorCode}`)
+          : undefined,
+        password: passwordResult.errorCode
+          ? t(`validation.password.${passwordResult.errorCode}`, { min: MIN_PASSWORD_LENGTH, max: MAX_PASSWORD_LENGTH })
+          : undefined,
       });
       return;
     }

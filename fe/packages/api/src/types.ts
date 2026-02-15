@@ -279,12 +279,21 @@ export interface Day {
   date: string;
   dayState: DayDayState | null;
   mainMediaId: string | null;
+  locationName: string | null;
+  latitude: number | null;
+  longitude: number | null;
   media: DayMedia[];
 }
 
 export interface UpsertDayRequest {
   dayStateId?: string | null;
   mainMediaId?: string | null;
+}
+
+export interface UpdateDayLocationRequest {
+  locationName?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface CreateDayMediaRequest {

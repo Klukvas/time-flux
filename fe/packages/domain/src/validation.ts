@@ -6,26 +6,30 @@ import {
   MAX_PASSWORD_LENGTH,
   MAX_TITLE_LENGTH,
   MIN_PASSWORD_LENGTH,
+  PASSWORD_COMPLEXITY_REGEX,
 } from '@lifespan/constants';
 
 export interface ValidationResult {
   valid: boolean;
   error?: string;
+  errorCode?: string;
 }
 
 export function validateEmail(email: string): ValidationResult {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) return { valid: false, error: 'Email is required.' };
-  if (!emailRegex.test(email)) return { valid: false, error: 'Enter a valid email address.' };
+  if (!email) return { valid: false, error: 'Email is required.', errorCode: 'required' };
+  if (!emailRegex.test(email)) return { valid: false, error: 'Enter a valid email address.', errorCode: 'invalid' };
   return { valid: true };
 }
 
 export function validatePassword(password: string): ValidationResult {
-  if (!password) return { valid: false, error: 'Password is required.' };
+  if (!password) return { valid: false, error: 'Password is required.', errorCode: 'required' };
   if (password.length < MIN_PASSWORD_LENGTH)
-    return { valid: false, error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.` };
+    return { valid: false, error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`, errorCode: 'min_length' };
   if (password.length > MAX_PASSWORD_LENGTH)
-    return { valid: false, error: `Password must be at most ${MAX_PASSWORD_LENGTH} characters.` };
+    return { valid: false, error: `Password must be at most ${MAX_PASSWORD_LENGTH} characters.`, errorCode: 'max_length' };
+  if (!PASSWORD_COMPLEXITY_REGEX.test(password))
+    return { valid: false, error: 'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number.', errorCode: 'complexity' };
   return { valid: true };
 }
 

@@ -9,13 +9,21 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.lifespan.mobile"
+      "bundleIdentifier": "app.lifespan.mobile",
+      "config": {
+        "googleMapsApiKey": "GOOGLE_MAPS_API_KEY"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#3b82f6"
       },
-      "package": "app.lifespan.mobile"
+      "package": "app.lifespan.mobile",
+      "config": {
+        "googleMaps": {
+          "apiKey": "GOOGLE_MAPS_API_KEY"
+        }
+      }
     },
     "plugins": ["expo-router", "expo-secure-store"]
   }

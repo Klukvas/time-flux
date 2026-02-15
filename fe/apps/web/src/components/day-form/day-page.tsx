@@ -8,16 +8,16 @@ import type { DayMedia } from '@lifespan/api';
 import { getPeriodsForDate, getUserMessage } from '@lifespan/domain';
 import {
   useCreateDayMedia,
-  useCreateDayStateFromRecommendation,
   useCreatePeriod,
   useDayMedia,
+  useDays,
   useDayStates,
   useDeleteDayMedia,
   useEventGroups,
   useMemoriesContext,
   usePresignedUpload,
-  useRecommendations,
   useTranslation,
+  useUpdateDayLocation,
   useUpsertDay,
 } from '@lifespan/hooks';
 import {
@@ -39,6 +39,7 @@ import { MediaCarousel } from '@/components/ui/media-carousel';
 import { DayCircle } from '@/components/ui/day-circle';
 import { CalendarPopover } from '@/components/ui/calendar-popover';
 import { ChapterSelector } from '@/components/ui/chapter-selector';
+import { LocationFormModal } from './location-form-modal';
 import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
 import { DateTime } from 'luxon';
@@ -79,15 +80,18 @@ export function DayPage({ date }: DayPageProps) {
 
   const { data: dayStates } = useDayStates();
   const { data: allGroups } = useEventGroups();
-  const { data: recommendations } = useRecommendations();
-  const createDayStateFromRec = useCreateDayStateFromRecommendation();
   const { data: existingMedia } = useDayMedia(date);
   const { data: memoriesData } = useMemoriesContext('day', date);
+  const { data: daysData } = useDays({ from: date, to: date });
   const upsertDay = useUpsertDay();
+  const updateLocation = useUpdateDayLocation();
   const createDayMedia = useCreateDayMedia();
   const deleteDayMedia = useDeleteDayMedia();
   const createPeriod = useCreatePeriod();
   const { upload } = usePresignedUpload();
+
+  const dayRecord = daysData?.[0] ?? null;
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   const [selectedDayStateId, setSelectedDayStateId] = useState<string | null>(null);
   const [selectedMainMediaId, setSelectedMainMediaId] = useState<string | null>(null);
@@ -157,22 +161,7 @@ export function DayPage({ date }: DayPageProps) {
     setInitialized(false);
   }, [date]);
 
-  const [creatingMoodKey, setCreatingMoodKey] = useState<string | null>(null);
-  const [createdMoodKeys, setCreatedMoodKeys] = useState<Set<string>>(new Set());
 
-  const handleCreateMoodFromRec = async (key: string) => {
-    setCreatingMoodKey(key);
-    try {
-      const name = t(`day_states.recommendations.${key}`);
-      const created = await createDayStateFromRec.mutateAsync({ key, name });
-      setSelectedDayStateId(created.id);
-      setCreatedMoodKeys((prev) => new Set(prev).add(key));
-    } catch {
-      // error handled by mutation
-    } finally {
-      setCreatingMoodKey(null);
-    }
-  };
 
   const handleAddMedia = useCallback(
     async (files: File[]) => {
@@ -282,6 +271,29 @@ export function DayPage({ date }: DayPageProps) {
 
   const handleBack = () => {
     router.push('/timeline');
+  };
+
+  const handleSaveLocation = (data: { locationName: string; latitude?: number; longitude?: number }) => {
+    updateLocation.mutate(
+      { date, data: { locationName: data.locationName, latitude: data.latitude ?? null, longitude: data.longitude ?? null } },
+      {
+        onSuccess: () => {
+          toast.success(t('day_form.location_updated'));
+          setShowLocationModal(false);
+        },
+        onError: (err) => toast.error(getUserMessage(extractApiError(err))),
+      },
+    );
+  };
+
+  const handleRemoveLocation = () => {
+    updateLocation.mutate(
+      { date, data: { locationName: null, latitude: null, longitude: null } },
+      {
+        onSuccess: () => toast.success(t('day_form.location_removed')),
+        onError: (err) => toast.error(getUserMessage(extractApiError(err))),
+      },
+    );
   };
 
   const handleChapterSelect = (eventGroupId: string) => {
@@ -447,41 +459,6 @@ export function DayPage({ date }: DayPageProps) {
               </button>
             )}
           </div>
-          {(() => {
-            const dsColors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
-            const visibleRecs = (recommendations?.moods ?? []).filter(
-              (r) => !createdMoodKeys.has(r.key) && !dsColors.has(r.color.toLowerCase()),
-            );
-            return visibleRecs.length > 0 && !dayStates?.length ? (
-            <div className="mt-2">
-              <p className="mb-1.5 text-xs text-content-tertiary">{t('day_states.recommendations.title')}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {visibleRecs.map((rec) => {
-                  const name = t(`day_states.recommendations.${rec.key}`);
-                  const isCreating = creatingMoodKey === rec.key;
-                  return (
-                    <button
-                      key={rec.key}
-                      type="button"
-                      onClick={() => handleCreateMoodFromRec(rec.key)}
-                      disabled={!!creatingMoodKey || isPending || futureDisabled}
-                      className="flex items-center gap-1.5 rounded-full border border-edge px-2.5 py-1 text-xs text-content transition-colors hover:bg-surface-secondary disabled:opacity-50"
-                    >
-                      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: rec.color }} />
-                      {name}
-                      {isCreating && (
-                        <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            ) : null;
-          })()}
         </div>
 
         {/* Media Section — Carousel + Upload */}
@@ -511,6 +488,68 @@ export function DayPage({ date }: DayPageProps) {
             />
           )}
         </div>
+
+        {/* Location */}
+        <div>
+          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('day_form.location')}</h3>
+          {dayRecord?.locationName ? (
+            <div className="flex items-center gap-3 rounded-lg border border-edge bg-surface-card px-3 py-2.5">
+              <span className="text-base">📍</span>
+              <span className="min-w-0 flex-1 truncate text-sm text-content">{dayRecord.locationName}</span>
+              <div className="flex shrink-0 items-center gap-2">
+                {dayRecord.latitude != null && dayRecord.longitude != null && (
+                  <a
+                    href={`https://www.google.com/maps?q=${dayRecord.latitude},${dayRecord.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-medium text-accent hover:underline"
+                  >
+                    {t('day_form.view_on_map')}
+                  </a>
+                )}
+                {!futureDisabled && (
+                  <>
+                    <button
+                      onClick={() => setShowLocationModal(true)}
+                      className="text-xs font-medium text-content-secondary hover:text-content"
+                    >
+                      {t('day_form.change_location')}
+                    </button>
+                    <button
+                      onClick={handleRemoveLocation}
+                      disabled={updateLocation.isPending}
+                      className="text-xs font-medium text-danger hover:underline"
+                    >
+                      {t('day_form.remove_location')}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-lg border border-dashed border-edge px-3 py-2.5">
+              <span className="flex-1 text-sm text-content-tertiary">{t('day_form.no_location')}</span>
+              {!futureDisabled && (
+                <button
+                  onClick={() => setShowLocationModal(true)}
+                  className="text-xs font-medium text-accent hover:underline"
+                >
+                  + {t('day_form.add_location')}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        <LocationFormModal
+          open={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          onSave={handleSaveLocation}
+          saving={updateLocation.isPending}
+          initialName={dayRecord?.locationName ?? ''}
+          initialLat={dayRecord?.latitude ?? undefined}
+          initialLng={dayRecord?.longitude ?? undefined}
+        />
 
         {/* Comment */}
         <div>

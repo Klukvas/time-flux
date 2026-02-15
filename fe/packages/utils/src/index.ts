@@ -41,3 +41,5 @@ export {
 } from './media';
 export type { MediaItem } from './media';
 export { getMoodEmoji, getMoodLabel } from './mood-score';
+export { reverseGeocode } from './geocode';
+export type { ReverseGeocodeResult } from './geocode';

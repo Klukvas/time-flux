@@ -104,12 +104,15 @@ model EventPeriod {
 }
 
 model Day {
-  id          String     @id @default(uuid())
-  userId      String     @map("user_id")
-  date        DateTime   @db.Date
-  dayStateId  String?    @map("day_state_id")
-  mainMediaId String?    @unique @map("main_media_id")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
+  id            String     @id @default(uuid())
+  userId        String     @map("user_id")
+  date          DateTime   @db.Date
+  dayStateId    String?    @map("day_state_id")
+  mainMediaId   String?    @unique @map("main_media_id")
+  locationName  String?    @map("location_name") @db.VarChar(120)
+  latitude      Float?
+  longitude     Float?
+  updatedAt     DateTime   @updatedAt @map("updated_at")
 
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   dayState   DayState?  @relation(fields: [dayStateId], references: [id], onDelete: SetNull)

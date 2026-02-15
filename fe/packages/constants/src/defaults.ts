@@ -32,8 +32,10 @@ export const DATE_FORMAT = 'yyyy-MM-dd';
 export const COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
 
 export const MAX_COMMENT_LENGTH = 300;
+export const MAX_LOCATION_NAME_LENGTH = 120;
 export const MAX_NAME_LENGTH = 100;
 export const MAX_TITLE_LENGTH = 200;
 export const MAX_DESCRIPTION_LENGTH = 500;
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 128;
+export const PASSWORD_COMPLEXITY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
