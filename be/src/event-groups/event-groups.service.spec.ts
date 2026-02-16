@@ -369,15 +369,18 @@ describe('EventGroupsService — Period Business Logic', () => {
       ).rejects.toThrow(InvalidDateRangeError);
     });
 
-    it('should reject same start and end date (zero-length period)', async () => {
-      repo.findGroupByIdAndUserId.mockResolvedValueOnce(mockGroup as any);
+    it('should allow same start and end date (single-day period)', async () => {
+      repo.findClosedPeriodsForGroup.mockResolvedValue([]);
+      repo.createPeriod.mockResolvedValue(makePeriod('p-new', '2024-03-15', '2024-03-15') as any);
+      repo.findGroupByIdAndUserId
+        .mockResolvedValueOnce(mockGroup as any)
+        .mockResolvedValueOnce({ ...mockGroup, periods: [makePeriod('p-new', '2024-03-15', '2024-03-15')] } as any);
 
-      await expect(
-        service.createPeriod(userId, groupId, {
-          startDate: '2024-03-15',
-          endDate: '2024-03-15',
-        }),
-      ).rejects.toThrow(InvalidDateRangeError);
+      const result = await service.createPeriod(userId, groupId, {
+        startDate: '2024-03-15',
+        endDate: '2024-03-15',
+      });
+      expect(result.periods).toHaveLength(1);
     });
   });
 
@@ -402,6 +405,23 @@ describe('EventGroupsService — Period Business Logic', () => {
       await expect(
         service.closePeriod(userId, 'p-1', { endDate: '2024-01-01' }),
       ).rejects.toThrow(InvalidDateRangeError);
+    });
+
+    it('should allow closing period on the same day as start date', async () => {
+      const activePeriod = makePeriod('p-active', '2024-06-01', null);
+      repo.findPeriodByIdAndUserId.mockResolvedValue(activePeriod as any);
+      repo.findClosedPeriodsForGroup.mockResolvedValue([]);
+      repo.updatePeriod.mockResolvedValue({
+        ...activePeriod,
+        endDate: new Date('2024-06-01T00:00:00Z'),
+      } as any);
+      repo.findGroupByIdAndUserId.mockResolvedValue({
+        ...mockGroup,
+        periods: [makePeriod('p-active', '2024-06-01', '2024-06-01')],
+      } as any);
+
+      const result = await service.closePeriod(userId, 'p-active', { endDate: '2024-06-01' });
+      expect(result.periods[0].endDate).toBe('2024-06-01');
     });
 
     it('should check for overlaps when closing period', async () => {

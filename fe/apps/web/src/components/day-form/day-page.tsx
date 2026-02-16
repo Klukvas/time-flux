@@ -570,13 +570,22 @@ export function DayPage({ date }: DayPageProps) {
 
         {/* Active Chapters Section */}
         <div>
-          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('chapters.title')}</h3>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-medium text-content-secondary">{t('chapters.title')}</h3>
+            <button
+              onClick={() => router.push('/chapters')}
+              className="text-xs font-medium text-accent hover:underline"
+            >
+              {t('chapters.view_all')}
+            </button>
+          </div>
           {overlappingPeriods.length > 0 ? (
             <div className="space-y-1.5">
               {overlappingPeriods.map((period) => (
-                <div
+                <button
                   key={period.id}
-                  className="flex items-center gap-2 rounded-lg border border-edge px-3 py-2 text-sm"
+                  onClick={() => router.push(`/chapters/${period.eventGroup.id}`)}
+                  className="flex w-full items-center gap-2 rounded-lg border border-edge px-3 py-2 text-left text-sm transition-colors hover:bg-surface-secondary"
                   style={{
                     borderLeftWidth: 3,
                     borderLeftColor: period.category.color,
@@ -601,7 +610,7 @@ export function DayPage({ date }: DayPageProps) {
                       {t('periods.active')}
                     </span>
                   )}
-                </div>
+                </button>
               ))}
             </div>
           ) : (

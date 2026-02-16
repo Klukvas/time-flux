@@ -204,7 +204,7 @@ export class EventGroupsService {
     const startDate = parseDate(dto.startDate, tz);
     const endDate = dto.endDate ? parseDate(dto.endDate, tz) : undefined;
 
-    if (endDate && startDate >= endDate) {
+    if (endDate && startDate > endDate) {
       throw new InvalidDateRangeError({ startDate: dto.startDate, endDate: dto.endDate });
     }
 
@@ -251,7 +251,7 @@ export class EventGroupsService {
       ? (dto.endDate ? parseDate(dto.endDate, tz) : null)
       : period.endDate;
 
-    if (newEndDate && newStartDate >= newEndDate) {
+    if (newEndDate && newStartDate > newEndDate) {
       throw new InvalidDateRangeError({
         startDate: DateTime.fromJSDate(newStartDate, { zone: 'utc' }).setZone(tz).toISODate()!,
         endDate: DateTime.fromJSDate(newEndDate, { zone: 'utc' }).setZone(tz).toISODate()!,
@@ -302,7 +302,7 @@ export class EventGroupsService {
     }
 
     const endDate = parseDate(dto.endDate, tz);
-    if (period.startDate >= endDate) {
+    if (period.startDate > endDate) {
       throw new InvalidDateRangeError({
         startDate: DateTime.fromJSDate(period.startDate, { zone: 'utc' }).setZone(tz).toISODate()!,
         endDate: dto.endDate,

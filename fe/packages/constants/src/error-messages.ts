@@ -8,7 +8,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   ACTIVE_PERIOD_EXISTS: 'An active period already exists in this chapter.',
   EVENT_NOT_FOUND: 'Event not found.',
   EVENT_ALREADY_CLOSED: 'This event is already closed.',
-  INVALID_DATE_RANGE: 'The end date must be after the start date.',
+  INVALID_DATE_RANGE: 'The end date cannot be before the start date.',
   CATEGORY_NOT_FOUND: 'Category not found.',
   DAY_STATE_NOT_FOUND: 'Day state not found.',
   DAY_NOT_FOUND: 'Day not found.',
