@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { v4 as uuidv4 } from 'uuid';
-import { MIME_TO_EXTENSION, MAX_UPLOAD_SIZE } from './dto/presigned-url.dto.js';
+import { MIME_TO_EXTENSION } from './dto/presigned-url.dto.js';
 
 @Injectable()
 export class S3Service {
@@ -16,7 +22,10 @@ export class S3Service {
       region: this.configService.get<string>('S3_REGION'),
       credentials: {
         accessKeyId: this.configService.get<string>('S3_ACCESS_KEY_ID', ''),
-        secretAccessKey: this.configService.get<string>('S3_SECRET_ACCESS_KEY', ''),
+        secretAccessKey: this.configService.get<string>(
+          'S3_SECRET_ACCESS_KEY',
+          '',
+        ),
       },
       forcePathStyle: true,
     });
@@ -39,7 +48,9 @@ export class S3Service {
       ContentLength: size,
     });
 
-    const uploadUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+    const uploadUrl = await getSignedUrl(this.s3Client, command, {
+      expiresIn: 3600,
+    });
 
     return { uploadUrl, key };
   }

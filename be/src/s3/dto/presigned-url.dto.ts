@@ -1,11 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsInt, IsString, Max, MaxLength, Min } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsString,
+  Matches,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export const ALLOWED_UPLOAD_CONTENT_TYPES = [
   'image/jpeg',
   'image/png',
   'image/webp',
   'image/gif',
+  'image/heic',
+  'image/heif',
   'video/mp4',
   'video/webm',
   'video/quicktime',
@@ -16,6 +26,8 @@ export const MIME_TO_EXTENSION: Record<string, string> = {
   'image/png': '.png',
   'image/webp': '.webp',
   'image/gif': '.gif',
+  'image/heic': '.heic',
+  'image/heif': '.heif',
   'video/mp4': '.mp4',
   'video/webm': '.webm',
   'video/quicktime': '.mov',
@@ -24,9 +36,16 @@ export const MIME_TO_EXTENSION: Record<string, string> = {
 export const MAX_UPLOAD_SIZE = 50 * 1024 * 1024; // 50 MB
 
 export class PresignedUrlRequestDto {
-  @ApiProperty({ example: 'photo.jpg', description: 'File name for the upload' })
+  @ApiProperty({
+    example: 'photo.jpg',
+    description: 'File name for the upload',
+  })
   @IsString()
   @MaxLength(255)
+  @Matches(/^[a-zA-Z0-9][a-zA-Z0-9._\- ]*$/, {
+    message:
+      'fileName must contain only alphanumeric characters, dots, hyphens, underscores, and spaces',
+  })
   fileName: string;
 
   @ApiProperty({
@@ -39,7 +58,10 @@ export class PresignedUrlRequestDto {
   })
   contentType: string;
 
-  @ApiProperty({ example: 1024000, description: 'File size in bytes (required, max 50 MB)' })
+  @ApiProperty({
+    example: 1024000,
+    description: 'File size in bytes (required, max 50 MB)',
+  })
   @IsInt()
   @Min(1)
   @Max(MAX_UPLOAD_SIZE)

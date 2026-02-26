@@ -1,4 +1,8 @@
-import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from 'axios';
 import type { ApiErrorResponse, AuthResponse } from './types';
 
 export type TokenGetter = () => string | null;
@@ -32,15 +36,20 @@ export function createApiClient(config: ApiClientConfig): AxiosInstance {
   client.interceptors.response.use(
     (response) => response,
     async (error: AxiosError<ApiErrorResponse>) => {
-      const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+      const original = error.config as InternalAxiosRequestConfig & {
+        _retry?: boolean;
+      };
 
       if (error.response?.status !== 401 || original._retry) {
         return Promise.reject(error);
       }
 
-      // Don't try to refresh if the failing request was the refresh endpoint itself
-      if (original.url?.includes('/auth/refresh')) {
-        config.onUnauthorized();
+      // Don't try to refresh for auth endpoints — let the caller handle the error
+      if (
+        original.url?.includes('/auth/login') ||
+        original.url?.includes('/auth/register') ||
+        original.url?.includes('/auth/refresh')
+      ) {
         return Promise.reject(error);
       }
 
@@ -56,9 +65,13 @@ export function createApiClient(config: ApiClientConfig): AxiosInstance {
         // Coalesce concurrent refresh attempts into a single request
         if (!refreshPromise) {
           refreshPromise = axios
-            .post<AuthResponse>(`${config.baseURL}/api/v1/auth/refresh`, { refresh_token: refreshToken })
+            .post<AuthResponse>(`${config.baseURL}/api/v1/auth/refresh`, {
+              refresh_token: refreshToken,
+            })
             .then((r) => r.data)
-            .finally(() => { refreshPromise = null; });
+            .finally(() => {
+              refreshPromise = null;
+            });
         }
 
         const data = await refreshPromise;

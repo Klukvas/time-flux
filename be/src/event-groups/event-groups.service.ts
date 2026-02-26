@@ -11,7 +11,6 @@ import { UpdateEventGroupDto } from './dto/update-event-group.dto.js';
 import { CreateEventPeriodDto } from './dto/create-event-period.dto.js';
 import { UpdateEventPeriodDto } from './dto/update-event-period.dto.js';
 import { CloseEventPeriodDto } from './dto/close-event-period.dto.js';
-import { EventGroupQueryDto } from './dto/event-group-query.dto.js';
 import {
   EventGroupNotFoundError,
   EventGroupInUseError,
@@ -27,15 +26,23 @@ import {
   buildMoodScoreMap,
   computeAverageMoodScore,
 } from '../common/utils/mood-score.js';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
 
 function parseDate(dateStr: string, timezone: string): Date {
-  return DateTime.fromISO(dateStr, { zone: timezone }).startOf('day').toUTC().toJSDate();
+  return DateTime.fromISO(dateStr, { zone: timezone })
+    .startOf('day')
+    .toUTC()
+    .toJSDate();
 }
 
 function formatPeriod(period: any, timezone: string) {
-  const startDate = DateTime.fromJSDate(period.startDate, { zone: 'utc' }).setZone(timezone).toISODate()!;
+  const startDate = DateTime.fromJSDate(period.startDate, { zone: 'utc' })
+    .setZone(timezone)
+    .toISODate()!;
   const endDate = period.endDate
-    ? DateTime.fromJSDate(period.endDate, { zone: 'utc' }).setZone(timezone).toISODate()!
+    ? DateTime.fromJSDate(period.endDate, { zone: 'utc' })
+        .setZone(timezone)
+        .toISODate()!
     : null;
   return {
     id: period.id,
@@ -69,6 +76,7 @@ export class EventGroupsService {
     private readonly daysRepository: DaysRepository,
     private readonly s3Service: S3Service,
     private readonly prisma: PrismaService,
+    private readonly subscriptionsService: SubscriptionsService,
   ) {}
 
   private async getUserTimezone(userId: string): Promise<string> {
@@ -78,16 +86,23 @@ export class EventGroupsService {
 
   private assertNotTooFarInFuture(dateStr: string, timezone: string) {
     const target = DateTime.fromISO(dateStr, { zone: timezone }).startOf('day');
-    const tomorrow = DateTime.now().setZone(timezone).startOf('day').plus({ days: 1 });
+    const tomorrow = DateTime.now()
+      .setZone(timezone)
+      .startOf('day')
+      .plus({ days: 1 });
     if (target > tomorrow) {
-      throw new FutureDateError({ date: dateStr, maxDate: tomorrow.toISODate()! });
+      throw new FutureDateError({
+        date: dateStr,
+        maxDate: tomorrow.toISODate()!,
+      });
     }
   }
 
   /**
-   * Check for overlapping closed periods in the same group.
+   * Check for overlapping periods in the same group.
    *
    * Two closed periods overlap when: newStart < existingEnd AND newEnd > existingStart
+   * An open-ended period [startDate, ∞) overlaps a closed period when: startDate < existingEnd
    * Boundary-sharing (e.g. existing 01–10 and new 10–20) is allowed because
    * strict inequality ensures touching edges do not count as overlap.
    */
@@ -98,14 +113,19 @@ export class EventGroupsService {
     excludePeriodId?: string,
     tx?: any,
   ) {
-    if (!endDate) return; // Open-ended periods are handled by active-period check
-
-    const closedPeriods = await this.repo.findClosedPeriodsForGroup(groupId, excludePeriodId, tx);
+    const closedPeriods = await this.repo.findClosedPeriodsForGroup(
+      groupId,
+      excludePeriodId,
+      tx,
+    );
     for (const existing of closedPeriods) {
       const existingEnd = existing.endDate!;
-      // Strict < / > ensures shared boundaries are allowed:
-      // e.g. existing 01–10 + new 10–20 → 10 < 10 = false → no overlap
-      if (startDate < existingEnd && endDate > existing.startDate) {
+      // Open-ended period: overlaps if it starts before the closed period ends
+      // Closed period: standard interval overlap check
+      const overlaps = endDate
+        ? startDate < existingEnd && endDate > existing.startDate
+        : startDate < existingEnd;
+      if (overlaps) {
         throw new PeriodOverlapError({
           existingPeriodId: existing.id,
           existingStart: existing.startDate.toISOString(),
@@ -118,9 +138,19 @@ export class EventGroupsService {
   // ─── EventGroup operations ────────────────────────────────
 
   async createGroup(userId: string, dto: CreateEventGroupDto) {
+    const count = await this.repo.countGroupsByUserId(userId);
+    await this.subscriptionsService.assertResourceLimit(
+      userId,
+      'chapters',
+      count,
+    );
+
     const tz = await this.getUserTimezone(userId);
 
-    const category = await this.categoriesRepository.findByIdAndUserId(dto.categoryId, userId);
+    const category = await this.categoriesRepository.findByIdAndUserId(
+      dto.categoryId,
+      userId,
+    );
     if (!category) {
       throw new CategoryNotFoundError();
     }
@@ -144,7 +174,10 @@ export class EventGroupsService {
     }
 
     if (dto.categoryId && dto.categoryId !== group.categoryId) {
-      const category = await this.categoriesRepository.findByIdAndUserId(dto.categoryId, userId);
+      const category = await this.categoriesRepository.findByIdAndUserId(
+        dto.categoryId,
+        userId,
+      );
       if (!category) {
         throw new CategoryNotFoundError();
       }
@@ -170,10 +203,10 @@ export class EventGroupsService {
       throw new EventGroupInUseError({ groupId: id, periodCount });
     }
 
-    await this.repo.deleteGroup(id);
+    await this.repo.deleteGroup(id, userId);
   }
 
-  async findAllGroups(userId: string, _query: EventGroupQueryDto) {
+  async findAllGroups(userId: string) {
     const tz = await this.getUserTimezone(userId);
     const groups = await this.repo.findAllGroupsByUserId(userId);
     return groups.map((g) => formatGroup(g, tz));
@@ -192,7 +225,11 @@ export class EventGroupsService {
 
   // ─── EventPeriod operations ───────────────────────────────
 
-  async createPeriod(userId: string, groupId: string, dto: CreateEventPeriodDto) {
+  async createPeriod(
+    userId: string,
+    groupId: string,
+    dto: CreateEventPeriodDto,
+  ) {
     const tz = await this.getUserTimezone(userId);
 
     const group = await this.repo.findGroupByIdAndUserId(groupId, userId);
@@ -205,32 +242,49 @@ export class EventGroupsService {
     const endDate = dto.endDate ? parseDate(dto.endDate, tz) : undefined;
 
     if (endDate && startDate > endDate) {
-      throw new InvalidDateRangeError({ startDate: dto.startDate, endDate: dto.endDate });
+      throw new InvalidDateRangeError({
+        startDate: dto.startDate,
+        endDate: dto.endDate,
+      });
     }
 
-    const period = await this.prisma.$transaction(async (tx) => {
-      if (!endDate) {
-        const existingActive = await this.repo.findActivePeriodForGroup(groupId, undefined, tx);
-        if (existingActive) {
-          throw new ActivePeriodExistsError({ groupId });
+    const period = await this.prisma.$transaction(
+      async (tx) => {
+        if (!endDate) {
+          const existingActive = await this.repo.findActivePeriodForGroup(
+            groupId,
+            undefined,
+            tx,
+          );
+          if (existingActive) {
+            throw new ActivePeriodExistsError({ groupId });
+          }
         }
-      }
 
-      // Check for overlapping closed periods
-      await this.assertNoOverlap(groupId, startDate, endDate, undefined, tx);
+        // Check for overlapping closed periods
+        await this.assertNoOverlap(groupId, startDate, endDate, undefined, tx);
 
-      return this.repo.createPeriod(
-        { eventGroupId: groupId, startDate, endDate, comment: dto.comment },
-        tx,
-      );
-    });
+        return this.repo.createPeriod(
+          { eventGroupId: groupId, startDate, endDate, comment: dto.comment },
+          tx,
+        );
+      },
+      { isolationLevel: 'Serializable' },
+    );
 
     // Re-fetch group to return updated data
-    const updatedGroup = await this.repo.findGroupByIdAndUserId(groupId, userId);
+    const updatedGroup = await this.repo.findGroupByIdAndUserId(
+      groupId,
+      userId,
+    );
     return formatGroup(updatedGroup!, tz);
   }
 
-  async updatePeriod(userId: string, periodId: string, dto: UpdateEventPeriodDto) {
+  async updatePeriod(
+    userId: string,
+    periodId: string,
+    dto: UpdateEventPeriodDto,
+  ) {
     const tz = await this.getUserTimezone(userId);
 
     const period = await this.repo.findPeriodByIdAndUserId(periodId, userId);
@@ -246,50 +300,75 @@ export class EventGroupsService {
       this.assertNotTooFarInFuture(dto.endDate, tz);
     }
 
-    const newStartDate = dto.startDate ? parseDate(dto.startDate, tz) : period.startDate;
-    const newEndDate = dto.endDate !== undefined
-      ? (dto.endDate ? parseDate(dto.endDate, tz) : null)
-      : period.endDate;
+    const newStartDate = dto.startDate
+      ? parseDate(dto.startDate, tz)
+      : period.startDate;
+    const newEndDate =
+      dto.endDate !== undefined
+        ? dto.endDate
+          ? parseDate(dto.endDate, tz)
+          : null
+        : period.endDate;
 
     if (newEndDate && newStartDate > newEndDate) {
       throw new InvalidDateRangeError({
-        startDate: DateTime.fromJSDate(newStartDate, { zone: 'utc' }).setZone(tz).toISODate()!,
-        endDate: DateTime.fromJSDate(newEndDate, { zone: 'utc' }).setZone(tz).toISODate()!,
+        startDate: DateTime.fromJSDate(newStartDate, { zone: 'utc' })
+          .setZone(tz)
+          .toISODate()!,
+        endDate: DateTime.fromJSDate(newEndDate, { zone: 'utc' })
+          .setZone(tz)
+          .toISODate()!,
       });
     }
 
-    const updated = await this.prisma.$transaction(async (tx) => {
-      if (!newEndDate) {
-        const existingActive = await this.repo.findActivePeriodForGroup(
+    const updated = await this.prisma.$transaction(
+      async (tx) => {
+        if (!newEndDate) {
+          const existingActive = await this.repo.findActivePeriodForGroup(
+            period.eventGroupId,
+            periodId,
+            tx,
+          );
+          if (existingActive) {
+            throw new ActivePeriodExistsError({ groupId: period.eventGroupId });
+          }
+        }
+
+        // Check for overlapping closed periods
+        await this.assertNoOverlap(
           period.eventGroupId,
+          newStartDate,
+          newEndDate,
           periodId,
           tx,
         );
-        if (existingActive) {
-          throw new ActivePeriodExistsError({ groupId: period.eventGroupId });
-        }
-      }
 
-      // Check for overlapping closed periods
-      await this.assertNoOverlap(period.eventGroupId, newStartDate, newEndDate, periodId, tx);
-
-      return this.repo.updatePeriod(
-        periodId,
-        {
-          startDate: dto.startDate ? newStartDate : undefined,
-          endDate: dto.endDate !== undefined ? newEndDate : undefined,
-          comment: dto.comment,
-        },
-        tx,
-      );
-    });
+        return this.repo.updatePeriod(
+          periodId,
+          {
+            startDate: dto.startDate ? newStartDate : undefined,
+            endDate: dto.endDate !== undefined ? newEndDate : undefined,
+            comment: dto.comment,
+          },
+          tx,
+        );
+      },
+      { isolationLevel: 'Serializable' },
+    );
 
     // Re-fetch group to return updated data
-    const group = await this.repo.findGroupByIdAndUserId(period.eventGroupId, userId);
+    const group = await this.repo.findGroupByIdAndUserId(
+      period.eventGroupId,
+      userId,
+    );
     return formatGroup(group!, tz);
   }
 
-  async closePeriod(userId: string, periodId: string, dto: CloseEventPeriodDto) {
+  async closePeriod(
+    userId: string,
+    periodId: string,
+    dto: CloseEventPeriodDto,
+  ) {
     const tz = await this.getUserTimezone(userId);
 
     const period = await this.repo.findPeriodByIdAndUserId(periodId, userId);
@@ -301,20 +380,37 @@ export class EventGroupsService {
       throw new EventAlreadyClosedError();
     }
 
+    this.assertNotTooFarInFuture(dto.endDate, tz);
+
     const endDate = parseDate(dto.endDate, tz);
     if (period.startDate > endDate) {
       throw new InvalidDateRangeError({
-        startDate: DateTime.fromJSDate(period.startDate, { zone: 'utc' }).setZone(tz).toISODate()!,
+        startDate: DateTime.fromJSDate(period.startDate, { zone: 'utc' })
+          .setZone(tz)
+          .toISODate()!,
         endDate: dto.endDate,
       });
     }
 
-    // Check for overlapping closed periods before closing
-    await this.assertNoOverlap(period.eventGroupId, period.startDate, endDate, periodId);
+    // Check overlap + update atomically to prevent race conditions
+    await this.prisma.$transaction(
+      async (tx) => {
+        await this.assertNoOverlap(
+          period.eventGroupId,
+          period.startDate,
+          endDate,
+          periodId,
+          tx,
+        );
+        await this.repo.updatePeriod(periodId, { endDate }, tx);
+      },
+      { isolationLevel: 'Serializable' },
+    );
 
-    await this.repo.updatePeriod(periodId, { endDate });
-
-    const group = await this.repo.findGroupByIdAndUserId(period.eventGroupId, userId);
+    const group = await this.repo.findGroupByIdAndUserId(
+      period.eventGroupId,
+      userId,
+    );
     return formatGroup(group!, tz);
   }
 
@@ -324,7 +420,7 @@ export class EventGroupsService {
       throw new EventPeriodNotFoundError();
     }
 
-    await this.repo.deletePeriod(periodId);
+    await this.repo.deletePeriod(periodId, userId);
   }
 
   // ─── Details endpoint ─────────────────────────────────────
@@ -357,23 +453,35 @@ export class EventGroupsService {
 
       // Convert to Date-only for days query
       const fromDate = new Date(
-        DateTime.fromJSDate(earliestStart, { zone: 'utc' }).setZone(tz).toISODate()! + 'T00:00:00Z',
+        DateTime.fromJSDate(earliestStart, { zone: 'utc' })
+          .setZone(tz)
+          .toISODate()! + 'T00:00:00Z',
       );
       const toDate = new Date(
-        DateTime.fromJSDate(latestEnd, { zone: 'utc' }).setZone(tz).toISODate()! + 'T00:00:00Z',
+        DateTime.fromJSDate(latestEnd, { zone: 'utc' })
+          .setZone(tz)
+          .toISODate()! + 'T00:00:00Z',
       );
 
-      const days = await this.daysRepository.findByUserIdAndDateRange(userId, fromDate, toDate);
+      const days = await this.daysRepository.findByUserIdAndDateRange(
+        userId,
+        fromDate,
+        toDate,
+      );
 
       // Filter to only days that overlap with at least one period
       allDays = days.filter((day: any) => {
         const dayTime = day.date.getTime();
         return dateRanges.some((r) => {
           const startTime = new Date(
-            DateTime.fromJSDate(r.start, { zone: 'utc' }).setZone(tz).toISODate()! + 'T00:00:00Z',
+            DateTime.fromJSDate(r.start, { zone: 'utc' })
+              .setZone(tz)
+              .toISODate()! + 'T00:00:00Z',
           ).getTime();
           const endTime = new Date(
-            DateTime.fromJSDate(r.end, { zone: 'utc' }).setZone(tz).toISODate()! + 'T00:00:00Z',
+            DateTime.fromJSDate(r.end, { zone: 'utc' })
+              .setZone(tz)
+              .toISODate()! + 'T00:00:00Z',
           ).getTime();
           return dayTime >= startTime && dayTime <= endTime;
         });
@@ -381,7 +489,10 @@ export class EventGroupsService {
     }
 
     // Aggregate mood stats
-    const moodCounts = new Map<string, { name: string; color: string; count: number }>();
+    const moodCounts = new Map<
+      string,
+      { name: string; color: string; count: number }
+    >();
     let totalDays = 0;
     for (const day of allDays) {
       if (day.dayState) {
@@ -390,47 +501,63 @@ export class EventGroupsService {
         if (existing) {
           existing.count++;
         } else {
-          moodCounts.set(key, { name: day.dayState.name, color: day.dayState.color, count: 1 });
+          moodCounts.set(key, {
+            name: day.dayState.name,
+            color: day.dayState.color,
+            count: 1,
+          });
         }
       }
       totalDays++;
     }
 
-    const totalMoodDays = Array.from(moodCounts.values()).reduce((sum, m) => sum + m.count, 0);
+    const totalMoodDays = Array.from(moodCounts.values()).reduce(
+      (sum, m) => sum + m.count,
+      0,
+    );
     const moodStats = Array.from(moodCounts.values())
       .sort((a, b) => b.count - a.count)
       .map((m) => ({
         dayStateName: m.name,
         dayStateColor: m.color,
         count: m.count,
-        percentage: totalMoodDays > 0 ? Math.round((m.count / totalMoodDays) * 100) : 0,
+        percentage:
+          totalMoodDays > 0 ? Math.round((m.count / totalMoodDays) * 100) : 0,
       }));
 
-    // Collect media from overlapping days — try-catch to prevent S3 failures from crashing request
-    const media: any[] = [];
-    let totalMedia = 0;
+    // Collect all media items, then batch-fetch presigned URLs in parallel
+    const allMediaItems: any[] = [];
     for (const day of allDays) {
       if (day.media) {
         for (const m of day.media) {
-          totalMedia++;
-          let url: string | null = null;
-          try {
-            url = await this.s3Service.getPresignedReadUrl(m.s3Key);
-          } catch (err) {
-            this.logger.warn(`Failed to generate presigned URL for s3Key=${m.s3Key}: ${err}`);
-          }
-          media.push({
-            id: m.id,
-            s3Key: m.s3Key,
-            url,
-            fileName: m.fileName,
-            contentType: m.contentType,
-            size: m.size,
-            createdAt: m.createdAt.toISOString(),
-          });
+          allMediaItems.push(m);
         }
       }
     }
+    const totalMedia = allMediaItems.length;
+
+    const mediaWithUrls = await Promise.all(
+      allMediaItems.map(async (m) => {
+        let url: string | null = null;
+        try {
+          url = await this.s3Service.getPresignedReadUrl(m.s3Key);
+        } catch (err) {
+          this.logger.warn(
+            `Failed to generate presigned URL for s3Key=${m.s3Key}: ${err}`,
+          );
+        }
+        return {
+          id: m.id,
+          s3Key: m.s3Key,
+          url,
+          fileName: m.fileName,
+          contentType: m.contentType,
+          size: m.size,
+          createdAt: m.createdAt.toISOString(),
+        };
+      }),
+    );
+    const media = mediaWithUrls;
 
     // ── Analytics ──────────────────────────────────────────────
     const dayStates = await this.prisma.dayState.findMany({
@@ -447,18 +574,25 @@ export class EventGroupsService {
         moodName: m.name,
         color: m.color,
         count: m.count,
-        percentage: totalMoodDays > 0 ? Math.round((m.count / totalMoodDays) * 100) : 0,
+        percentage:
+          totalMoodDays > 0 ? Math.round((m.count / totalMoodDays) * 100) : 0,
       }));
 
     // Density: for each period, count days that have mood or media
     const density = group.periods.map((p: any) => {
-      const pStart = DateTime.fromJSDate(p.startDate, { zone: 'utc' }).setZone(tz).startOf('day');
+      const pStart = DateTime.fromJSDate(p.startDate, { zone: 'utc' })
+        .setZone(tz)
+        .startOf('day');
       const pEnd = p.endDate
-        ? DateTime.fromJSDate(p.endDate, { zone: 'utc' }).setZone(tz).startOf('day')
+        ? DateTime.fromJSDate(p.endDate, { zone: 'utc' })
+            .setZone(tz)
+            .startOf('day')
         : DateTime.now().setZone(tz).startOf('day');
 
       const activeDays = allDays.filter((day: any) => {
-        const dayDt = DateTime.fromJSDate(day.date, { zone: 'utc' }).setZone(tz).startOf('day');
+        const dayDt = DateTime.fromJSDate(day.date, { zone: 'utc' })
+          .setZone(tz)
+          .startOf('day');
         if (dayDt < pStart || dayDt > pEnd) return false;
         return day.dayState || (day.media && day.media.length > 0);
       }).length;

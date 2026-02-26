@@ -282,12 +282,14 @@ export interface Day {
   locationName: string | null;
   latitude: number | null;
   longitude: number | null;
+  comment: string | null;
   media: DayMedia[];
 }
 
 export interface UpsertDayRequest {
   dayStateId?: string | null;
   mainMediaId?: string | null;
+  comment?: string | null;
 }
 
 export interface UpdateDayLocationRequest {
@@ -384,6 +386,22 @@ export interface DayContextResponse {
   memories: DayContextMemory[];
 }
 
+export interface WeekContextMemory {
+  interval: MemoryInterval;
+  weekStart: string;
+  weekEnd: string;
+  activeDays: number;
+  totalMedia: number;
+}
+
+export interface WeekContextResponse {
+  type: 'week';
+  baseWeek: { start: string; end: string };
+  memories: WeekContextMemory[];
+}
+
+export type MemoriesContextResponse = DayContextResponse | WeekContextResponse;
+
 export type MemoriesContextMode = 'day' | 'week';
 
 export interface MemoriesContextParams {
@@ -406,6 +424,48 @@ export interface RecommendationsResponse {
 export interface CreateFromRecommendationRequest {
   key: string;
   name: string;
+}
+
+// ─── Subscription ───────────────────────────────────────────
+
+export type SubscriptionTier = 'FREE' | 'PRO' | 'PREMIUM';
+export type SubscriptionStatus =
+  | 'ACTIVE'
+  | 'TRIALING'
+  | 'PAST_DUE'
+  | 'CANCELED'
+  | 'PAUSED';
+
+export interface SubscriptionLimits {
+  media: number;
+  chapters: number;
+  categories: number;
+  dayStates: number;
+  analytics: boolean;
+  memories: boolean;
+}
+
+export interface SubscriptionUsage {
+  media: number;
+  chapters: number;
+  categories: number;
+  dayStates: number;
+}
+
+export interface SubscriptionResponse {
+  id: string;
+  tier: SubscriptionTier;
+  status: SubscriptionStatus;
+  paddleSubscriptionId: string | null;
+  currentPeriodEnd: string | null;
+  canceledAt: string | null;
+  limits: SubscriptionLimits;
+  usage: SubscriptionUsage;
+}
+
+export interface CancelSubscriptionResponse {
+  message: string;
+  canceledAt: string | null;
 }
 
 // ─── API Error ───────────────────────────────────────────────
@@ -441,4 +501,9 @@ export type ErrorCode =
   | 'GOOGLE_AUTH_FAILED'
   | 'USER_CREATION_FAILED'
   | 'INTERNAL_ERROR'
-  | 'HTTP_ERROR';
+  | 'HTTP_ERROR'
+  | 'QUOTA_EXCEEDED'
+  | 'FEATURE_LOCKED'
+  | 'SUBSCRIPTION_NOT_FOUND'
+  | 'PADDLE_NOT_CONFIGURED'
+  | 'PADDLE_CANCEL_ERROR';

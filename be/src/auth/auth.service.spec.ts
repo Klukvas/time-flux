@@ -12,6 +12,7 @@ import {
   GoogleAuthFailedError,
 } from '../common/errors/app.error.js';
 import type { GoogleProfile } from './strategies/google.strategy.js';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -58,7 +59,7 @@ describe('AuthService', () => {
         })),
         findFirst: jest.fn(),
         delete: jest.fn(),
-        deleteMany: jest.fn(),
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
       $transaction: jest.fn(),
     };
@@ -71,10 +72,6 @@ describe('AuthService', () => {
           useValue: {
             findUserByEmail: jest.fn(),
             findUserById: jest.fn(),
-            findUserByGoogleId: jest.fn(),
-            createUser: jest.fn(),
-            createGoogleUser: jest.fn(),
-            linkGoogleAccount: jest.fn(),
             completeOnboarding: jest.fn(),
           },
         },
@@ -87,6 +84,15 @@ describe('AuthService', () => {
         {
           provide: PrismaService,
           useValue: prisma,
+        },
+        {
+          provide: SubscriptionsService,
+          useValue: {
+            getSubscription: jest.fn().mockResolvedValue({
+              tier: 'FREE',
+              status: 'ACTIVE',
+            }),
+          },
         },
       ],
     }).compile();
@@ -107,7 +113,9 @@ describe('AuthService', () => {
         password: 'Password1',
       });
 
-      expect(authRepository.findUserByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(authRepository.findUserByEmail).toHaveBeenCalledWith(
+        'test@example.com',
+      );
       expect(prisma.user.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ email: 'test@example.com' }),
@@ -124,9 +132,14 @@ describe('AuthService', () => {
     });
 
     it('should hash password with bcrypt (12 rounds) before storing', async () => {
+      // bcrypt is CPU-intensive, increase timeout for coverage runs
+      jest.setTimeout(30_000);
       authRepository.findUserByEmail.mockResolvedValue(null);
 
-      await service.register({ email: 'new@example.com', password: 'Password1' });
+      await service.register({
+        email: 'new@example.com',
+        password: 'Password1',
+      });
 
       const createCall = prisma.user.create.mock.calls[0][0];
       const storedHash = createCall.data.passwordHash;
@@ -142,7 +155,10 @@ describe('AuthService', () => {
     it('should default to UTC timezone when none provided', async () => {
       authRepository.findUserByEmail.mockResolvedValue(null);
 
-      await service.register({ email: 'new@example.com', password: 'Password1' });
+      await service.register({
+        email: 'new@example.com',
+        password: 'Password1',
+      });
 
       expect(prisma.user.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -190,7 +206,10 @@ describe('AuthService', () => {
     it('should generate JWT with sub and email payload', async () => {
       authRepository.findUserByEmail.mockResolvedValue(null);
 
-      await service.register({ email: 'new@example.com', password: 'Password1' });
+      await service.register({
+        email: 'new@example.com',
+        password: 'Password1',
+      });
 
       expect(jwtService.sign).toHaveBeenCalledWith(
         { sub: 'new-user-id', email: 'new@example.com' },
@@ -206,7 +225,10 @@ describe('AuthService', () => {
       authRepository.findUserByEmail.mockResolvedValue(null);
 
       await expect(
-        service.login({ email: 'nonexistent@example.com', password: 'Password1' }),
+        service.login({
+          email: 'nonexistent@example.com',
+          password: 'Password1',
+        }),
       ).rejects.toThrow(UnauthorizedError);
     });
 
@@ -230,7 +252,10 @@ describe('AuthService', () => {
       });
 
       await expect(
-        service.login({ email: 'test@example.com', password: 'WrongPassword1' }),
+        service.login({
+          email: 'test@example.com',
+          password: 'WrongPassword1',
+        }),
       ).rejects.toThrow(UnauthorizedError);
     });
 
@@ -259,9 +284,14 @@ describe('AuthService', () => {
         passwordHash: realHash,
       });
 
-      await service.login({ email: '  TEST@Example.COM ', password: 'Password1' });
+      await service.login({
+        email: '  TEST@Example.COM ',
+        password: 'Password1',
+      });
 
-      expect(authRepository.findUserByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(authRepository.findUserByEmail).toHaveBeenCalledWith(
+        'test@example.com',
+      );
     });
 
     it('should return identical error for user-not-found and wrong-password (timing-safe)', async () => {
@@ -276,10 +306,16 @@ describe('AuthService', () => {
 
       // Wrong password
       const hash = await bcrypt.hash('RightPass1', 12);
-      authRepository.findUserByEmail.mockResolvedValue({ ...mockUser, passwordHash: hash });
+      authRepository.findUserByEmail.mockResolvedValue({
+        ...mockUser,
+        passwordHash: hash,
+      });
       let error2: any;
       try {
-        await service.login({ email: 'test@example.com', password: 'WrongPass1' });
+        await service.login({
+          email: 'test@example.com',
+          password: 'WrongPass1',
+        });
       } catch (e) {
         error2 = e;
       }
@@ -303,14 +339,20 @@ describe('AuthService', () => {
         user: mockUser,
       });
 
-      await expect(service.refresh('some-token')).rejects.toThrow(UnauthorizedError);
-      expect(prisma.refreshToken.delete).toHaveBeenCalledWith({ where: { id: 'rt-expired' } });
+      await expect(service.refresh('some-token')).rejects.toThrow(
+        UnauthorizedError,
+      );
+      expect(prisma.refreshToken.delete).toHaveBeenCalledWith({
+        where: { id: 'rt-expired' },
+      });
     });
 
     it('should reject token not found in DB', async () => {
       prisma.refreshToken.findFirst.mockResolvedValue(null);
 
-      await expect(service.refresh('unknown-token')).rejects.toThrow(UnauthorizedError);
+      await expect(service.refresh('unknown-token')).rejects.toThrow(
+        UnauthorizedError,
+      );
       // Should NOT attempt to delete when token doesn't exist
       expect(prisma.refreshToken.delete).not.toHaveBeenCalled();
     });
@@ -328,7 +370,9 @@ describe('AuthService', () => {
       const result = await service.refresh('valid-raw-token');
 
       // Old token must be deleted
-      expect(prisma.refreshToken.delete).toHaveBeenCalledWith({ where: { id: 'rt-old' } });
+      expect(prisma.refreshToken.delete).toHaveBeenCalledWith({
+        where: { id: 'rt-old' },
+      });
       // New token must be created
       expect(prisma.refreshToken.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -392,7 +436,9 @@ describe('AuthService', () => {
       // Second use: token was deleted during rotation
       prisma.refreshToken.findFirst.mockResolvedValueOnce(null);
 
-      await expect(service.refresh('raw-token')).rejects.toThrow(UnauthorizedError);
+      await expect(service.refresh('raw-token')).rejects.toThrow(
+        UnauthorizedError,
+      );
     });
 
     it('should set new refresh token expiry ~7 days from now', async () => {
@@ -460,13 +506,18 @@ describe('AuthService', () => {
     });
 
     it('should link Google to existing LOCAL user without overwriting provider', async () => {
-      const localUser = { ...mockUser, provider: 'LOCAL' as const, avatarUrl: null };
+      const localUser = {
+        ...mockUser,
+        provider: 'LOCAL' as const,
+        avatarUrl: null,
+      };
 
       prisma.$transaction.mockImplementation(async (cb: any) => {
         const tx = {
           user: {
-            findUnique: jest.fn()
-              .mockResolvedValueOnce(null)     // no googleId match
+            findUnique: jest
+              .fn()
+              .mockResolvedValueOnce(null) // no googleId match
               .mockResolvedValueOnce(localUser), // email match
             update: jest.fn().mockResolvedValue({
               ...localUser,
@@ -492,7 +543,8 @@ describe('AuthService', () => {
       prisma.$transaction.mockImplementation(async (cb: any) => {
         const tx = {
           user: {
-            findUnique: jest.fn()
+            findUnique: jest
+              .fn()
               .mockResolvedValueOnce(null)
               .mockResolvedValueOnce(userWithAvatar),
             update: jest.fn().mockImplementation(({ data }) => ({
@@ -517,7 +569,8 @@ describe('AuthService', () => {
       prisma.$transaction.mockImplementation(async (cb: any) => {
         const tx = {
           user: {
-            findUnique: jest.fn()
+            findUnique: jest
+              .fn()
               .mockResolvedValueOnce(null)
               .mockResolvedValueOnce(userWithoutAvatar),
             update: jest.fn().mockImplementation(({ data }) => ({
@@ -551,7 +604,8 @@ describe('AuthService', () => {
       prisma.$transaction.mockImplementation(async (cb: any) => {
         const tx = {
           user: {
-            findUnique: jest.fn()
+            findUnique: jest
+              .fn()
               .mockResolvedValueOnce(null)
               .mockResolvedValueOnce(null),
             update: jest.fn(),

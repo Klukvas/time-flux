@@ -4,8 +4,18 @@ import Slider from '@react-native-community/slider';
 import type { DayState } from '@lifespan/api';
 import { extractApiError } from '@lifespan/api';
 import { getUserMessage, validateColor, validateName } from '@lifespan/domain';
-import { useCreateDayState, useTranslation, useUpdateDayState, useTheme } from '@lifespan/hooks';
-import { BASE_COLORS, contrastTextColor, getMoodEmoji, getMoodLabel } from '@lifespan/utils';
+import {
+  useCreateDayState,
+  useTranslation,
+  useUpdateDayState,
+  useTheme,
+} from '@lifespan/hooks';
+import {
+  BASE_COLORS,
+  contrastTextColor,
+  getMoodEmoji,
+  getMoodLabel,
+} from '@lifespan/utils';
 import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { Input } from '@/components/ui/input';
@@ -19,7 +29,11 @@ interface DayStateFormModalProps {
   dayState?: DayState | null;
 }
 
-export function DayStateFormModal({ visible, onClose, dayState }: DayStateFormModalProps) {
+export function DayStateFormModal({
+  visible,
+  onClose,
+  dayState,
+}: DayStateFormModalProps) {
   const { t } = useTranslation();
   const { tokens } = useTheme();
   const createDayState = useCreateDayState();
@@ -57,10 +71,14 @@ export function DayStateFormModal({ visible, onClose, dayState }: DayStateFormMo
     }
 
     const onSuccess = () => onClose();
-    const onError = (err: Error) => Alert.alert('Error', getUserMessage(extractApiError(err)));
+    const onError = (err: Error) =>
+      Alert.alert('Error', getUserMessage(extractApiError(err)));
 
     if (isEditing) {
-      updateDayState.mutate({ id: dayState.id, data: { name, color, score } }, { onSuccess, onError });
+      updateDayState.mutate(
+        { id: dayState.id, data: { name, color, score } },
+        { onSuccess, onError },
+      );
     } else {
       createDayState.mutate({ name, color, score }, { onSuccess, onError });
     }
@@ -69,9 +87,17 @@ export function DayStateFormModal({ visible, onClose, dayState }: DayStateFormMo
   const isPending = createDayState.isPending || updateDayState.isPending;
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
       <ScrollView
-        contentContainerStyle={[styles.modal, { backgroundColor: tokens.colors.bg }]}
+        contentContainerStyle={[
+          styles.modal,
+          { backgroundColor: tokens.colors.bg },
+        ]}
         style={{ backgroundColor: tokens.colors.bg }}
       >
         <Text style={[styles.modalTitle, { color: tokens.colors.text }]}>
@@ -79,13 +105,30 @@ export function DayStateFormModal({ visible, onClose, dayState }: DayStateFormMo
         </Text>
 
         {/* Live preview — circular badge for moods */}
-        <View style={[styles.preview, { backgroundColor: tokens.colors.bgSecondary, borderColor: tokens.colors.border }]}>
+        <View
+          style={[
+            styles.preview,
+            {
+              backgroundColor: tokens.colors.bgSecondary,
+              borderColor: tokens.colors.border,
+            },
+          ]}
+        >
           <View style={[styles.previewBadge, { backgroundColor: color }]}>
-            <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: contrastTextColor(color) }}>
+            <Text
+              style={{
+                fontSize: fontSize.sm,
+                fontWeight: '700',
+                color: contrastTextColor(color),
+              }}
+            >
               {name ? name[0].toUpperCase() : '?'}
             </Text>
           </View>
-          <Text style={[styles.previewName, { color: tokens.colors.text }]} numberOfLines={1}>
+          <Text
+            style={[styles.previewName, { color: tokens.colors.text }]}
+            numberOfLines={1}
+          >
             {name || t('day_states.preview_placeholder')}
           </Text>
         </View>
@@ -122,11 +165,30 @@ export function DayStateFormModal({ visible, onClose, dayState }: DayStateFormMo
             thumbTintColor={tokens.colors.accent}
           />
           <View style={styles.sliderLabels}>
-            <Text style={[styles.sliderEdgeLabel, { color: tokens.colors.textTertiary }]}>0</Text>
-            <Text style={[styles.sliderValueLabel, { color: tokens.colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.sliderEdgeLabel,
+                { color: tokens.colors.textTertiary },
+              ]}
+            >
+              0
+            </Text>
+            <Text
+              style={[
+                styles.sliderValueLabel,
+                { color: tokens.colors.textSecondary },
+              ]}
+            >
               {score} — {getMoodLabel(score)}
             </Text>
-            <Text style={[styles.sliderEdgeLabel, { color: tokens.colors.textTertiary }]}>10</Text>
+            <Text
+              style={[
+                styles.sliderEdgeLabel,
+                { color: tokens.colors.textTertiary },
+              ]}
+            >
+              10
+            </Text>
           </View>
         </View>
 
@@ -151,7 +213,11 @@ export function DayStateFormModal({ visible, onClose, dayState }: DayStateFormMo
 
 const styles = StyleSheet.create({
   modal: { padding: spacing.xl, paddingTop: 60 },
-  modalTitle: { fontSize: fontSize.xl, fontWeight: '600', marginBottom: spacing.xl },
+  modalTitle: {
+    fontSize: fontSize.xl,
+    fontWeight: '600',
+    marginBottom: spacing.xl,
+  },
   preview: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -170,7 +236,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   previewName: { fontSize: fontSize.sm, fontWeight: '500', flex: 1 },
-  label: { fontSize: fontSize.sm, fontWeight: '500', marginBottom: spacing.sm, marginTop: spacing.lg },
+  label: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    marginBottom: spacing.sm,
+    marginTop: spacing.lg,
+  },
   errorText: { fontSize: fontSize.xs, color: '#ef4444', marginTop: spacing.xs },
   sliderContainer: {
     alignItems: 'center',

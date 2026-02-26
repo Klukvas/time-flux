@@ -19,13 +19,17 @@ import {
   OnThisDayResponseDto,
   WeekContextResponseDto,
 } from './dto/context-response.dto.js';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
 
 @ApiTags('Memories')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('api/v1/memories')
 export class MemoriesController {
-  constructor(private readonly memoriesService: MemoriesService) {}
+  constructor(
+    private readonly memoriesService: MemoriesService,
+    private readonly subscriptionsService: SubscriptionsService,
+  ) {}
 
   @Get('on-this-day')
   @ApiOperation({
@@ -42,6 +46,7 @@ export class MemoriesController {
     @CurrentUser() user: JwtPayload,
     @Query() query: OnThisDayQueryDto,
   ): Promise<OnThisDayResponseDto> {
+    await this.subscriptionsService.assertFeatureAccess(user.sub, 'memories');
     return this.memoriesService.getOnThisDay(user.sub, query.date);
   }
 
@@ -68,6 +73,7 @@ export class MemoriesController {
     @CurrentUser() user: JwtPayload,
     @Query() query: ContextQueryDto,
   ): Promise<ContextResponseDto> {
+    await this.subscriptionsService.assertFeatureAccess(user.sub, 'memories');
     return this.memoriesService.getContext(user.sub, query.mode, query.date);
   }
 }

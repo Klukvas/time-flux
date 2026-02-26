@@ -29,6 +29,7 @@ describe('MemoriesService', () => {
       locationName: null,
       latitude: null,
       longitude: null,
+      comment: null,
       updatedAt: new Date(),
       media,
     };
@@ -71,9 +72,21 @@ describe('MemoriesService', () => {
 
       // Set up days for each interval
       memoriesRepo.findDaysByDates.mockResolvedValue([
-        makeDay('2024-06-15', { dayStateId: 'ds-1', dayState: mood, mediaCount: 1 }), // 1 month ago
-        makeDay('2024-01-15', { dayStateId: 'ds-1', dayState: mood, mediaCount: 0 }), // 6 months ago
-        makeDay('2023-07-15', { dayStateId: 'ds-1', dayState: mood, mediaCount: 2 }), // 1 year ago
+        makeDay('2024-06-15', {
+          dayStateId: 'ds-1',
+          dayState: mood,
+          mediaCount: 1,
+        }), // 1 month ago
+        makeDay('2024-01-15', {
+          dayStateId: 'ds-1',
+          dayState: mood,
+          mediaCount: 0,
+        }), // 6 months ago
+        makeDay('2023-07-15', {
+          dayStateId: 'ds-1',
+          dayState: mood,
+          mediaCount: 2,
+        }), // 1 year ago
       ]);
 
       const result = await service.getOnThisDay(userId, '2024-07-15');
@@ -133,7 +146,11 @@ describe('MemoriesService', () => {
 
       // Only 1 month ago has data
       memoriesRepo.findDaysByDates.mockResolvedValue([
-        makeDay('2024-06-15', { dayStateId: 'ds-1', dayState: mood, mediaCount: 1 }),
+        makeDay('2024-06-15', {
+          dayStateId: 'ds-1',
+          dayState: mood,
+          mediaCount: 1,
+        }),
       ]);
 
       const result = await service.getOnThisDay(userId, '2024-07-15');
@@ -150,7 +167,11 @@ describe('MemoriesService', () => {
       const mood = { id: 'ds-1', name: 'Good', color: '#84CC16' };
 
       memoriesRepo.findDaysByDates.mockResolvedValue([
-        makeDay('2024-06-15', { dayStateId: 'ds-1', dayState: mood, mediaCount: 0 }),
+        makeDay('2024-06-15', {
+          dayStateId: 'ds-1',
+          dayState: mood,
+          mediaCount: 0,
+        }),
       ]);
 
       const result = await service.getOnThisDay(userId, '2024-07-15');
@@ -193,15 +214,21 @@ describe('MemoriesService', () => {
 
       // Feb 29, 2024 is a leap year day
       // 1 year ago: Feb 28, 2023 (2023 is not a leap year)
-      memoriesRepo.findDaysByDates.mockImplementation(async (_userId, dates) => {
-        const dateStrs = dates.map((d: Date) => d.toISOString().split('T')[0]);
-        // Verify Luxon adjusted Feb 29 - 1yr to Feb 28
-        expect(dateStrs).toContain('2023-02-28');
-        // Should NOT contain 2023-02-29 (doesn't exist)
-        expect(dateStrs).not.toContain('2023-02-29');
+      memoriesRepo.findDaysByDates.mockImplementation(
+        async (_userId, dates) => {
+          const dateStrs = dates.map(
+            (d: Date) => d.toISOString().split('T')[0],
+          );
+          // Verify Luxon adjusted Feb 29 - 1yr to Feb 28
+          expect(dateStrs).toContain('2023-02-28');
+          // Should NOT contain 2023-02-29 (doesn't exist)
+          expect(dateStrs).not.toContain('2023-02-29');
 
-        return [makeDay('2023-02-28', { dayStateId: 'ds-1', dayState: mood })];
-      });
+          return [
+            makeDay('2023-02-28', { dayStateId: 'ds-1', dayState: mood }),
+          ];
+        },
+      );
 
       const result = await service.getOnThisDay(userId, '2024-02-29');
       expect(result.baseDate).toBe('2024-02-29');
@@ -212,12 +239,18 @@ describe('MemoriesService', () => {
       const mood = { id: 'ds-1', name: 'Good', color: '#84CC16' };
 
       // Mar 31, 2024 → 1 month ago = Feb 29 (2024 is leap year)
-      memoriesRepo.findDaysByDates.mockImplementation(async (_userId, dates) => {
-        const dateStrs = dates.map((d: Date) => d.toISOString().split('T')[0]);
-        // Luxon: Mar 31 - 1 month = Feb 29 in 2024
-        expect(dateStrs).toContain('2024-02-29');
-        return [makeDay('2024-02-29', { dayStateId: 'ds-1', dayState: mood })];
-      });
+      memoriesRepo.findDaysByDates.mockImplementation(
+        async (_userId, dates) => {
+          const dateStrs = dates.map(
+            (d: Date) => d.toISOString().split('T')[0],
+          );
+          // Luxon: Mar 31 - 1 month = Feb 29 in 2024
+          expect(dateStrs).toContain('2024-02-29');
+          return [
+            makeDay('2024-02-29', { dayStateId: 'ds-1', dayState: mood }),
+          ];
+        },
+      );
 
       await service.getOnThisDay(userId, '2024-03-31');
     });
@@ -226,11 +259,17 @@ describe('MemoriesService', () => {
       memoriesRepo.findDayWithContent.mockResolvedValue({ id: 'day-1' });
       const mood = { id: 'ds-1', name: 'Good', color: '#84CC16' };
 
-      memoriesRepo.findDaysByDates.mockImplementation(async (_userId, dates) => {
-        const dateStrs = dates.map((d: Date) => d.toISOString().split('T')[0]);
-        expect(dateStrs).toContain('2023-12-31');
-        return [makeDay('2023-12-31', { dayStateId: 'ds-1', dayState: mood })];
-      });
+      memoriesRepo.findDaysByDates.mockImplementation(
+        async (_userId, dates) => {
+          const dateStrs = dates.map(
+            (d: Date) => d.toISOString().split('T')[0],
+          );
+          expect(dateStrs).toContain('2023-12-31');
+          return [
+            makeDay('2023-12-31', { dayStateId: 'ds-1', dayState: mood }),
+          ];
+        },
+      );
 
       await service.getOnThisDay(userId, '2024-01-31');
     });
@@ -240,7 +279,9 @@ describe('MemoriesService', () => {
 
   describe('getOnThisDay — timezone', () => {
     it('should use user timezone for date interpretation', async () => {
-      authRepo.findUserById.mockResolvedValue({ timezone: 'America/New_York' } as any);
+      authRepo.findUserById.mockResolvedValue({
+        timezone: 'America/New_York',
+      } as any);
       memoriesRepo.findDayWithContent.mockResolvedValue({ id: 'day-1' });
       memoriesRepo.findDaysByDates.mockResolvedValue([]);
 
@@ -263,9 +304,9 @@ describe('MemoriesService', () => {
 
   describe('getOnThisDay — invalid date', () => {
     it('should throw BadRequestException for invalid date', async () => {
-      await expect(
-        service.getOnThisDay(userId, 'not-a-date'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.getOnThisDay(userId, 'not-a-date')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -275,7 +316,11 @@ describe('MemoriesService', () => {
     it('should return empty memories when current week has no content', async () => {
       memoriesRepo.hasContentInRange.mockResolvedValue(false);
 
-      const result = await service.getContext(userId, 'week' as any, '2024-07-17');
+      const result = await service.getContext(
+        userId,
+        'week' as any,
+        '2024-07-17',
+      );
 
       expect(result).toHaveProperty('type', 'week');
       expect((result as any).memories).toHaveLength(0);
@@ -287,11 +332,23 @@ describe('MemoriesService', () => {
       const mood = { id: 'ds-1', name: 'Good', color: '#84CC16' };
       memoriesRepo.findDaysInRange.mockResolvedValue([
         // 1 month ago week: 2 active days, 3 total media
-        makeDay('2024-06-17', { dayStateId: 'ds-1', dayState: mood, mediaCount: 2 }),
-        makeDay('2024-06-18', { dayStateId: 'ds-1', dayState: mood, mediaCount: 1 }),
+        makeDay('2024-06-17', {
+          dayStateId: 'ds-1',
+          dayState: mood,
+          mediaCount: 2,
+        }),
+        makeDay('2024-06-18', {
+          dayStateId: 'ds-1',
+          dayState: mood,
+          mediaCount: 1,
+        }),
       ]);
 
-      const result = await service.getContext(userId, 'week' as any, '2024-07-17');
+      const result = await service.getContext(
+        userId,
+        'week' as any,
+        '2024-07-17',
+      );
 
       const weekResult = result as any;
       expect(weekResult.memories.length).toBeGreaterThanOrEqual(1);
@@ -308,7 +365,11 @@ describe('MemoriesService', () => {
         makeDay('2024-06-17', { dayState: null, mediaCount: 0 }),
       ]);
 
-      const result = await service.getContext(userId, 'week' as any, '2024-07-17');
+      const result = await service.getContext(
+        userId,
+        'week' as any,
+        '2024-07-17',
+      );
       const weekResult = result as any;
       expect(weekResult.memories).toHaveLength(0);
     });

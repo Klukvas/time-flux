@@ -1,13 +1,37 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 
+const REQUIRED_ENV_VARS = ['DATABASE_URL', 'JWT_SECRET'];
+const PRODUCTION_REQUIRED_ENV_VARS = ['FRONTEND_URL'];
+
+function validateEnv() {
+  const required =
+    process.env.NODE_ENV === 'production'
+      ? [...REQUIRED_ENV_VARS, ...PRODUCTION_REQUIRED_ENV_VARS]
+      : REQUIRED_ENV_VARS;
+  const missing = required.filter((key) => !process.env[key]);
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missing.join(', ')}`,
+    );
+  }
+}
+
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  validateEnv();
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
+  const logger = new Logger('Bootstrap');
+
+  // ── Graceful shutdown ──────────────────────────────────────
+  app.enableShutdownHooks();
 
   // ── Security: Helmet (must come before CORS) ──────────────────
   app.use(
@@ -55,31 +79,36 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // ── Swagger ────────────────────────────────────────────────────
-  const config = new DocumentBuilder()
-    .setTitle('LifeSpan API')
-    .setDescription('Backend API for Life Timeline — build a visual timeline of your life')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .addTag('Auth', 'User registration and login')
-    .addTag('Categories', 'User-defined event categories with colors')
-    .addTag('Day States', 'User-defined day states (moods) with colors')
-    .addTag('Events', 'Timeline events / periods (legacy)')
-    .addTag('Event Groups', 'Chapters — reusable event groups')
-    .addTag('Event Periods', 'Dated periods within event groups')
-    .addTag('Days', 'Per-day visual state management')
-    .addTag('Timeline', 'Read-only timeline views (vertical + week)')
-    .addTag('Uploads', 'S3-compatible presigned URL generation')
-    .addTag('Memories', 'Memory resurfacing — "On This Day"')
-    .addTag('Analytics', 'Emotional pattern detection and mood analytics')
-    .build();
+  // ── Swagger (disabled in production) ───────────────────────────
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('LifeSpan API')
+      .setDescription(
+        'Backend API for Life Timeline — build a visual timeline of your life',
+      )
+      .setVersion('1.0')
+      .addBearerAuth()
+      .addTag('Auth', 'User registration and login')
+      .addTag('Categories', 'User-defined event categories with colors')
+      .addTag('Day States', 'User-defined day states (moods) with colors')
+      .addTag('Event Groups', 'Chapters — reusable event groups')
+      .addTag('Event Periods', 'Dated periods within event groups')
+      .addTag('Days', 'Per-day visual state management')
+      .addTag('Timeline', 'Read-only timeline views (vertical + week)')
+      .addTag('Uploads', 'S3-compatible presigned URL generation')
+      .addTag('Memories', 'Memory resurfacing — "On This Day"')
+      .addTag('Analytics', 'Emotional pattern detection and mood analytics')
+      .addTag('Subscriptions', 'Subscription management and billing')
+      .addTag('Health', 'Health check endpoint')
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+    logger.log('Swagger docs available at /api/docs');
+  }
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  console.log(`Application running on: http://localhost:${port}`);
-  console.log(`Swagger docs available at: http://localhost:${port}/api/docs`);
+  logger.log(`Application running on port ${port}`);
 }
 bootstrap();

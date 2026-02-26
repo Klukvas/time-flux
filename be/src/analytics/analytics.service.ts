@@ -103,7 +103,10 @@ export class AnalyticsService {
         const dateRanges: { start: Date; end: Date }[] = [];
         for (const group of cat.eventGroups) {
           for (const p of group.periods) {
-            dateRanges.push({ start: p.startDate, end: p.endDate ?? new Date() });
+            dateRanges.push({
+              start: p.startDate,
+              end: p.endDate ?? new Date(),
+            });
           }
         }
         if (dateRanges.length === 0) continue;
@@ -169,15 +172,22 @@ export class AnalyticsService {
         const dateStr = DateTime.fromJSDate(day.date, { zone: 'utc' })
           .setZone(tz)
           .toISODate()!;
-        const score = day.dayState ? (scoreMap.get(day.dayState.id) ?? 0) : 0;
+        const score = day.dayState
+          ? (scoreMap.get(day.dayState.id) ?? null)
+          : null;
         return { date: dateStr, score };
       })
-      .filter((t) => t.score > 0);
+      .filter(
+        (t): t is { date: string; score: number } =>
+          t.score !== null && t.score > 0,
+      );
 
     // ── Weekday Insights ─────────────────────────────────────
     const daysWithScore: DayWithScore[] = allDaysWithMood
       .map((day) => {
-        const score = day.dayState ? (scoreMap.get(day.dayState.id) ?? null) : null;
+        const score = day.dayState
+          ? (scoreMap.get(day.dayState.id) ?? null)
+          : null;
         if (score === null || score < 0) return null;
         return { date: day.date, score };
       })

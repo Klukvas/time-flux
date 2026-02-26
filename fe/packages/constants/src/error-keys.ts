@@ -27,4 +27,9 @@ export const ERROR_TRANSLATION_KEYS: Record<ErrorCode, string> = {
   USER_CREATION_FAILED: 'errors.user_creation_failed',
   INTERNAL_ERROR: 'errors.internal_error',
   HTTP_ERROR: 'errors.http_error',
+  QUOTA_EXCEEDED: 'errors.quota_exceeded',
+  FEATURE_LOCKED: 'errors.feature_locked',
+  SUBSCRIPTION_NOT_FOUND: 'errors.subscription_not_found',
+  PADDLE_NOT_CONFIGURED: 'errors.paddle_not_configured',
+  PADDLE_CANCEL_ERROR: 'errors.paddle_cancel_error',
 };

@@ -3,7 +3,11 @@ import { Alert, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Category } from '@lifespan/api';
 import { extractApiError } from '@lifespan/api';
 import { getUserMessage, validateColor, validateName } from '@lifespan/domain';
-import { useCreateCategory, useTranslation, useUpdateCategory } from '@lifespan/hooks';
+import {
+  useCreateCategory,
+  useTranslation,
+  useUpdateCategory,
+} from '@lifespan/hooks';
 import { BASE_COLORS, contrastTextColor } from '@lifespan/utils';
 import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
@@ -62,10 +66,14 @@ export function CategoryFormModal({
     }
 
     const onSuccess = () => onClose();
-    const onError = (err: Error) => Alert.alert('Error', getUserMessage(extractApiError(err)));
+    const onError = (err: Error) =>
+      Alert.alert('Error', getUserMessage(extractApiError(err)));
 
     if (isEditing) {
-      updateCategory.mutate({ id: category.id, data: { name, color } }, { onSuccess, onError });
+      updateCategory.mutate(
+        { id: category.id, data: { name, color } },
+        { onSuccess, onError },
+      );
     } else {
       createCategory.mutate({ name, color }, { onSuccess, onError });
     }
@@ -74,9 +82,17 @@ export function CategoryFormModal({
   const isPending = createCategory.isPending || updateCategory.isPending;
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
       <ScrollView
-        contentContainerStyle={[styles.modal, { backgroundColor: tokens.colors.bg }]}
+        contentContainerStyle={[
+          styles.modal,
+          { backgroundColor: tokens.colors.bg },
+        ]}
         style={{ backgroundColor: tokens.colors.bg }}
       >
         <Text style={[styles.modalTitle, { color: tokens.colors.text }]}>
@@ -84,13 +100,30 @@ export function CategoryFormModal({
         </Text>
 
         {/* Live preview */}
-        <View style={[styles.preview, { backgroundColor: tokens.colors.bgSecondary, borderColor: tokens.colors.border }]}>
+        <View
+          style={[
+            styles.preview,
+            {
+              backgroundColor: tokens.colors.bgSecondary,
+              borderColor: tokens.colors.border,
+            },
+          ]}
+        >
           <View style={[styles.previewBadge, { backgroundColor: color }]}>
-            <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: contrastTextColor(color) }}>
+            <Text
+              style={{
+                fontSize: fontSize.sm,
+                fontWeight: '700',
+                color: contrastTextColor(color),
+              }}
+            >
               {name ? name[0].toUpperCase() : '?'}
             </Text>
           </View>
-          <Text style={[styles.previewName, { color: tokens.colors.text }]} numberOfLines={1}>
+          <Text
+            style={[styles.previewName, { color: tokens.colors.text }]}
+            numberOfLines={1}
+          >
             {name || t('categories.preview_placeholder')}
           </Text>
         </View>
@@ -130,7 +163,11 @@ export function CategoryFormModal({
 
 const styles = StyleSheet.create({
   modal: { padding: spacing.xl, paddingTop: 60 },
-  modalTitle: { fontSize: fontSize.xl, fontWeight: '600', marginBottom: spacing.xl },
+  modalTitle: {
+    fontSize: fontSize.xl,
+    fontWeight: '600',
+    marginBottom: spacing.xl,
+  },
   preview: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -149,7 +186,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   previewName: { fontSize: fontSize.sm, fontWeight: '500', flex: 1 },
-  label: { fontSize: fontSize.sm, fontWeight: '500', marginBottom: spacing.sm, marginTop: spacing.lg },
+  label: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    marginBottom: spacing.sm,
+    marginTop: spacing.lg,
+  },
   errorText: { fontSize: fontSize.xs, color: '#ef4444', marginTop: spacing.xs },
   actions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xl },
 });

@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CreateDayStateRequest, UpdateDayStateRequest } from '@lifespan/api';
+import type {
+  CreateDayStateRequest,
+  UpdateDayStateRequest,
+} from '@lifespan/api';
 import { QUERY_KEYS, STALE_TIMES } from '@lifespan/constants';
 import { useApi } from './api-context';
 
@@ -31,6 +34,7 @@ export function useUpdateDayState() {
       qc.invalidateQueries({ queryKey: QUERY_KEYS.dayStates });
       qc.invalidateQueries({ queryKey: ['timeline'] });
       qc.invalidateQueries({ queryKey: ['days'] });
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.moodOverview });
     },
   });
 }
@@ -40,6 +44,11 @@ export function useDeleteDayState() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.dayStates.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: QUERY_KEYS.dayStates }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.dayStates });
+      qc.invalidateQueries({ queryKey: ['days'] });
+      qc.invalidateQueries({ queryKey: ['timeline'] });
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.moodOverview });
+    },
   });
 }

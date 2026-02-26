@@ -146,6 +146,7 @@
 - Backend endpoint: `GET /api/v1/analytics/mood-overview`
 - Chapter analytics embedded in existing `GET /api/v1/event-groups/:id/details` response
 - All aggregation computed on backend (5 optimized queries for global, in-memory grouping by weekday)
+- **Paywall for FREE tier:** FREE users see a blurred mock dashboard with static demo data + "Unlock Insights" overlay card linking to Settings/pricing. No API call made for locked users. Web: `InsightsPaywall` component, Mobile: `InsightsPaywallScreen` inline component
 - Available on both web (`/dashboard`) and mobile (Insights tab)
 
 ### Chapter Details (Enhanced)
@@ -153,10 +154,23 @@
 - Activity density shows active days (with mood or media) per period as progress bars
 - Mobile app now has a full chapter detail screen (`/chapter/[id]`) with all sections
 
+### Subscription & Billing (Paddle)
+- **Three tiers:** FREE, PRO, PREMIUM — each with resource limits (media, chapters, categories, moods) and feature gates (analytics, memories)
+- Tier limits enforced across the backend via `assertResourceLimit()` / `assertFeatureAccess()` in 4 services
+- **Paddle Billing integration** — payment processing via Paddle overlay checkout (web) and Paddle hosted checkout (mobile via `expo-web-browser`)
+- **Webhook handler:** `POST /api/v1/webhooks/paddle` — HMAC-SHA256 verified, idempotent (stores event IDs in `WebhookEvent` table), handles 6 event types: `subscription.created/activated/updated/canceled/past_due/paused`
+- **REST API:** `GET /api/v1/subscriptions` (current plan + limits), `POST /api/v1/subscriptions/cancel` (cancels via Paddle API, optimistic `canceledAt`)
+- **User ↔ Paddle linking:** frontend sends `customData: { userId }` in checkout → Paddle webhook returns it → backend updates subscription
+- **Conditional init:** Paddle SDK and webhook verification gracefully disabled when env vars not set (works in dev without credentials)
+- **Frontend (Web):** Subscription section in Settings page — current plan badge, renewal date, cancellation banner, "Compare Plans" expandable pricing cards (3-column grid), overlay checkout
+- **Frontend (Mobile):** Subscription section in Settings tab — plan info, limits overview, upgrade via browser, cancel with Alert confirmation
+- Env vars: `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRO_PRICE_ID`, `PADDLE_PREMIUM_PRICE_ID`, `PADDLE_ENVIRONMENT` (backend); `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `NEXT_PUBLIC_PADDLE_ENVIRONMENT`, `NEXT_PUBLIC_PADDLE_PRO_PRICE_ID`, `NEXT_PUBLIC_PADDLE_PREMIUM_PRICE_ID` (web)
+
 ### Settings
 - View account info (email, timezone)
 - Theme preference (Light / Dark / System)
 - Language preference
+- **Subscription management** — view current plan, compare plans, upgrade, cancel
 
 ---
 
@@ -286,6 +300,7 @@ LifeSpan/
 │   │   ├── memories/           "On This Day" memory resurfacing
 │   │   ├── media/             Media attach/list/delete
 │   │   ├── s3/                S3 presigned URL generation
+│   │   ├── subscriptions/     Subscription tiers, Paddle billing, webhooks
 │   │   ├── prisma/            Database client module
 │   │   └── common/            Guards, filters, decorators, pipes, errors, constants, middleware
 │   └── prisma/                Schema, migrations, seed (seed.ts)
@@ -329,7 +344,7 @@ LifeSpan/
 | **GlobalExceptionFilter** | Catches all exceptions, normalizes error responses |
 | **RequestLoggerMiddleware** | Logs incoming HTTP requests (method, URL, status, duration) |
 
-### Database Models (9)
+### Database Models (11)
 
 | Model | Key Fields |
 |-------|-----------|
@@ -341,9 +356,11 @@ LifeSpan/
 | **Day** | userId, date, dayStateId?, mainMediaId?, locationName?, latitude?, longitude? |
 | **DayMedia** | dayId, userId, s3Key, fileName, contentType, size |
 | **RefreshToken** | userId, tokenHash (SHA-256), expiresAt |
+| **Subscription** | userId (unique), tier (FREE/PRO/PREMIUM), status (ACTIVE/PAST_DUE/CANCELED/PAUSED), paddleCustomerId?, paddleSubscriptionId?, currentPeriodEnd?, canceledAt? |
+| **WebhookEvent** | id (Paddle event ID), type, processed, payload (JSON) |
 | **AuthProvider** (enum) | LOCAL, GOOGLE |
 
-### Test Coverage (12 suites, 168 tests)
+### Test Coverage (42 suites, 542 tests)
 
 | Test File | Tests | What It Covers |
 |-----------|-------|----------------|
@@ -359,6 +376,13 @@ LifeSpan/
 | `s3.service.spec.ts` | MIME whitelist (images, videos, dangerous types rejected, SVG blocked), extension mapping, 50 MB size limit |
 | `days.service.spec.ts` | Update location (name + coords), clear location (all null), reject future date, upsert if missing, name-only update, formatDay location fields |
 | `weekday-insights.spec.ts` | Weekday grouping, best/worst mood day, activity scoring, volatility (std dev), recovery index, burnout pattern detection |
+| `subscriptions.service.spec.ts` | getSubscription (FREE/PRO/PREMIUM limits), getTier (default FREE), assertResourceLimit (under/at/over limit, unlimited), assertFeatureAccess (lock/unlock), cancelSubscription (Paddle call, missing sub, Paddle error) |
+| `subscriptions.controller.spec.ts` | GET returns subscription+limits, POST cancel delegates to service |
+| `paddle-price-map.spec.ts` | Map building from env vars, tier resolution, missing env vars, unknown price |
+| `paddle.service.spec.ts` | isEnabled flag (true/false), cancelSubscription/getSubscription when disabled |
+| `webhook.repository.spec.ts` | findById, create, markProcessed |
+| `webhook.service.spec.ts` | Idempotency (skip processed), all 6 event types, missing userId, unknown price ID, unknown event type |
+| `webhook.controller.spec.ts` | HMAC signature verification (valid/invalid/missing/malformed), event forwarding, returns {received: true} |
 
 ---
 

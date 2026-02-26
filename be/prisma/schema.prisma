@@ -11,6 +11,20 @@ enum AuthProvider {
   GOOGLE
 }
 
+enum SubscriptionTier {
+  FREE
+  PRO
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  PAUSED
+}
+
 model User {
   id           String       @id @default(uuid())
   email        String       @unique
@@ -29,6 +43,7 @@ model User {
   days          Day[]
   dayMedia      DayMedia[]
   refreshTokens RefreshToken[]
+  subscription  Subscription?
 
   @@map("users")
 }
@@ -83,6 +98,7 @@ model EventGroup {
 
   @@index([userId])
   @@index([userId, categoryId])
+  @@index([categoryId])
   @@map("event_groups")
 }
 
@@ -110,8 +126,9 @@ model Day {
   dayStateId    String?    @map("day_state_id")
   mainMediaId   String?    @unique @map("main_media_id")
   locationName  String?    @map("location_name") @db.VarChar(120)
-  latitude      Float?
-  longitude     Float?
+  latitude      Float?     @db.DoublePrecision
+  longitude     Float?     @db.DoublePrecision
+  comment       String?    @db.VarChar(500)
   updatedAt     DateTime   @updatedAt @map("updated_at")
 
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -120,7 +137,6 @@ model Day {
   media      DayMedia[] @relation("DayMedia")
 
   @@unique([userId, date])
-  @@index([userId, date])
   @@index([userId, dayStateId])
   @@map("days")
 }
@@ -129,7 +145,7 @@ model DayMedia {
   id          String   @id @default(uuid())
   dayId       String   @map("day_id")
   userId      String   @map("user_id")
-  s3Key       String   @map("s3_key")
+  s3Key       String   @unique @map("s3_key")
   fileName    String   @map("file_name")
   contentType String   @map("content_type")
   size        Int
@@ -142,19 +158,50 @@ model DayMedia {
 
   @@index([dayId])
   @@index([userId])
+  @@index([dayId, userId])
   @@map("day_media")
 }
 
 model RefreshToken {
   id        String   @id @default(uuid())
   userId    String   @map("user_id")
-  tokenHash String   @map("token_hash")
+  tokenHash String   @unique @map("token_hash")
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([tokenHash])
   @@map("refresh_tokens")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  userId               String             @unique @map("user_id")
+  tier                 SubscriptionTier   @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  paddleCustomerId     String?            @unique @map("paddle_customer_id")
+  paddleSubscriptionId String?            @unique @map("paddle_subscription_id")
+  currentPeriodEnd     DateTime?          @map("current_period_end") @db.Timestamptz
+  canceledAt           DateTime?          @map("canceled_at") @db.Timestamptz
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([paddleCustomerId])
+  @@index([paddleSubscriptionId])
+  @@map("subscriptions")
+}
+
+model WebhookEvent {
+  id        String   @id
+  type      String
+  processed Boolean  @default(false)
+  payload   Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([processed, createdAt])
+  @@index([type])
+  @@map("webhook_events")
 }

@@ -2,9 +2,12 @@
 
 import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import axios from 'axios';
 import toast from 'react-hot-toast';
-import type { AuthUser } from '@lifespan/api';
+import type { AuthResponse } from '@lifespan/api';
 import { useAuthStore } from '@/stores/auth-store';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
 function GoogleCallbackContent() {
   const router = useRouter();
@@ -16,25 +19,26 @@ function GoogleCallbackContent() {
     if (processed.current) return;
     processed.current = true;
 
-    const token = searchParams.get('token');
-    const refreshTokenParam = searchParams.get('refresh_token');
-    const userParam = searchParams.get('user');
+    const code = searchParams.get('code');
     const error = searchParams.get('error');
 
-    if (error || !token || !refreshTokenParam || !userParam) {
+    if (error || !code) {
       toast.error('Google authentication failed. Please try again.');
       router.replace('/');
       return;
     }
 
-    try {
-      const user = JSON.parse(userParam) as AuthUser;
-      setAuth(token, refreshTokenParam, user);
-      router.replace('/timeline');
-    } catch {
-      toast.error('Google authentication failed. Please try again.');
-      router.replace('/');
-    }
+    axios
+      .post<AuthResponse>(`${API_BASE_URL}/api/v1/auth/google/exchange`, { code })
+      .then((res) => {
+        const { access_token, refresh_token, user } = res.data;
+        setAuth(access_token, refresh_token, user);
+        router.replace('/timeline');
+      })
+      .catch(() => {
+        toast.error('Google authentication failed. Please try again.');
+        router.replace('/');
+      });
   }, [searchParams, setAuth, router]);
 
   return (

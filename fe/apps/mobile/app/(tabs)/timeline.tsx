@@ -14,12 +14,9 @@ import {
   isActivePeriod,
   sortPeriods,
 } from '@lifespan/domain';
+import { useOnboarding, useTimeline, useWeekTimeline } from '@lifespan/hooks';
 import {
-  useOnboarding,
-  useTimeline,
-  useWeekTimeline,
-} from '@lifespan/hooks';
-import {
+  addDays,
   formatDate,
   formatDateRange,
   formatDayNumber,
@@ -75,9 +72,7 @@ export default function TimelineScreen() {
   }, [onboarding.step]);
 
   const navigateWeek = (offset: number) => {
-    const d = new Date(currentDate);
-    d.setDate(d.getDate() + offset * 7);
-    setCurrentDate(d.toISOString().slice(0, 10));
+    setCurrentDate(addDays(currentDate, offset * 7));
   };
 
   const showNavigation = timelineMode === 'week';
@@ -120,7 +115,10 @@ export default function TimelineScreen() {
           <Pressable onPress={() => navigateWeek(-1)} style={styles.navBtn}>
             <Text style={styles.navBtnText}>Prev</Text>
           </Pressable>
-          <Pressable onPress={() => setCurrentDate(todayISO())} style={styles.navBtn}>
+          <Pressable
+            onPress={() => setCurrentDate(todayISO())}
+            style={styles.navBtn}
+          >
             <Text style={styles.navBtnText}>Today</Text>
           </Pressable>
           <Pressable onPress={() => navigateWeek(1)} style={styles.navBtn}>
@@ -131,7 +129,9 @@ export default function TimelineScreen() {
 
       {/* Mode content */}
       {timelineMode === 'horizontal' && <HorizontalMode />}
-      {timelineMode === 'week' && <WeekMode currentDate={currentDate} onDayPress={navigateToDayPage} />}
+      {timelineMode === 'week' && (
+        <WeekMode currentDate={currentDate} onDayPress={navigateToDayPage} />
+      )}
 
       {/* Onboarding overlay */}
       {onboarding.shouldShow && onboarding.step !== 'first-memory' && (
@@ -150,7 +150,10 @@ export default function TimelineScreen() {
 
 function HorizontalMode() {
   const { data, isLoading } = useTimeline();
-  const months = useMemo(() => (data ? groupTimelineByMonth(data) : []), [data]);
+  const months = useMemo(
+    () => (data ? groupTimelineByMonth(data) : []),
+    [data],
+  );
 
   if (isLoading) return <Loading />;
 
@@ -162,14 +165,18 @@ function HorizontalMode() {
       ListEmptyComponent={
         <View style={styles.empty}>
           <Text style={styles.emptyText}>No timeline data yet.</Text>
-          <Text style={styles.emptySubtext}>Create chapters to see your timeline.</Text>
+          <Text style={styles.emptySubtext}>
+            Create chapters to see your timeline.
+          </Text>
         </View>
       }
       renderItem={({ item: month }) => (
         <View style={styles.monthBlock}>
           <View style={styles.monthHeader}>
             <View style={styles.monthBadge}>
-              <Text style={styles.monthBadgeText}>{month.label.split(' ')[0].slice(0, 3)}</Text>
+              <Text style={styles.monthBadgeText}>
+                {month.label.split(' ')[0].slice(0, 3)}
+              </Text>
             </View>
             <Text style={styles.monthLabel}>{month.label}</Text>
           </View>
@@ -181,7 +188,9 @@ function HorizontalMode() {
                   key={day.date}
                   style={[
                     styles.dot,
-                    { backgroundColor: day.dayState?.color ?? colors.gray[200] },
+                    {
+                      backgroundColor: day.dayState?.color ?? colors.gray[200],
+                    },
                   ]}
                 />
               ))}
@@ -201,8 +210,15 @@ function HorizontalMode() {
               ]}
             >
               <View style={styles.eventTop}>
-                <View style={[styles.badge, { backgroundColor: hexToRgba(period.category.color, 0.15) }]}>
-                  <Text style={[styles.badgeText, { color: period.category.color }]}>
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: hexToRgba(period.category.color, 0.15) },
+                  ]}
+                >
+                  <Text
+                    style={[styles.badgeText, { color: period.category.color }]}
+                  >
                     {period.eventGroup.title}
                   </Text>
                 </View>
@@ -213,7 +229,9 @@ function HorizontalMode() {
                   </View>
                 )}
               </View>
-              {period.comment && <Text style={styles.comment}>{period.comment}</Text>}
+              {period.comment && (
+                <Text style={styles.comment}>{period.comment}</Text>
+              )}
               <Text style={styles.dateRange}>
                 {formatDateRange(period.startDate, period.endDate)}
               </Text>
@@ -227,10 +245,19 @@ function HorizontalMode() {
 
 // ─── Week Mode ─────────────────────────────────────────────
 
-function WeekMode({ currentDate, onDayPress }: { currentDate: string; onDayPress: (date: string) => void }) {
+function WeekMode({
+  currentDate,
+  onDayPress,
+}: {
+  currentDate: string;
+  onDayPress: (date: string) => void;
+}) {
   const { data: weekData, isLoading } = useWeekTimeline({ date: currentDate });
 
-  const weekDays = useMemo(() => (weekData ? buildWeekGrid(weekData) : []), [weekData]);
+  const weekDays = useMemo(
+    () => (weekData ? buildWeekGrid(weekData) : []),
+    [weekData],
+  );
 
   if (isLoading) return <Loading />;
 
@@ -248,13 +275,14 @@ function WeekMode({ currentDate, onDayPress }: { currentDate: string; onDayPress
             <Pressable
               key={day.date}
               onPress={() => onDayPress(day.date)}
-              style={[
-                styles.dayCard,
-                isToday(day.date) && styles.dayToday,
-              ]}
+              style={[styles.dayCard, isToday(day.date) && styles.dayToday]}
             >
-              <Text style={styles.dayCardLabel}>{formatDayShort(day.date)}</Text>
-              <Text style={styles.dayCardNumber}>{formatDayNumber(day.date)}</Text>
+              <Text style={styles.dayCardLabel}>
+                {formatDayShort(day.date)}
+              </Text>
+              <Text style={styles.dayCardNumber}>
+                {formatDayNumber(day.date)}
+              </Text>
               <View
                 style={[
                   styles.moodCircle,
@@ -264,7 +292,9 @@ function WeekMode({ currentDate, onDayPress }: { currentDate: string; onDayPress
                   },
                 ]}
               />
-              <Text style={styles.moodName}>{day.dayState?.name ?? 'No mood'}</Text>
+              <Text style={styles.moodName}>
+                {day.dayState?.name ?? 'No mood'}
+              </Text>
             </Pressable>
           ))}
         </View>
@@ -302,7 +332,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  segmentedText: { fontSize: fontSize.sm, fontWeight: '500', color: colors.gray[500] },
+  segmentedText: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    color: colors.gray[500],
+  },
   segmentedTextActive: { color: colors.gray[900] },
 
   // Navigation
@@ -324,13 +358,29 @@ const styles = StyleSheet.create({
 
   // Shared
   list: { padding: spacing.lg },
-  range: { fontSize: fontSize.sm, color: colors.gray[500], marginBottom: spacing.md },
+  range: {
+    fontSize: fontSize.sm,
+    color: colors.gray[500],
+    marginBottom: spacing.md,
+  },
   empty: { alignItems: 'center', paddingVertical: 80 },
-  emptyText: { fontSize: fontSize.md, fontWeight: '600', color: colors.gray[900] },
-  emptySubtext: { fontSize: fontSize.sm, color: colors.gray[500], marginTop: spacing.xs },
+  emptyText: {
+    fontSize: fontSize.md,
+    fontWeight: '600',
+    color: colors.gray[900],
+  },
+  emptySubtext: {
+    fontSize: fontSize.sm,
+    color: colors.gray[500],
+    marginTop: spacing.xs,
+  },
   // Horizontal mode — month blocks
   monthBlock: { marginBottom: spacing.xl },
-  monthHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
+  monthHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
   monthBadge: {
     width: 44,
     height: 44,
@@ -339,8 +389,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  monthBadgeText: { fontSize: fontSize.xs, fontWeight: '700', color: colors.brand[700] },
-  monthLabel: { fontSize: fontSize.lg, fontWeight: '600', color: colors.gray[900], marginLeft: spacing.md },
+  monthBadgeText: {
+    fontSize: fontSize.xs,
+    fontWeight: '700',
+    color: colors.brand[700],
+  },
+  monthLabel: {
+    fontSize: fontSize.lg,
+    fontWeight: '600',
+    color: colors.gray[900],
+    marginLeft: spacing.md,
+  },
   dotsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -361,13 +420,34 @@ const styles = StyleSheet.create({
     marginLeft: 56,
   },
   eventTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  badge: { borderRadius: borderRadius.full, paddingHorizontal: spacing.sm, paddingVertical: 2 },
+  badge: {
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
   badgeText: { fontSize: fontSize.xs, fontWeight: '600' },
   activeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.green[500] },
-  activeText: { fontSize: fontSize.xs, fontWeight: '500', color: colors.green[600] },
-  comment: { fontSize: fontSize.sm, color: colors.gray[700], marginTop: spacing.xs },
-  dateRange: { fontSize: fontSize.xs, color: colors.gray[500], marginTop: spacing.xs },
+  activeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.green[500],
+  },
+  activeText: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    color: colors.green[600],
+  },
+  comment: {
+    fontSize: fontSize.sm,
+    color: colors.gray[700],
+    marginTop: spacing.xs,
+  },
+  dateRange: {
+    fontSize: fontSize.xs,
+    color: colors.gray[500],
+    marginTop: spacing.xs,
+  },
 
   // Week mode — grid
   weekGrid: { flexDirection: 'row', gap: spacing.sm },
@@ -381,8 +461,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   dayToday: { borderColor: colors.brand[500], borderWidth: 2 },
-  dayCardLabel: { fontSize: fontSize.xs, fontWeight: '500', color: colors.gray[500] },
-  dayCardNumber: { fontSize: fontSize.xxl, fontWeight: '700', color: colors.gray[900], marginVertical: spacing.xs },
+  dayCardLabel: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    color: colors.gray[500],
+  },
+  dayCardNumber: {
+    fontSize: fontSize.xxl,
+    fontWeight: '700',
+    color: colors.gray[900],
+    marginVertical: spacing.xs,
+  },
   moodCircle: {
     width: 32,
     height: 32,
@@ -391,5 +480,4 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   moodName: { fontSize: fontSize.xs, color: colors.gray[500] },
-
 });

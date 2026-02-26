@@ -19,13 +19,18 @@ export function usePresignedUpload() {
         size: file.size,
       });
 
-      await fetch(uploadUrl, {
+      const response = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
         headers: { 'Content-Type': file.type },
       });
 
-      return { key, url: uploadUrl.split('?')[0] };
+      if (!response.ok) {
+        throw new Error(`S3 upload failed with status ${response.status}`);
+      }
+
+      const parsedUrl = new URL(uploadUrl);
+      return { key, url: `${parsedUrl.origin}${parsedUrl.pathname}` };
     },
     [api],
   );

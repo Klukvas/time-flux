@@ -4,12 +4,17 @@ import { DayStatesRepository } from './day-states.repository.js';
 import {
   DayStateInUseError,
   DayStateNotFoundError,
+  QuotaExceededError,
   RecommendationNotFoundError,
 } from '../common/errors/app.error.js';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 describe('DayStatesService', () => {
   let service: DayStatesService;
   let repo: jest.Mocked<DayStatesRepository>;
+  let subscriptionsService: { assertResourceLimit: jest.Mock };
+  let mockTx: { day: { count: jest.Mock }; dayState: { delete: jest.Mock } };
 
   const userId = 'user-1';
 
@@ -26,6 +31,15 @@ describe('DayStatesService', () => {
   };
 
   beforeEach(async () => {
+    subscriptionsService = {
+      assertResourceLimit: jest.fn(),
+    };
+
+    mockTx = {
+      day: { count: jest.fn().mockResolvedValue(0) },
+      dayState: { delete: jest.fn().mockResolvedValue(undefined) },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DayStatesService,
@@ -41,6 +55,18 @@ describe('DayStatesService', () => {
             countDaysForDayState: jest.fn(),
           },
         },
+        {
+          provide: SubscriptionsService,
+          useValue: subscriptionsService,
+        },
+        {
+          provide: PrismaService,
+          useValue: {
+            $transaction: jest.fn((cb: (tx: any) => Promise<any>) =>
+              cb(mockTx),
+            ),
+          },
+        },
       ],
     }).compile();
 
@@ -53,18 +79,22 @@ describe('DayStatesService', () => {
   describe('delete', () => {
     it('should reject deleting mood used by existing days', async () => {
       repo.findByIdAndUserId.mockResolvedValue(mockDayState);
-      repo.countDaysForDayState.mockResolvedValue(10);
+      mockTx.day.count.mockResolvedValue(10);
 
-      await expect(service.delete(userId, 'ds-1')).rejects.toThrow(DayStateInUseError);
+      await expect(service.delete(userId, 'ds-1')).rejects.toThrow(
+        DayStateInUseError,
+      );
     });
 
     it('should allow deleting mood not used by any day', async () => {
       repo.findByIdAndUserId.mockResolvedValue(mockDayState);
-      repo.countDaysForDayState.mockResolvedValue(0);
-      repo.delete.mockResolvedValue(undefined as any);
+      mockTx.day.count.mockResolvedValue(0);
+      mockTx.dayState.delete.mockResolvedValue(undefined);
 
       await expect(service.delete(userId, 'ds-1')).resolves.toBeUndefined();
-      expect(repo.delete).toHaveBeenCalledWith('ds-1');
+      expect(mockTx.dayState.delete).toHaveBeenCalledWith({
+        where: { id: 'ds-1', userId },
+      });
     });
 
     it('should reject deleting non-existent mood', async () => {
@@ -133,12 +163,15 @@ describe('DayStatesService', () => {
       repo.countByUserId.mockResolvedValue(0);
       repo.create.mockResolvedValue(mockDayState);
 
-      await service.createFromRecommendation(userId, { key: 'great' as any, name: 'Great' });
+      await service.createFromRecommendation(userId, {
+        key: 'great' as any,
+        name: 'Great',
+      });
 
       expect(repo.create).toHaveBeenCalledWith(
         expect.objectContaining({
           color: '#22C55E', // Great recommendation color
-          score: 9,         // Great recommendation score
+          score: 9, // Great recommendation score
         }),
       );
     });
@@ -157,7 +190,10 @@ describe('DayStatesService', () => {
 
       for (const [key, expectedScore] of Object.entries(expectedScores)) {
         repo.create.mockClear();
-        await service.createFromRecommendation(userId, { key: key as any, name: key });
+        await service.createFromRecommendation(userId, {
+          key: key as any,
+          name: key,
+        });
 
         expect(repo.create).toHaveBeenCalledWith(
           expect.objectContaining({ score: expectedScore }),
@@ -172,6 +208,65 @@ describe('DayStatesService', () => {
           name: 'Bad Key',
         }),
       ).rejects.toThrow(RecommendationNotFoundError);
+    });
+  });
+
+  // ─── QUOTA ENFORCEMENT ────────────────────────────────────
+
+  describe('quota enforcement', () => {
+    it('should throw QuotaExceededError when at limit on create', async () => {
+      repo.countByUserId.mockResolvedValue(5);
+      subscriptionsService.assertResourceLimit.mockRejectedValue(
+        new QuotaExceededError({
+          resource: 'dayStates',
+          current: 5,
+          limit: 5,
+          tier: 'FREE',
+        }),
+      );
+
+      await expect(
+        service.create(userId, {
+          name: 'Over Limit',
+          color: '#FF0000',
+          score: 5,
+        }),
+      ).rejects.toThrow(QuotaExceededError);
+    });
+
+    it('should throw QuotaExceededError when at limit on createFromRecommendation', async () => {
+      repo.countByUserId.mockResolvedValue(5);
+      subscriptionsService.assertResourceLimit.mockRejectedValue(
+        new QuotaExceededError({
+          resource: 'dayStates',
+          current: 5,
+          limit: 5,
+          tier: 'FREE',
+        }),
+      );
+
+      await expect(
+        service.createFromRecommendation(userId, {
+          key: 'great' as any,
+          name: 'Great',
+        }),
+      ).rejects.toThrow(QuotaExceededError);
+    });
+
+    it('should allow create when under limit', async () => {
+      repo.countByUserId.mockResolvedValue(3);
+      repo.create.mockResolvedValue(mockDayState);
+      subscriptionsService.assertResourceLimit.mockResolvedValue(undefined);
+
+      await expect(
+        service.create(userId, { name: 'New', color: '#FF0000', score: 5 }),
+      ).resolves.toBeDefined();
+
+      expect(subscriptionsService.assertResourceLimit).toHaveBeenCalledWith(
+        userId,
+        'dayStates',
+        3,
+      );
     });
   });
 
@@ -192,7 +287,10 @@ describe('DayStatesService', () => {
 
       await service.update(userId, 'ds-1', { score: 3 });
 
-      expect(repo.update).toHaveBeenCalledWith('ds-1', expect.objectContaining({ score: 3 }));
+      expect(repo.update).toHaveBeenCalledWith(
+        'ds-1',
+        expect.objectContaining({ score: 3 }),
+      );
     });
   });
 });

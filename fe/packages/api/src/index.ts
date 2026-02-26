@@ -10,9 +10,15 @@ import { createUploadsApi } from './endpoints/uploads';
 import { createMemoriesApi } from './endpoints/memories';
 import { createRecommendationsApi } from './endpoints/recommendations';
 import { createAnalyticsApi } from './endpoints/analytics';
+import { createSubscriptionsApi } from './endpoints/subscriptions';
 
 export { createApiClient, extractApiError } from './client';
-export type { ApiClientConfig, SessionClearer, TokenGetter, TokenSetter } from './client';
+export type {
+  ApiClientConfig,
+  SessionClearer,
+  TokenGetter,
+  TokenSetter,
+} from './client';
 export * from './types';
 
 export interface Api {
@@ -27,6 +33,7 @@ export interface Api {
   memories: ReturnType<typeof createMemoriesApi>;
   recommendations: ReturnType<typeof createRecommendationsApi>;
   analytics: ReturnType<typeof createAnalyticsApi>;
+  subscriptions: ReturnType<typeof createSubscriptionsApi>;
 }
 
 export function createApi(client: AxiosInstance): Api {
@@ -42,5 +49,6 @@ export function createApi(client: AxiosInstance): Api {
     memories: createMemoriesApi(client),
     recommendations: createRecommendationsApi(client),
     analytics: createAnalyticsApi(client),
+    subscriptions: createSubscriptionsApi(client),
   };
 }

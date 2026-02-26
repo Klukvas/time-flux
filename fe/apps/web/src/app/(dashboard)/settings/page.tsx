@@ -6,6 +6,8 @@ import type { Language } from '@lifespan/i18n';
 import type { ThemePreference } from '@lifespan/theme';
 import { useAuthStore } from '@/stores/auth-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
+import { SubscriptionSection } from '@/components/settings/subscription-section';
+import { UsageSection } from '@/components/settings/usage-section';
 
 export default function SettingsPage() {
   const user = useAuthStore((s) => s.user);
@@ -18,42 +20,73 @@ export default function SettingsPage() {
     { value: 'system', label: t('settings.theme_system') },
   ];
 
-  const languageOptions: { value: Language; label: string }[] = SUPPORTED_LANGUAGES.map((lang) => ({
-    value: lang,
-    label: LANGUAGE_NAMES[lang],
-  }));
+  const languageOptions: { value: Language; label: string }[] =
+    SUPPORTED_LANGUAGES.map((lang) => ({
+      value: lang,
+      label: LANGUAGE_NAMES[lang],
+    }));
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-content">{t('settings.title')}</h1>
+      <h1 className="mb-6 text-2xl font-bold text-content">
+        {t('settings.title')}
+      </h1>
 
       <div className="space-y-6">
         {/* Appearance Section */}
         <div className="rounded-xl border border-edge bg-surface-card p-6">
-          <h2 className="mb-4 text-lg font-semibold text-content">{t('settings.appearance')}</h2>
+          <h2 className="mb-4 text-lg font-semibold text-content">
+            {t('settings.appearance')}
+          </h2>
           <div className="space-y-5">
             {/* Theme */}
             <div>
-              <p className="mb-1 text-sm font-medium text-content-secondary">{t('settings.theme')}</p>
-              <p className="mb-3 text-xs text-content-tertiary">{t('settings.theme_description')}</p>
-              <SegmentedControl value={theme} onChange={setTheme} options={themeOptions} />
+              <p className="mb-1 text-sm font-medium text-content-secondary">
+                {t('settings.theme')}
+              </p>
+              <p className="mb-3 text-xs text-content-tertiary">
+                {t('settings.theme_description')}
+              </p>
+              <SegmentedControl
+                value={theme}
+                onChange={setTheme}
+                options={themeOptions}
+              />
             </div>
 
             {/* Language */}
             <div>
-              <p className="mb-1 text-sm font-medium text-content-secondary">{t('settings.language')}</p>
-              <p className="mb-3 text-xs text-content-tertiary">{t('settings.language_description')}</p>
-              <SegmentedControl value={language} onChange={setLanguage} options={languageOptions} />
+              <p className="mb-1 text-sm font-medium text-content-secondary">
+                {t('settings.language')}
+              </p>
+              <p className="mb-3 text-xs text-content-tertiary">
+                {t('settings.language_description')}
+              </p>
+              <SegmentedControl
+                value={language}
+                onChange={setLanguage}
+                options={languageOptions}
+              />
             </div>
           </div>
         </div>
 
+        {/* Subscription Section */}
+        <SubscriptionSection />
+
+        {/* Usage Section */}
+        <UsageSection />
+
         {/* Account Section */}
         <div className="rounded-xl border border-edge bg-surface-card p-6">
-          <h2 className="mb-4 text-lg font-semibold text-content">{t('settings.account')}</h2>
+          <h2 className="mb-4 text-lg font-semibold text-content">
+            {t('settings.account')}
+          </h2>
           <div className="space-y-3">
             <div>
-              <p className="text-sm font-medium text-content-secondary">{t('auth.email.label')}</p>
+              <p className="text-sm font-medium text-content-secondary">
+                {t('auth.email.label')}
+              </p>
               <p className="text-content">{user?.email}</p>
             </div>
           </div>

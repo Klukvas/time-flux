@@ -13,7 +13,11 @@ import {
 import { useRouter } from 'expo-router';
 import type { EventGroup } from '@lifespan/api';
 import { extractApiError } from '@lifespan/api';
-import { getUserMessage, validateTitle, validateDescription } from '@lifespan/domain';
+import {
+  getUserMessage,
+  validateTitle,
+  validateDescription,
+} from '@lifespan/domain';
 import {
   useCategories,
   useCreateEventGroup,
@@ -49,7 +53,9 @@ export default function ChaptersScreen() {
         const aActive = a.periods.some((p) => p.endDate === null);
         const bActive = b.periods.some((p) => p.endDate === null);
         if (aActive !== bActive) return aActive ? -1 : 1;
-        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        return (
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
       })
     : [];
 
@@ -71,19 +77,32 @@ export default function ChaptersScreen() {
 
   const handleSave = () => {
     const titleResult = validateTitle(title);
-    if (!titleResult.valid) { Alert.alert('Error', titleResult.error!); return; }
-    if (!categoryId) { Alert.alert('Error', 'Select a category.'); return; }
+    if (!titleResult.valid) {
+      Alert.alert('Error', titleResult.error!);
+      return;
+    }
+    if (!categoryId) {
+      Alert.alert('Error', 'Select a category.');
+      return;
+    }
     const descResult = validateDescription(description);
-    if (!descResult.valid) { Alert.alert('Error', descResult.error!); return; }
+    if (!descResult.valid) {
+      Alert.alert('Error', descResult.error!);
+      return;
+    }
 
     const onSuccess = () => {
       setModalVisible(false);
     };
-    const onError = (err: Error) => Alert.alert('Error', getUserMessage(extractApiError(err)));
+    const onError = (err: Error) =>
+      Alert.alert('Error', getUserMessage(extractApiError(err)));
 
     if (editingGroup) {
       updateGroup.mutate(
-        { id: editingGroup.id, data: { title, categoryId, description: description || undefined } },
+        {
+          id: editingGroup.id,
+          data: { title, categoryId, description: description || undefined },
+        },
         { onSuccess, onError },
       );
     } else {
@@ -102,7 +121,8 @@ export default function ChaptersScreen() {
         style: 'destructive',
         onPress: () =>
           deleteGroup.mutate(group.id, {
-            onError: (err) => Alert.alert('Error', getUserMessage(extractApiError(err))),
+            onError: (err) =>
+              Alert.alert('Error', getUserMessage(extractApiError(err))),
           }),
       },
     ]);
@@ -117,7 +137,11 @@ export default function ChaptersScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          <Button title="+ New Chapter" onPress={openCreate} style={{ marginBottom: spacing.lg }} />
+          <Button
+            title="+ New Chapter"
+            onPress={openCreate}
+            style={{ marginBottom: spacing.lg }}
+          />
         }
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -126,11 +150,12 @@ export default function ChaptersScreen() {
         }
         renderItem={({ item: group }) => {
           const hasActive = group.periods.some((p) => p.endDate === null);
-          const latestPeriod = group.periods.length > 0
-            ? group.periods.reduce((a, b) =>
-                new Date(b.startDate) > new Date(a.startDate) ? b : a,
-              )
-            : null;
+          const latestPeriod =
+            group.periods.length > 0
+              ? group.periods.reduce((a, b) =>
+                  new Date(b.startDate) > new Date(a.startDate) ? b : a,
+                )
+              : null;
 
           return (
             <Pressable
@@ -139,9 +164,18 @@ export default function ChaptersScreen() {
               onLongPress={() => handleDelete(group)}
             >
               <View style={styles.cardTop}>
-                <Text style={styles.cardTitle} numberOfLines={1}>{group.title}</Text>
-                <View style={[styles.badge, { backgroundColor: hexToRgba(group.category.color, 0.15) }]}>
-                  <Text style={[styles.badgeText, { color: group.category.color }]}>
+                <Text style={styles.cardTitle} numberOfLines={1}>
+                  {group.title}
+                </Text>
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: hexToRgba(group.category.color, 0.15) },
+                  ]}
+                >
+                  <Text
+                    style={[styles.badgeText, { color: group.category.color }]}
+                  >
                     {group.category.name}
                   </Text>
                 </View>
@@ -152,11 +186,23 @@ export default function ChaptersScreen() {
                   </View>
                 )}
               </View>
-              {group.description && <Text style={styles.description} numberOfLines={2}>{group.description}</Text>}
+              {group.description && (
+                <Text style={styles.description} numberOfLines={2}>
+                  {group.description}
+                </Text>
+              )}
               <View style={styles.meta}>
-                <Text style={styles.metaText}>{group.periods.length} {group.periods.length === 1 ? 'period' : 'periods'}</Text>
+                <Text style={styles.metaText}>
+                  {group.periods.length}{' '}
+                  {group.periods.length === 1 ? 'period' : 'periods'}
+                </Text>
                 {latestPeriod && (
-                  <Text style={styles.metaText}>{formatDateRange(latestPeriod.startDate, latestPeriod.endDate)}</Text>
+                  <Text style={styles.metaText}>
+                    {formatDateRange(
+                      latestPeriod.startDate,
+                      latestPeriod.endDate,
+                    )}
+                  </Text>
                 )}
               </View>
             </Pressable>
@@ -165,7 +211,12 @@ export default function ChaptersScreen() {
       />
 
       {/* Create/Edit Modal */}
-      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet">
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setModalVisible(false)}
+      >
         <ScrollView contentContainerStyle={styles.modal}>
           <Text style={styles.modalTitle}>
             {editingGroup ? 'Edit Chapter' : 'New Chapter'}
@@ -180,7 +231,11 @@ export default function ChaptersScreen() {
           />
 
           <Text style={styles.label}>Category</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.lg }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginBottom: spacing.lg }}
+          >
             <View style={styles.catRow}>
               {categories?.map((cat) => (
                 <Pressable
@@ -188,10 +243,15 @@ export default function ChaptersScreen() {
                   onPress={() => setCategoryId(cat.id)}
                   style={[
                     styles.catChip,
-                    categoryId === cat.id && { backgroundColor: hexToRgba(cat.color, 0.2), borderColor: cat.color },
+                    categoryId === cat.id && {
+                      backgroundColor: hexToRgba(cat.color, 0.2),
+                      borderColor: cat.color,
+                    },
                   ]}
                 >
-                  <View style={[styles.catDot, { backgroundColor: cat.color }]} />
+                  <View
+                    style={[styles.catDot, { backgroundColor: cat.color }]}
+                  />
                   <Text style={styles.catChipText}>{cat.name}</Text>
                 </Pressable>
               ))}
@@ -208,7 +268,9 @@ export default function ChaptersScreen() {
             maxLength={MAX_DESCRIPTION_LENGTH}
             placeholderTextColor={colors.gray[400]}
           />
-          <Text style={styles.counter}>{description.length}/{MAX_DESCRIPTION_LENGTH}</Text>
+          <Text style={styles.counter}>
+            {description.length}/{MAX_DESCRIPTION_LENGTH}
+          </Text>
 
           <View style={styles.modalActions}>
             <Button
@@ -245,21 +307,58 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  cardTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap' },
-  cardTitle: { fontSize: fontSize.sm, fontWeight: '600', color: colors.gray[900], flexShrink: 1 },
-  badge: { borderRadius: borderRadius.full, paddingHorizontal: spacing.sm, paddingVertical: 2 },
+  cardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flexWrap: 'wrap',
+  },
+  cardTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    color: colors.gray[900],
+    flexShrink: 1,
+  },
+  badge: {
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
   badgeText: { fontSize: fontSize.xs, fontWeight: '600' },
   activeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.green[500] },
-  activeText: { fontSize: fontSize.xs, fontWeight: '500', color: colors.green[600] },
-  description: { fontSize: fontSize.sm, color: colors.gray[700], marginTop: spacing.xs },
+  activeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.green[500],
+  },
+  activeText: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    color: colors.green[600],
+  },
+  description: {
+    fontSize: fontSize.sm,
+    color: colors.gray[700],
+    marginTop: spacing.xs,
+  },
   meta: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xs },
   metaText: { fontSize: fontSize.xs, color: colors.gray[500] },
   empty: { alignItems: 'center', paddingVertical: 80 },
   emptyText: { fontSize: fontSize.md, color: colors.gray[500] },
   modal: { padding: spacing.xl, paddingTop: 60 },
-  modalTitle: { fontSize: fontSize.xl, fontWeight: '600', color: colors.gray[900], marginBottom: spacing.xl },
-  label: { fontSize: fontSize.sm, fontWeight: '500', color: colors.gray[700], marginBottom: spacing.xs },
+  modalTitle: {
+    fontSize: fontSize.xl,
+    fontWeight: '600',
+    color: colors.gray[900],
+    marginBottom: spacing.xl,
+  },
+  label: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    color: colors.gray[700],
+    marginBottom: spacing.xs,
+  },
   catRow: { flexDirection: 'row', gap: spacing.sm },
   catChip: {
     flexDirection: 'row',
@@ -284,6 +383,11 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     marginBottom: spacing.xs,
   },
-  counter: { fontSize: fontSize.xs, color: colors.gray[400], textAlign: 'right', marginBottom: spacing.lg },
+  counter: {
+    fontSize: fontSize.xs,
+    color: colors.gray[400],
+    textAlign: 'right',
+    marginBottom: spacing.lg,
+  },
   modalActions: { flexDirection: 'row', gap: spacing.md },
 });

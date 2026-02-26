@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, MinLength, MaxLength, IsOptional, Matches } from 'class-validator';
+import { IsIANATimezone } from '../../common/decorators/is-iana-timezone.decorator.js';
 
 export class RegisterDto {
   @ApiProperty({ example: 'user@example.com' })
@@ -17,6 +18,6 @@ export class RegisterDto {
 
   @ApiProperty({ example: 'Europe/Berlin', required: false, default: 'UTC' })
   @IsOptional()
-  @IsString()
+  @IsIANATimezone()
   timezone?: string;
 }

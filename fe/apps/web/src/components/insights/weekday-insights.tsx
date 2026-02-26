@@ -13,11 +13,6 @@ const WEEKDAY_KEYS = [
   'insights.weekday_sunday',
 ] as const;
 
-function useWeekdayName(weekday: number) {
-  const { t } = useTranslation();
-  return t(WEEKDAY_KEYS[weekday] ?? WEEKDAY_KEYS[0]);
-}
-
 function InsightCard({
   icon,
   title,

@@ -106,9 +106,11 @@ export function computeBestWorstMoodDay(
   if (weekdayStats.length === 0) return { best: null, worst: null };
 
   weekdayStats.sort((a, b) => b.averageScore - a.averageScore);
+  const best = weekdayStats[0];
+  const worst = weekdayStats[weekdayStats.length - 1];
   return {
-    best: weekdayStats[0],
-    worst: weekdayStats[weekdayStats.length - 1],
+    best,
+    worst: best.weekday === worst.weekday ? null : worst,
   };
 }
 
@@ -132,9 +134,7 @@ export function computeActivityDays(
 
   if (weekdayStats.length === 0) return { most: null, least: null };
 
-  weekdayStats.sort(
-    (a, b) => b.averageActivityScore - a.averageActivityScore,
-  );
+  weekdayStats.sort((a, b) => b.averageActivityScore - a.averageActivityScore);
   return {
     most: weekdayStats[0],
     least: weekdayStats[weekdayStats.length - 1],
@@ -178,9 +178,7 @@ export function computeRecoveryIndex(
   if (days.length < 2) return null;
 
   // Sort by date ascending
-  const sorted = [...days].sort(
-    (a, b) => a.date.getTime() - b.date.getTime(),
-  );
+  const sorted = [...days].sort((a, b) => a.date.getTime() - b.date.getTime());
 
   // Build recovery events per weekday
   const recoveryByWeekday = new Map<
@@ -261,7 +259,7 @@ export function computeBurnoutPattern(
   );
   const gapMagnitude = Math.min(
     1,
-    ((globalAverage - mondayAvg - 1 + (fridayAvg - globalAverage - 1)) / 4),
+    (globalAverage - mondayAvg - 1 + (fridayAvg - globalAverage - 1)) / 4,
   );
   const confidence = round2(sampleFactor * 0.6 + gapMagnitude * 0.4);
 

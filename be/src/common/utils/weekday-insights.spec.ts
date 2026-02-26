@@ -18,10 +18,7 @@ function dateForWeekday(weekday: number, weekIndex = 0): Date {
   return base;
 }
 
-function makeDaysWithScore(
-  weekday: number,
-  scores: number[],
-): DayWithScore[] {
+function makeDaysWithScore(weekday: number, scores: number[]): DayWithScore[] {
   return scores.map((score, i) => ({
     date: dateForWeekday(weekday, i),
     score,
@@ -64,7 +61,7 @@ describe('computeBestWorstMoodDay', () => {
 
     const result = computeBestWorstMoodDay(days, 'UTC');
     expect(result.best!.weekday).toBe(0);
-    expect(result.worst!.weekday).toBe(0); // same day since only one valid
+    expect(result.worst).toBeNull(); // null when same weekday as best
   });
 });
 

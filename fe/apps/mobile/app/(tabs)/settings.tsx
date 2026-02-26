@@ -1,5 +1,13 @@
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import type { Language } from '@lifespan/i18n';
 import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@lifespan/i18n';
 import type { ThemePreference } from '@lifespan/theme';
@@ -7,6 +15,7 @@ import { useTheme, useTranslation } from '@lifespan/hooks';
 import { useAuthStore } from '@/stores/auth-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { borderRadius, fontSize, spacing } from '@/lib/theme';
+import { SubscriptionSection } from '@/components/settings/subscription-section';
 
 export default function SettingsScreen() {
   const user = useAuthStore((s) => s.user);
@@ -20,10 +29,11 @@ export default function SettingsScreen() {
     { value: 'system', label: t('settings.theme_system') },
   ];
 
-  const languageOptions: { value: Language; label: string }[] = SUPPORTED_LANGUAGES.map((lang) => ({
-    value: lang,
-    label: LANGUAGE_NAMES[lang],
-  }));
+  const languageOptions: { value: Language; label: string }[] =
+    SUPPORTED_LANGUAGES.map((lang) => ({
+      value: lang,
+      label: LANGUAGE_NAMES[lang],
+    }));
 
   const handleLogout = () => {
     Alert.alert(t('auth.logout'), t('auth.logout') + '?', [
@@ -40,41 +50,141 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={[styles.container, { backgroundColor: tokens.colors.bg }]}>
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={[
+        styles.container,
+        { backgroundColor: tokens.colors.bg },
+      ]}
+    >
       {/* Appearance Section */}
       <View style={[styles.card, { backgroundColor: tokens.colors.bgCard }]}>
-        <Text style={[styles.sectionTitle, { color: tokens.colors.text }]}>{t('settings.appearance')}</Text>
+        <Text style={[styles.sectionTitle, { color: tokens.colors.text }]}>
+          {t('settings.appearance')}
+        </Text>
 
         {/* Theme */}
         <View style={styles.settingRow}>
-          <Text style={[styles.settingLabel, { color: tokens.colors.textSecondary }]}>{t('settings.theme')}</Text>
-          <Text style={[styles.settingDesc, { color: tokens.colors.textTertiary }]}>{t('settings.theme_description')}</Text>
-          <SegmentedControl value={theme} onChange={setTheme} options={themeOptions} />
+          <Text
+            style={[
+              styles.settingLabel,
+              { color: tokens.colors.textSecondary },
+            ]}
+          >
+            {t('settings.theme')}
+          </Text>
+          <Text
+            style={[styles.settingDesc, { color: tokens.colors.textTertiary }]}
+          >
+            {t('settings.theme_description')}
+          </Text>
+          <SegmentedControl
+            value={theme}
+            onChange={setTheme}
+            options={themeOptions}
+          />
         </View>
 
         {/* Language */}
         <View style={[styles.settingRow, { marginTop: spacing.lg }]}>
-          <Text style={[styles.settingLabel, { color: tokens.colors.textSecondary }]}>{t('settings.language')}</Text>
-          <Text style={[styles.settingDesc, { color: tokens.colors.textTertiary }]}>{t('settings.language_description')}</Text>
-          <SegmentedControl value={language} onChange={setLanguage} options={languageOptions} />
+          <Text
+            style={[
+              styles.settingLabel,
+              { color: tokens.colors.textSecondary },
+            ]}
+          >
+            {t('settings.language')}
+          </Text>
+          <Text
+            style={[styles.settingDesc, { color: tokens.colors.textTertiary }]}
+          >
+            {t('settings.language_description')}
+          </Text>
+          <SegmentedControl
+            value={language}
+            onChange={setLanguage}
+            options={languageOptions}
+          />
         </View>
       </View>
+
+      {/* Subscription Section */}
+      <SubscriptionSection
+        paddleCheckoutUrl={process.env.EXPO_PUBLIC_PADDLE_CHECKOUT_URL}
+      />
 
       {/* Account Section */}
       <View style={[styles.card, { backgroundColor: tokens.colors.bgCard }]}>
-        <Text style={[styles.sectionTitle, { color: tokens.colors.text }]}>{t('settings.account')}</Text>
+        <Text style={[styles.sectionTitle, { color: tokens.colors.text }]}>
+          {t('settings.account')}
+        </Text>
         <View style={styles.row}>
-          <Text style={[styles.label, { color: tokens.colors.textSecondary }]}>{t('auth.email.label')}</Text>
-          <Text style={[styles.value, { color: tokens.colors.text }]}>{user?.email}</Text>
+          <Text style={[styles.label, { color: tokens.colors.textSecondary }]}>
+            {t('auth.email.label')}
+          </Text>
+          <Text style={[styles.value, { color: tokens.colors.text }]}>
+            {user?.email}
+          </Text>
         </View>
         <View style={styles.row}>
-          <Text style={[styles.label, { color: tokens.colors.textSecondary }]}>Timezone</Text>
-          <Text style={[styles.value, { color: tokens.colors.text }]}>{user?.timezone}</Text>
+          <Text style={[styles.label, { color: tokens.colors.textSecondary }]}>
+            Timezone
+          </Text>
+          <Text style={[styles.value, { color: tokens.colors.text }]}>
+            {user?.timezone}
+          </Text>
         </View>
       </View>
 
-      <Pressable onPress={handleLogout} style={[styles.logoutBtn, { borderColor: tokens.colors.danger }]}>
-        <Text style={[styles.logoutText, { color: tokens.colors.danger }]}>{t('auth.logout')}</Text>
+      {/* Legal Section */}
+      <View style={[styles.card, { backgroundColor: tokens.colors.bgCard }]}>
+        <Text style={[styles.sectionTitle, { color: tokens.colors.text }]}>
+          Legal
+        </Text>
+        <Pressable
+          onPress={() => {
+            const baseUrl = (
+              process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
+            ).replace('/api/v1', '');
+            WebBrowser.openBrowserAsync(`${baseUrl}/terms`);
+          }}
+          style={styles.legalRow}
+        >
+          <Text style={[styles.legalRowText, { color: tokens.colors.text }]}>
+            {t('legal.terms_title')}
+          </Text>
+          <Text style={{ color: tokens.colors.textTertiary }}>{'\u203A'}</Text>
+        </Pressable>
+        <View
+          style={{
+            height: 1,
+            backgroundColor: tokens.colors.border,
+            marginVertical: spacing.sm,
+          }}
+        />
+        <Pressable
+          onPress={() => {
+            const baseUrl = (
+              process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
+            ).replace('/api/v1', '');
+            WebBrowser.openBrowserAsync(`${baseUrl}/privacy`);
+          }}
+          style={styles.legalRow}
+        >
+          <Text style={[styles.legalRowText, { color: tokens.colors.text }]}>
+            {t('legal.privacy_title')}
+          </Text>
+          <Text style={{ color: tokens.colors.textTertiary }}>{'\u203A'}</Text>
+        </Pressable>
+      </View>
+
+      <Pressable
+        onPress={handleLogout}
+        style={[styles.logoutBtn, { borderColor: tokens.colors.danger }]}
+      >
+        <Text style={[styles.logoutText, { color: tokens.colors.danger }]}>
+          {t('auth.logout')}
+        </Text>
       </Pressable>
     </ScrollView>
   );
@@ -92,7 +202,11 @@ const styles = StyleSheet.create({
     elevation: 2,
     marginBottom: spacing.lg,
   },
-  sectionTitle: { fontSize: fontSize.lg, fontWeight: '600', marginBottom: spacing.lg },
+  sectionTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: '600',
+    marginBottom: spacing.lg,
+  },
   settingRow: { marginBottom: spacing.xs },
   settingLabel: { fontSize: fontSize.sm, fontWeight: '500', marginBottom: 2 },
   settingDesc: { fontSize: fontSize.xs, marginBottom: spacing.sm },
@@ -106,4 +220,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   logoutText: { fontSize: fontSize.md, fontWeight: '600' },
+  legalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  legalRowText: { fontSize: fontSize.md },
 });

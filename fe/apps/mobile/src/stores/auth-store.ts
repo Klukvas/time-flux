@@ -24,23 +24,29 @@ export const useAuthStore = create<AuthState>((set) => ({
   ready: false,
 
   setAuth: (token, refreshToken, user) => {
-    SecureStore.setItemAsync(TOKEN_KEY, token);
-    SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
-    SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
     set({ token, refreshToken, user });
+    Promise.all([
+      SecureStore.setItemAsync(TOKEN_KEY, token),
+      SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken),
+      SecureStore.setItemAsync(USER_KEY, JSON.stringify(user)),
+    ]).catch(() => {});
   },
 
   setTokens: (token, refreshToken) => {
-    SecureStore.setItemAsync(TOKEN_KEY, token);
-    SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
     set({ token, refreshToken });
+    Promise.all([
+      SecureStore.setItemAsync(TOKEN_KEY, token),
+      SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken),
+    ]).catch(() => {});
   },
 
   logout: () => {
-    SecureStore.deleteItemAsync(TOKEN_KEY);
-    SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-    SecureStore.deleteItemAsync(USER_KEY);
     set({ token: null, refreshToken: null, user: null });
+    Promise.all([
+      SecureStore.deleteItemAsync(TOKEN_KEY),
+      SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
+      SecureStore.deleteItemAsync(USER_KEY),
+    ]).catch(() => {});
   },
 
   hydrate: async () => {

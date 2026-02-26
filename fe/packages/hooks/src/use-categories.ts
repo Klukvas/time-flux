@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CreateCategoryRequest, UpdateCategoryRequest } from '@lifespan/api';
+import type {
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+} from '@lifespan/api';
 import { QUERY_KEYS, STALE_TIMES } from '@lifespan/constants';
 import { useApi } from './api-context';
 
@@ -30,7 +33,7 @@ export function useUpdateCategory() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: QUERY_KEYS.categories });
       qc.invalidateQueries({ queryKey: ['timeline'] });
-      qc.invalidateQueries({ queryKey: ['events'] });
+      qc.invalidateQueries({ queryKey: ['event-groups'] });
     },
   });
 }
@@ -40,6 +43,10 @@ export function useDeleteCategory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.categories.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: QUERY_KEYS.categories }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.categories });
+      qc.invalidateQueries({ queryKey: ['event-groups'] });
+      qc.invalidateQueries({ queryKey: ['timeline'] });
+    },
   });
 }

@@ -13,18 +13,52 @@ import {
   ValidationError,
 } from '../common/errors/app.error.js';
 import type { GoogleProfile } from './strategies/google.strategy.js';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
+const OAUTH_CODE_TTL_MS = 60_000;
+
+// Pre-computed bcrypt hash for constant-time comparison when user doesn't exist
+const DUMMY_HASH =
+  '$2b$12$LJ3m4ys3Lk0TSwHlvPkSxOSZSGwcF5s8F1YMwXBPjKzLy4qXzKe7W';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly oauthCodes = new Map<
+    string,
+    {
+      data: { access_token: string; refresh_token: string; user: any };
+      expiresAt: number;
+    }
+  >();
 
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
+    private readonly subscriptionsService: SubscriptionsService,
   ) {}
+
+  private async buildUserResponse(user: {
+    id: string;
+    email: string;
+    avatarUrl?: string | null;
+    timezone: string;
+    onboardingCompleted: boolean;
+    createdAt: Date;
+  }) {
+    const sub = await this.subscriptionsService.getSubscription(user.id);
+    return {
+      id: user.id,
+      email: user.email,
+      avatarUrl: user.avatarUrl ?? undefined,
+      timezone: user.timezone,
+      onboardingCompleted: user.onboardingCompleted,
+      tier: sub.tier,
+      createdAt: user.createdAt.toISOString(),
+    };
+  }
 
   async register(dto: RegisterDto) {
     const email = dto.email.toLowerCase().trim();
@@ -50,7 +84,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      user: { id: user.id, email: user.email, timezone: user.timezone, onboardingCompleted: user.onboardingCompleted, createdAt: user.createdAt.toISOString() },
+      user: await this.buildUserResponse(user),
     };
   }
 
@@ -58,12 +92,13 @@ export class AuthService {
     const email = dto.email.toLowerCase().trim();
 
     const user = await this.authRepository.findUserByEmail(email);
-    if (!user || !user.passwordHash) {
-      throw new UnauthorizedError('Invalid email or password');
-    }
 
-    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!isPasswordValid) {
+    // Always run bcrypt.compare to prevent timing-based user enumeration
+    const isPasswordValid = await bcrypt.compare(
+      dto.password,
+      user?.passwordHash ?? DUMMY_HASH,
+    );
+    if (!user || !user.passwordHash || !isPasswordValid) {
       throw new UnauthorizedError('Invalid email or password');
     }
 
@@ -73,7 +108,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
-      user: { id: user.id, email: user.email, timezone: user.timezone, onboardingCompleted: user.onboardingCompleted, createdAt: user.createdAt.toISOString() },
+      user: await this.buildUserResponse(user),
     };
   }
 
@@ -128,23 +163,22 @@ export class AuthService {
         };
       });
 
-      const accessToken = this.generateAccessToken(result.user.id, result.user.email);
+      const accessToken = this.generateAccessToken(
+        result.user.id,
+        result.user.email,
+      );
       const refreshToken = await this.createRefreshToken(result.user.id);
 
       return {
         access_token: accessToken,
         refresh_token: refreshToken,
-        user: {
-          id: result.user.id,
-          email: result.user.email,
-          avatarUrl: result.user.avatarUrl,
-          timezone: result.user.timezone,
-          onboardingCompleted: result.user.onboardingCompleted,
-          createdAt: result.user.createdAt.toISOString(),
-        },
+        user: await this.buildUserResponse(result.user),
       };
     } catch (error) {
-      if (error instanceof GoogleAuthFailedError || error instanceof UserCreationFailedError) {
+      if (
+        error instanceof GoogleAuthFailedError ||
+        error instanceof UserCreationFailedError
+      ) {
         throw error;
       }
       this.logger.error('Google login failed', error);
@@ -171,20 +205,16 @@ export class AuthService {
     // Rotate: delete the old token and issue a new pair
     await this.prisma.refreshToken.delete({ where: { id: stored.id } });
 
-    const accessToken = this.generateAccessToken(stored.user.id, stored.user.email);
+    const accessToken = this.generateAccessToken(
+      stored.user.id,
+      stored.user.email,
+    );
     const newRefreshToken = await this.createRefreshToken(stored.user.id);
 
     return {
       access_token: accessToken,
       refresh_token: newRefreshToken,
-      user: {
-        id: stored.user.id,
-        email: stored.user.email,
-        avatarUrl: stored.user.avatarUrl,
-        timezone: stored.user.timezone,
-        onboardingCompleted: stored.user.onboardingCompleted,
-        createdAt: stored.user.createdAt.toISOString(),
-      },
+      user: await this.buildUserResponse(stored.user),
     };
   }
 
@@ -193,15 +223,37 @@ export class AuthService {
     await this.prisma.refreshToken.deleteMany({ where: { tokenHash } });
   }
 
+  storeOAuthCode(data: {
+    access_token: string;
+    refresh_token: string;
+    user: any;
+  }): string {
+    const code = randomBytes(32).toString('hex');
+    this.oauthCodes.set(code, {
+      data,
+      expiresAt: Date.now() + OAUTH_CODE_TTL_MS,
+    });
+    return code;
+  }
+
+  exchangeOAuthCode(code: string): {
+    access_token: string;
+    refresh_token: string;
+    user: any;
+  } {
+    const entry = this.oauthCodes.get(code);
+    this.oauthCodes.delete(code);
+
+    if (!entry || entry.expiresAt < Date.now()) {
+      throw new UnauthorizedError('Invalid or expired OAuth code');
+    }
+
+    return entry.data;
+  }
+
   async completeOnboarding(userId: string) {
     const user = await this.authRepository.completeOnboarding(userId);
-    return {
-      id: user.id,
-      email: user.email,
-      timezone: user.timezone,
-      onboardingCompleted: user.onboardingCompleted,
-      createdAt: user.createdAt.toISOString(),
-    };
+    return this.buildUserResponse(user);
   }
 
   private generateAccessToken(userId: string, email: string): string {
@@ -211,11 +263,22 @@ export class AuthService {
   private async createRefreshToken(userId: string): Promise<string> {
     const rawToken = randomBytes(32).toString('hex');
     const tokenHash = this.hashToken(rawToken);
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(
+      Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
+    );
 
     await this.prisma.refreshToken.create({
       data: { userId, tokenHash, expiresAt },
     });
+
+    // Opportunistically clean up expired tokens for this user
+    this.prisma.refreshToken
+      .deleteMany({
+        where: { userId, expiresAt: { lt: new Date() } },
+      })
+      .catch((err) =>
+        this.logger.warn(`Failed to clean expired tokens: ${err}`),
+      );
 
     return rawToken;
   }

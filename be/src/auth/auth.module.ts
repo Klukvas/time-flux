@@ -7,6 +7,7 @@ import { AuthService } from './auth.service.js';
 import { AuthRepository } from './auth.repository.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { GoogleStrategy } from './strategies/google.strategy.js';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module.js';
 
 const googleStrategyProvider = {
   provide: GoogleStrategy,
@@ -25,6 +26,7 @@ const googleStrategyProvider = {
 
 @Module({
   imports: [
+    SubscriptionsModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

@@ -55,6 +55,14 @@ export default function Home() {
 
       <footer className="border-t border-edge px-4 py-8 text-center text-xs text-content-tertiary">
         LifeSpan &copy; {new Date().getFullYear()}
+        {' · '}
+        <a href="/terms" className="underline hover:text-content-secondary">
+          Terms of Service
+        </a>
+        {' · '}
+        <a href="/privacy" className="underline hover:text-content-secondary">
+          Privacy Policy
+        </a>
       </footer>
 
       <LoginForm

@@ -22,10 +22,18 @@ export class DayResponseDto {
   @ApiProperty({ nullable: true, type: () => DayStateSummaryDto })
   dayState: DayStateSummaryDto | null;
 
-  @ApiProperty({ nullable: true, example: 'media-uuid', description: 'ID of the cover media' })
+  @ApiProperty({
+    nullable: true,
+    example: 'media-uuid',
+    description: 'ID of the cover media',
+  })
   mainMediaId: string | null;
 
-  @ApiProperty({ nullable: true, example: 'Kyiv, Ukraine', description: 'Location name' })
+  @ApiProperty({
+    nullable: true,
+    example: 'Kyiv, Ukraine',
+    description: 'Location name',
+  })
   locationName: string | null;
 
   @ApiProperty({ nullable: true, example: 50.4501, description: 'Latitude' })
@@ -33,6 +41,13 @@ export class DayResponseDto {
 
   @ApiProperty({ nullable: true, example: 30.5234, description: 'Longitude' })
   longitude: number | null;
+
+  @ApiProperty({
+    nullable: true,
+    example: 'Had a great day!',
+    description: 'Day comment',
+  })
+  comment: string | null;
 
   @ApiProperty({ type: () => [DayMediaResponseDto] })
   media: DayMediaResponseDto[];

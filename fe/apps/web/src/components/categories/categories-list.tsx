@@ -5,11 +5,18 @@ import toast from 'react-hot-toast';
 import type { Category } from '@lifespan/api';
 import { extractApiError } from '@lifespan/api';
 import { getUserMessage } from '@lifespan/domain';
-import { useCategories, useCreateCategoryFromRecommendation, useDeleteCategory, useRecommendations, useTranslation } from '@lifespan/hooks';
+import {
+  useCategories,
+  useCreateCategoryFromRecommendation,
+  useDeleteCategory,
+  useRecommendations,
+  useTranslation,
+} from '@lifespan/hooks';
 import { contrastTextColor } from '@lifespan/utils';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { CategoriesSkeleton } from '@/components/ui/skeleton';
 import { CategoryFormModal } from './category-form-modal';
 
 export function CategoriesList() {
@@ -21,9 +28,13 @@ export function CategoriesList() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(
+    null,
+  );
   const [formInitialName, setFormInitialName] = useState<string | undefined>();
-  const [formInitialColor, setFormInitialColor] = useState<string | undefined>();
+  const [formInitialColor, setFormInitialColor] = useState<
+    string | undefined
+  >();
   const [addingAll, setAddingAll] = useState(false);
   const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set());
   const [suggestionsDismissed, setSuggestionsDismissed] = useState(false);
@@ -70,7 +81,9 @@ export function CategoriesList() {
   const handleAddAll = async () => {
     setAddingAll(true);
     try {
-      const colors = new Set((categories ?? []).map((c) => c.color.toLowerCase()));
+      const colors = new Set(
+        (categories ?? []).map((c) => c.color.toLowerCase()),
+      );
       const remaining = (recommendations?.categories ?? []).filter(
         (s) => !dismissedKeys.has(s.key) && !colors.has(s.color.toLowerCase()),
       );
@@ -87,27 +100,27 @@ export function CategoriesList() {
     }
   };
 
-  const existingColors = new Set((categories ?? []).map((c) => c.color.toLowerCase()));
-  const visibleRecommendations = (recommendations?.categories ?? []).filter(
-    (s) => !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  const existingColors = new Set(
+    (categories ?? []).map((c) => c.color.toLowerCase()),
   );
-  const showRecommendations = !suggestionsDismissed && visibleRecommendations.length > 0;
+  const visibleRecommendations = (recommendations?.categories ?? []).filter(
+    (s) =>
+      !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  );
+  const showRecommendations =
+    !suggestionsDismissed && visibleRecommendations.length > 0;
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
-      </div>
-    );
+    return <CategoriesSkeleton />;
   }
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-content">{t('categories.title')}</h1>
-        <Button onClick={handleOpenCreate}>
-          + {t('categories.create')}
-        </Button>
+        <h1 className="text-2xl font-bold text-content">
+          {t('categories.title')}
+        </h1>
+        <Button onClick={handleOpenCreate}>+ {t('categories.create')}</Button>
       </div>
 
       {!categories?.length && !showRecommendations && (
@@ -158,9 +171,24 @@ export function CategoriesList() {
                       />
                       {name}
                       {isCreating && (
-                        <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        <svg
+                          className="h-3 w-3 animate-spin"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          />
                         </svg>
                       )}
                     </button>
@@ -170,8 +198,18 @@ export function CategoriesList() {
                       className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary transition-colors"
                       title="Dismiss"
                     >
-                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -219,9 +257,13 @@ export function CategoriesList() {
                   {cat.name[0]}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-content">{cat.name}</p>
+                  <p className="truncate font-medium text-content">
+                    {cat.name}
+                  </p>
                   <p className="text-xs text-content-secondary">
-                    {cat.isSystem ? t('categories.system_label') : t('categories.custom_label')}
+                    {cat.isSystem
+                      ? t('categories.system_label')
+                      : t('categories.custom_label')}
                   </p>
                 </div>
               </div>
@@ -229,7 +271,12 @@ export function CategoriesList() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => { setEditingCategory(cat); setFormInitialName(undefined); setFormInitialColor(undefined); setFormOpen(true); }}
+                  onClick={() => {
+                    setEditingCategory(cat);
+                    setFormInitialName(undefined);
+                    setFormInitialColor(undefined);
+                    setFormOpen(true);
+                  }}
                 >
                   {t('common.edit')}
                 </Button>
@@ -249,7 +296,12 @@ export function CategoriesList() {
 
       <CategoryFormModal
         open={formOpen}
-        onClose={() => { setFormOpen(false); setEditingCategory(null); setFormInitialName(undefined); setFormInitialColor(undefined); }}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingCategory(null);
+          setFormInitialName(undefined);
+          setFormInitialColor(undefined);
+        }}
         category={editingCategory}
         initialName={formInitialName}
         initialColor={formInitialColor}
@@ -260,7 +312,9 @@ export function CategoriesList() {
         onClose={() => setDeletingCategory(null)}
         onConfirm={handleDelete}
         title={t('categories.delete')}
-        message={t('categories.confirm_delete_message', { name: deletingCategory?.name ?? '' })}
+        message={t('categories.confirm_delete_message', {
+          name: deletingCategory?.name ?? '',
+        })}
         loading={deleteCategory.isPending}
       />
     </div>

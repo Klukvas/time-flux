@@ -1,19 +1,29 @@
 'use client';
 
-import { useMoodOverview, useTranslation } from '@lifespan/hooks';
+import {
+  useMoodOverview,
+  useSubscription,
+  useTranslation,
+} from '@lifespan/hooks';
 import { MoodTrendChart } from './mood-trend-chart';
+import { InsightsPaywall } from './insights-paywall';
 import { WeekdayInsightsSection } from './weekday-insights';
+import { InsightsSkeleton } from '@/components/ui/skeleton';
 
 export function InsightsDashboard() {
   const { t } = useTranslation();
-  const { data, isLoading, error } = useMoodOverview();
+  const { data: subscription } = useSubscription();
+  const analyticsLocked = subscription?.limits.analytics === false;
+  const { data, isLoading, error } = useMoodOverview({
+    enabled: !analyticsLocked,
+  });
+
+  if (analyticsLocked) {
+    return <InsightsPaywall />;
+  }
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
-      </div>
-    );
+    return <InsightsSkeleton />;
   }
 
   if (error || !data) {
@@ -27,9 +37,13 @@ export function InsightsDashboard() {
   if (data.totalDaysWithMood === 0) {
     return (
       <div>
-        <h1 className="mb-6 text-2xl font-bold text-content">{t('insights.title')}</h1>
+        <h1 className="mb-6 text-2xl font-bold text-content">
+          {t('insights.title')}
+        </h1>
         <div className="rounded-lg border border-edge bg-surface-card p-8 text-center">
-          <p className="text-sm text-content-secondary">{t('insights.no_data')}</p>
+          <p className="text-sm text-content-secondary">
+            {t('insights.no_data')}
+          </p>
         </div>
       </div>
     );
@@ -37,7 +51,9 @@ export function InsightsDashboard() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-content">{t('insights.title')}</h1>
+      <h1 className="mb-6 text-2xl font-bold text-content">
+        {t('insights.title')}
+      </h1>
 
       <div className="space-y-6">
         {/* Average Mood */}
@@ -104,7 +120,8 @@ export function InsightsDashboard() {
                   {data.bestCategory.name}
                 </p>
                 <p className="mt-1 text-sm text-content-tertiary">
-                  {data.bestCategory.averageMoodScore.toFixed(1)} {t('insights.out_of')}
+                  {data.bestCategory.averageMoodScore.toFixed(1)}{' '}
+                  {t('insights.out_of')}
                 </p>
               </div>
             )}
@@ -117,7 +134,8 @@ export function InsightsDashboard() {
                   {data.worstCategory.name}
                 </p>
                 <p className="mt-1 text-sm text-content-tertiary">
-                  {data.worstCategory.averageMoodScore.toFixed(1)} {t('insights.out_of')}
+                  {data.worstCategory.averageMoodScore.toFixed(1)}{' '}
+                  {t('insights.out_of')}
                 </p>
               </div>
             )}

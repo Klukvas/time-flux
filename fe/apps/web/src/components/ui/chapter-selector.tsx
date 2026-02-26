@@ -13,7 +13,11 @@ interface ChapterSelectorProps {
   disabled?: boolean;
 }
 
-export function ChapterSelector({ activePeriodIds, onSelect, disabled }: ChapterSelectorProps) {
+export function ChapterSelector({
+  activePeriodIds,
+  onSelect,
+  disabled,
+}: ChapterSelectorProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const { data: allGroups } = useEventGroups();
@@ -24,7 +28,10 @@ export function ChapterSelector({ activePeriodIds, onSelect, disabled }: Chapter
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
         setSearch('');
       }
@@ -62,12 +69,25 @@ export function ChapterSelector({ activePeriodIds, onSelect, disabled }: Chapter
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        onClick={() => { setOpen((o) => !o); setSearch(''); }}
+        onClick={() => {
+          setOpen((o) => !o);
+          setSearch('');
+        }}
         disabled={disabled}
         className="inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent-hover disabled:opacity-50"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 4v16m8-8H4"
+          />
         </svg>
         {t('day_form.add_chapter')}
       </button>
@@ -95,25 +115,31 @@ export function ChapterSelector({ activePeriodIds, onSelect, disabled }: Chapter
                   <button
                     key={group.id}
                     type="button"
+                    disabled={isActive}
                     onClick={() => {
                       onSelect(group.id);
                       setOpen(false);
                       setSearch('');
                     }}
                     className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-surface-secondary ${
-                      isActive ? 'opacity-60' : ''
+                      isActive ? 'opacity-60 cursor-default' : ''
                     }`}
                   >
                     <span
                       className="h-3 w-3 flex-none rounded-full"
                       style={{ backgroundColor: group.category.color }}
                     />
-                    <span className="flex-1 truncate text-content">{group.title}</span>
+                    <span className="flex-1 truncate text-content">
+                      {group.title}
+                    </span>
                     {isActive && (
                       <span
                         className="flex-none rounded-full px-2 py-0.5 text-xs font-medium"
                         style={{
-                          backgroundColor: hexToRgba(group.category.color, 0.15),
+                          backgroundColor: hexToRgba(
+                            group.category.color,
+                            0.15,
+                          ),
                           color: group.category.color,
                         }}
                       >
@@ -138,8 +164,18 @@ export function ChapterSelector({ activePeriodIds, onSelect, disabled }: Chapter
                 onClick={() => router.push('/chapters')}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-accent hover:bg-surface-secondary"
               >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 {t('day_form.create_new_chapter')}
               </button>

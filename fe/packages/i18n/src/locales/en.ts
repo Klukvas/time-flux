@@ -145,7 +145,8 @@ const en: TranslationDictionary = {
     system_label: 'System',
     custom_label: 'Custom',
     preview_placeholder: 'Category name',
-    confirm_delete_message: 'Are you sure you want to delete "{name}"? This cannot be undone. Categories with chapters cannot be deleted.',
+    confirm_delete_message:
+      'Are you sure you want to delete "{name}"? This cannot be undone. Categories with chapters cannot be deleted.',
     form: {
       name: 'Name',
       name_placeholder: 'e.g., Side Project',
@@ -153,7 +154,8 @@ const en: TranslationDictionary = {
     },
     recommendations: {
       title: 'Get started quickly',
-      description: 'Pick the categories that fit your life, or create your own.',
+      description:
+        'Pick the categories that fit your life, or create your own.',
       add_all: 'Add all',
       dismiss: 'Dismiss suggestions',
       work: 'Work',
@@ -180,7 +182,8 @@ const en: TranslationDictionary = {
     updated: 'Mood updated',
     deleted: 'Mood deleted',
     preview_placeholder: 'Mood name',
-    confirm_delete_message: 'Are you sure you want to delete "{name}"? Moods assigned to days cannot be deleted.',
+    confirm_delete_message:
+      'Are you sure you want to delete "{name}"? Moods assigned to days cannot be deleted.',
     form: {
       name: 'Name',
       name_placeholder: 'e.g., Energized',
@@ -212,6 +215,60 @@ const en: TranslationDictionary = {
     theme_system: 'System',
     account: 'Account',
     danger_zone: 'Danger Zone',
+  },
+
+  subscription: {
+    title: 'Subscription',
+    current_plan: 'Current Plan',
+    compare_plans: 'Compare Plans',
+    upgrade: 'Upgrade',
+    cancel: 'Cancel Subscription',
+    cancel_confirm:
+      'Are you sure you want to cancel your subscription? You will keep access until the end of the billing period.',
+    canceled_banner:
+      'Your subscription will end on {date}. You can continue using all features until then.',
+    status_active: 'Active',
+    status_trialing: 'Trial',
+    status_past_due: 'Past Due',
+    status_canceled: 'Canceled',
+    status_paused: 'Paused',
+    renews_on: 'Renews on {date}',
+    free_plan: 'Free',
+    pro_plan: 'Pro',
+    premium_plan: 'Premium',
+    free_description: 'Get started with the basics',
+    pro_description: 'For power users who want more',
+    premium_description: 'Unlimited everything',
+    media_limit: 'Up to {count} media files',
+    media_unlimited: 'Unlimited media files',
+    chapters_limit: 'Up to {count} chapters',
+    chapters_unlimited: 'Unlimited chapters',
+    categories_limit: 'Up to {count} categories',
+    categories_unlimited: 'Unlimited categories',
+    moods_limit: 'Up to {count} moods',
+    moods_unlimited: 'Unlimited moods',
+    analytics_included: 'Analytics included',
+    analytics_locked: 'Analytics locked',
+    memories_included: 'Memories included',
+    memories_locked: 'Memories locked',
+    cancel_success: 'Subscription cancellation scheduled',
+    payment_success:
+      'Payment successful! Your subscription is being activated.',
+    success_title: 'Welcome to {plan}!',
+    success_description:
+      'Your subscription is now active. Enjoy all the premium features.',
+    success_renews: 'Your plan renews on {date}.',
+    success_cta: 'Start Exploring',
+    popular: 'Most Popular',
+    per_month: '/mo',
+    free_price: 'Free',
+    usage_title: 'Usage',
+    usage_of: '{used} of {limit}',
+    usage_unlimited: 'Unlimited',
+    usage_media: 'Media Files',
+    usage_chapters: 'Chapters',
+    usage_categories: 'Categories',
+    usage_moods: 'Moods',
   },
 
   common: {
@@ -265,7 +322,8 @@ const en: TranslationDictionary = {
     coordinates: 'Coordinates (optional)',
     latitude_placeholder: 'Latitude',
     longitude_placeholder: 'Longitude',
-    location_permission_denied: 'Location permission denied. Please enter manually.',
+    location_permission_denied:
+      'Location permission denied. Please enter manually.',
     location_unavailable: 'Location unavailable. Please enter manually.',
     search_location: 'Search for a place...',
     tap_to_place_pin: 'Tap on the map to place a pin',
@@ -273,7 +331,8 @@ const en: TranslationDictionary = {
 
   confirm_delete: {
     title: 'Confirm Delete',
-    message: 'Are you sure you want to delete this? This action cannot be undone.',
+    message:
+      'Are you sure you want to delete this? This action cannot be undone.',
   },
 
   errors: {
@@ -289,20 +348,30 @@ const en: TranslationDictionary = {
     day_state_not_found: 'Day state not found.',
     period_overlap: 'An active period already exists in this chapter.',
     category_in_use: 'This category cannot be deleted because it has chapters.',
-    day_state_in_use: 'This day state cannot be deleted because it is assigned to days.',
+    day_state_in_use:
+      'This day state cannot be deleted because it is assigned to days.',
     validation_error: 'Please check your input and try again.',
     unauthorized: 'Invalid email or password.',
     forbidden: 'You do not have permission to perform this action.',
     google_auth_failed: 'Google authentication failed. Please try again.',
     user_creation_failed: 'Failed to create account. Please try again.',
+    quota_exceeded:
+      'You have reached the limit for your current plan. Upgrade to get more.',
+    feature_locked: 'This feature requires a higher subscription tier.',
+    subscription_not_found: 'No active subscription found.',
+    paddle_not_configured: 'Billing is temporarily unavailable.',
+    paddle_cancel_error: 'Failed to cancel subscription. Please try again.',
     internal_error: 'Something went wrong. Please try again later.',
     http_error: 'A network error occurred. Please try again.',
     email_already_exists: 'This email is already registered.',
     invalid_email: 'Enter a valid email address.',
-    weak_password: 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number.',
+    weak_password:
+      'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number.',
     wrong_credentials: 'Invalid email or password.',
-    google_no_password: 'This account uses Google sign-in. Please continue with Google.',
-    google_unverified_email: 'Your Google email is not verified. Please verify it first.',
+    google_no_password:
+      'This account uses Google sign-in. Please continue with Google.',
+    google_unverified_email:
+      'Your Google email is not verified. Please verify it first.',
   },
 
   onboarding: {
@@ -315,13 +384,16 @@ const en: TranslationDictionary = {
     navigation_settings: 'Settings — preferences & account',
     timeline: 'This is your timeline — a visual map of your days and periods.',
     day: 'Tap any day to add a mood, photo, or memory.',
-    first_memory: 'You can start small — even one photo or a feeling is enough.',
+    first_memory:
+      'You can start small — even one photo or a feeling is enough.',
     next: 'Next',
     try_it: 'Try it',
     save_finish: 'Save & Finish',
     skip: 'Skip',
-    highlight_timeline: 'This is the Timeline — where your life flows over time.',
-    highlight_chapters: 'Here you can manage Chapters — reusable groups of life events.',
+    highlight_timeline:
+      'This is the Timeline — where your life flows over time.',
+    highlight_chapters:
+      'Here you can manage Chapters — reusable groups of life events.',
     highlight_categories: 'Categories help you organize chapters by type.',
     highlight_moods: 'Moods let you color each day with how you felt.',
     highlight_settings: 'Settings let you customize TimeFlux.',
@@ -342,7 +414,8 @@ const en: TranslationDictionary = {
   insights: {
     title: 'Insights',
     average_mood: 'Average Mood',
-    average_mood_description: 'Your overall emotional score across all tracked days.',
+    average_mood_description:
+      'Your overall emotional score across all tracked days.',
     mood_distribution: 'Mood Distribution',
     best_category: 'Most Positive Area',
     worst_category: 'Most Challenging Area',
@@ -368,7 +441,8 @@ const en: TranslationDictionary = {
     least_active_day: 'Least Active Day',
     least_active_day_description: 'You are least active on {day}',
     most_unstable_day: 'Most Unstable Day',
-    most_unstable_day_description: '{day} is your most emotionally unstable day',
+    most_unstable_day_description:
+      '{day} is your most emotionally unstable day',
     recovery_day: 'Recovery Day',
     recovery_day_description: 'You recover most often on {day}',
     burnout_detected: 'Work Stress Pattern Detected',
@@ -383,12 +457,17 @@ const en: TranslationDictionary = {
     score_label: 'avg {score}',
     sample_size: '{count} days',
     recovery_rate: '{rate}% recovery rate',
+    paywall_title: 'Unlock Insights',
+    paywall_description:
+      'Upgrade to Pro to see mood analytics, trends, and patterns.',
+    paywall_cta: 'Upgrade to Pro',
   },
 
   landing: {
     hero: {
       headline: 'Visualize your life. Understand your patterns.',
-      subtext: 'Track moods, chapters, and emotional cycles in a beautiful interactive timeline.',
+      subtext:
+        'Track moods, chapters, and emotional cycles in a beautiful interactive timeline.',
       cta_start: 'Start your timeline',
       cta_demo: 'Explore demo',
       badge_pattern: 'Burnout pattern detected',
@@ -425,6 +504,71 @@ const en: TranslationDictionary = {
     },
   },
 
+  legal: {
+    terms_title: 'Terms of Service',
+    privacy_title: 'Privacy Policy',
+    last_updated: 'Last updated: February 26, 2026',
+    agree_prefix: 'By creating an account, you agree to our',
+    terms_link: 'Terms of Service',
+    and_separator: 'and',
+    privacy_link: 'Privacy Policy',
+    terms: {
+      acceptance_title: '1. Acceptance of Terms',
+      acceptance_text:
+        'By accessing or using LifeSpan ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.',
+      description_title: '2. Description of Service',
+      description_text:
+        'LifeSpan is a personal life-tracking application that allows users to record moods, chapters, memories, and media on an interactive timeline. The Service is provided "as is" and may be updated from time to time.',
+      accounts_title: '3. User Accounts',
+      accounts_text:
+        'You must provide accurate information when creating an account. You are responsible for maintaining the confidentiality of your credentials and for all activity under your account. Notify us immediately of any unauthorized use.',
+      subscriptions_title: '4. Subscriptions & Billing',
+      subscriptions_text:
+        'Some features require a paid subscription. Payments are processed by Paddle.com Market Limited ("Paddle"), our Merchant of Record. Paddle handles all billing, invoicing, tax collection, and refund processing. By subscribing, you also agree to Paddle\'s Terms of Use and Privacy Policy. Subscriptions renew automatically unless canceled before the end of the billing period.',
+      content_title: '5. User Content',
+      content_text:
+        'You retain ownership of all content you upload (photos, text, media). By using the Service, you grant us a limited license to store, process, and display your content solely for providing the Service. We do not sell or share your content with third parties for advertising purposes.',
+      ip_title: '6. Intellectual Property',
+      ip_text:
+        'All trademarks, logos, and software constituting the Service are owned by LifeSpan. You may not copy, modify, or distribute any part of the Service without our written permission.',
+      termination_title: '7. Termination',
+      termination_text:
+        'We may suspend or terminate your account if you violate these Terms or engage in abusive behavior. You may delete your account at any time through Settings. Upon termination, your data will be permanently deleted within 30 days.',
+      liability_title: '8. Limitation of Liability',
+      liability_text:
+        'To the maximum extent permitted by law, LifeSpan shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Service. Our total liability is limited to the amount you paid in the 12 months preceding the claim.',
+      contact_title: '9. Contact',
+      contact_text:
+        'If you have questions about these Terms, contact us at support@lifespan.app.',
+    },
+    privacy: {
+      intro_title: '1. Introduction',
+      intro_text:
+        'This Privacy Policy explains how LifeSpan ("we", "us", "our") collects, uses, and protects your personal data when you use our Service.',
+      data_collected_title: '2. Data We Collect',
+      data_collected_text:
+        'We collect the following data: email address and authentication credentials; timezone and language preferences; mood entries, day comments, and chapter information; photos and media you upload; location data (only when you explicitly provide it); and usage analytics (anonymous).',
+      usage_title: '3. How We Use Your Data',
+      usage_text:
+        'Your data is used exclusively to provide and improve the Service: displaying your timeline and memories; generating mood analytics and insights; sending account-related notifications. We do not sell your data to third parties.',
+      storage_title: '4. Data Storage & Security',
+      storage_text:
+        'Your data is stored on secure servers with encryption at rest and in transit. Media files are stored in encrypted cloud storage (Amazon S3). We implement industry-standard security measures, but no system is 100% secure.',
+      third_parties_title: '5. Third Parties',
+      third_parties_text:
+        'We share data only with essential service providers: Paddle.com — payment processing (receives your email and billing info); Amazon Web Services — cloud infrastructure and media storage; Google — authentication (only if you use Google Sign-In). These providers are bound by their own privacy policies and data protection obligations.',
+      cookies_title: '6. Cookies & Local Storage',
+      cookies_text:
+        'We use local storage and cookies to maintain your session, remember language and theme preferences, and improve the user experience. We do not use third-party tracking cookies.',
+      rights_title: '7. Your Rights',
+      rights_text:
+        'You have the right to: access all data we hold about you; export your data; correct inaccurate data; delete your account and all associated data; withdraw consent at any time. To exercise these rights, contact us at support@lifespan.app or use the account settings.',
+      contact_title: '8. Contact',
+      contact_text:
+        'For privacy-related inquiries, contact us at support@lifespan.app.',
+    },
+  },
+
   validation: {
     email: {
       required: 'Email is required.',
@@ -434,7 +578,8 @@ const en: TranslationDictionary = {
       required: 'Password is required.',
       min_length: 'Password must be at least {min} characters.',
       max_length: 'Password must be at most {max} characters.',
-      complexity: 'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number.',
+      complexity:
+        'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number.',
     },
     name: {
       required: 'Name is required.',

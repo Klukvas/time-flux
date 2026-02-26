@@ -14,6 +14,8 @@ import { MediaModule } from './media/media.module.js';
 import { MemoriesModule } from './memories/memories.module.js';
 import { RecommendationsModule } from './recommendations/recommendations.module.js';
 import { AnalyticsModule } from './analytics/analytics.module.js';
+import { HealthModule } from './health/health.module.js';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware.js';
 
 @Module({
@@ -34,10 +36,10 @@ import { RequestLoggerMiddleware } from './common/middleware/request-logger.midd
     MemoriesModule,
     RecommendationsModule,
     AnalyticsModule,
+    HealthModule,
+    SubscriptionsModule,
   ],
-  providers: [
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
-  ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

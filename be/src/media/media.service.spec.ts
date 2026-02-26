@@ -5,13 +5,19 @@ import { MediaService } from './media.service.js';
 import { MediaRepository } from './media.repository.js';
 import { AuthRepository } from '../auth/auth.repository.js';
 import { S3Service } from '../s3/s3.service.js';
-import { FutureDateError, MediaNotFoundError } from '../common/errors/app.error.js';
+import {
+  FutureDateError,
+  MediaNotFoundError,
+  QuotaExceededError,
+} from '../common/errors/app.error.js';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
 
 describe('MediaService', () => {
   let service: MediaService;
   let mediaRepo: jest.Mocked<MediaRepository>;
   let authRepo: jest.Mocked<AuthRepository>;
   let s3Service: jest.Mocked<S3Service>;
+  let subscriptionsService: { assertResourceLimit: jest.Mock };
 
   const userId = 'user-1';
 
@@ -34,6 +40,10 @@ describe('MediaService', () => {
   };
 
   beforeEach(async () => {
+    subscriptionsService = {
+      assertResourceLimit: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MediaService,
@@ -49,6 +59,7 @@ describe('MediaService', () => {
             upsertDay: jest.fn().mockResolvedValue(mockDay),
             setMainMedia: jest.fn(),
             clearMainMediaIfMatch: jest.fn(),
+            countByUserId: jest.fn().mockResolvedValue(0),
           },
         },
         {
@@ -60,9 +71,15 @@ describe('MediaService', () => {
         {
           provide: S3Service,
           useValue: {
-            getPresignedReadUrl: jest.fn().mockResolvedValue('https://s3.example.com/read'),
+            getPresignedReadUrl: jest
+              .fn()
+              .mockResolvedValue('https://s3.example.com/read'),
             deleteObject: jest.fn(),
           },
+        },
+        {
+          provide: SubscriptionsService,
+          useValue: subscriptionsService,
         },
       ],
     }).compile();
@@ -106,7 +123,10 @@ describe('MediaService', () => {
 
   describe('addMedia — auto cover photo', () => {
     it('should auto-set first image as cover when no cover exists', async () => {
-      mediaRepo.upsertDay.mockResolvedValue({ ...mockDay, mainMediaId: null } as any);
+      mediaRepo.upsertDay.mockResolvedValue({
+        ...mockDay,
+        mainMediaId: null,
+      } as any);
 
       await service.addMedia(userId, '2024-01-15', {
         s3Key: 'uploads/user-1/photo.jpg',
@@ -135,7 +155,10 @@ describe('MediaService', () => {
     });
 
     it('should NOT auto-set cover for video uploads', async () => {
-      mediaRepo.upsertDay.mockResolvedValue({ ...mockDay, mainMediaId: null } as any);
+      mediaRepo.upsertDay.mockResolvedValue({
+        ...mockDay,
+        mainMediaId: null,
+      } as any);
 
       await service.addMedia(userId, '2024-01-15', {
         s3Key: 'uploads/user-1/video.mp4',
@@ -185,7 +208,10 @@ describe('MediaService', () => {
 
       await service.deleteMedia(userId, 'media-1');
 
-      expect(mediaRepo.clearMainMediaIfMatch).toHaveBeenCalledWith('day-1', 'media-1');
+      expect(mediaRepo.clearMainMediaIfMatch).toHaveBeenCalledWith(
+        'day-1',
+        'media-1',
+      );
     });
 
     it('should delete from S3 before deleting from DB', async () => {
@@ -202,7 +228,7 @@ describe('MediaService', () => {
 
       await service.deleteMedia(userId, 'media-1');
 
-      expect(callOrder).toEqual(['s3', 'db']);
+      expect(callOrder).toEqual(['db', 's3']);
     });
 
     it('should pass correct S3 key to delete', async () => {
@@ -210,7 +236,9 @@ describe('MediaService', () => {
 
       await service.deleteMedia(userId, 'media-1');
 
-      expect(s3Service.deleteObject).toHaveBeenCalledWith('uploads/user-1/abc.jpg');
+      expect(s3Service.deleteObject).toHaveBeenCalledWith(
+        'uploads/user-1/abc.jpg',
+      );
     });
   });
 
@@ -238,11 +266,38 @@ describe('MediaService', () => {
     });
   });
 
+  // ─── QUOTA ENFORCEMENT ────────────────────────────────────
+
+  describe('addMedia — quota enforcement', () => {
+    it('should throw QuotaExceededError when media at limit', async () => {
+      mediaRepo.countByUserId.mockResolvedValue(50);
+      subscriptionsService.assertResourceLimit.mockRejectedValue(
+        new QuotaExceededError({
+          resource: 'media',
+          current: 50,
+          limit: 50,
+          tier: 'FREE',
+        }),
+      );
+
+      await expect(
+        service.addMedia(userId, '2024-01-15', {
+          s3Key: 'uploads/user-1/file.jpg',
+          fileName: 'file.jpg',
+          contentType: 'image/jpeg',
+          size: 1024,
+        }),
+      ).rejects.toThrow(QuotaExceededError);
+    });
+  });
+
   // ─── TIMEZONE-AWARE FUTURE DATE CHECK ──────────────────────
 
   describe('addMedia — timezone-aware validation', () => {
     it('should use user timezone for future date check', async () => {
-      authRepo.findUserById.mockResolvedValue({ timezone: 'Pacific/Auckland' } as any);
+      authRepo.findUserById.mockResolvedValue({
+        timezone: 'Pacific/Auckland',
+      } as any);
 
       // A date that might be "tomorrow" in UTC but "today" in NZ timezone won't matter
       // for 2099, it's always future regardless

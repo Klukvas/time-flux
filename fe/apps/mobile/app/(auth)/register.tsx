@@ -1,9 +1,22 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Link, router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { extractApiError } from '@lifespan/api';
-import { getUserMessage, validateEmail, validatePassword } from '@lifespan/domain';
+import {
+  getUserMessage,
+  validateEmail,
+  validatePassword,
+} from '@lifespan/domain';
 import { useRegister } from '@lifespan/hooks';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
@@ -19,7 +32,9 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const timezone = Localization.getCalendars()[0]?.timeZone ?? 'UTC';
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {},
+  );
 
   const handleRegister = () => {
     const emailResult = validateEmail(email);
@@ -48,7 +63,10 @@ export default function RegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.flex}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
           <Text style={styles.title}>LifeSpan</Text>
           <Text style={styles.subtitle}>Your visual life timeline</Text>
@@ -74,15 +92,48 @@ export default function RegisterScreen() {
             placeholder="At least 8 characters"
             secureTextEntry
           />
-          <Button title="Create Account" onPress={handleRegister} loading={register.isPending} />
+          <Button
+            title="Create Account"
+            onPress={handleRegister}
+            loading={register.isPending}
+          />
+          <Text style={styles.legalText}>
+            By creating an account, you agree to our{' '}
+            <Text
+              style={styles.legalLink}
+              onPress={() =>
+                WebBrowser.openBrowserAsync(
+                  `${API_BASE_URL.replace('/api/v1', '')}/terms`,
+                )
+              }
+            >
+              Terms of Service
+            </Text>{' '}
+            and{' '}
+            <Text
+              style={styles.legalLink}
+              onPress={() =>
+                WebBrowser.openBrowserAsync(
+                  `${API_BASE_URL.replace('/api/v1', '')}/privacy`,
+                )
+              }
+            >
+              Privacy Policy
+            </Text>
+          </Text>
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>or</Text>
             <View style={styles.dividerLine} />
           </View>
           <Pressable
-            onPress={() => WebBrowser.openBrowserAsync(`${API_BASE_URL}/api/v1/auth/google`)}
-            style={({ pressed }) => [styles.googleButton, { opacity: pressed ? 0.7 : 1 }]}
+            onPress={() =>
+              WebBrowser.openBrowserAsync(`${API_BASE_URL}/api/v1/auth/google`)
+            }
+            style={({ pressed }) => [
+              styles.googleButton,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
           >
             <Text style={styles.googleButtonText}>Continue with Google</Text>
           </Pressable>
@@ -106,8 +157,16 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
   },
   header: { alignItems: 'center', marginBottom: spacing.xxl },
-  title: { fontSize: fontSize.xxxl, fontWeight: 'bold', color: colors.brand[600] },
-  subtitle: { fontSize: fontSize.sm, color: colors.gray[500], marginTop: spacing.xs },
+  title: {
+    fontSize: fontSize.xxxl,
+    fontWeight: 'bold',
+    color: colors.brand[600],
+  },
+  subtitle: {
+    fontSize: fontSize.sm,
+    color: colors.gray[500],
+    marginTop: spacing.xs,
+  },
   card: {
     backgroundColor: colors.white,
     borderRadius: 16,
@@ -162,5 +221,16 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: '600',
     color: colors.gray[700],
+  },
+  legalText: {
+    fontSize: fontSize.xs,
+    color: colors.gray[500],
+    textAlign: 'center',
+    marginTop: spacing.sm,
+    lineHeight: 18,
+  },
+  legalLink: {
+    color: colors.brand[600],
+    textDecorationLine: 'underline',
   },
 });

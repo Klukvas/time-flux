@@ -1,4 +1,5 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
+import { DateTime } from 'luxon';
 
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -9,9 +10,9 @@ export class ParseDatePipe implements PipeTransform<string, string> {
       throw new BadRequestException('Date must be in YYYY-MM-DD format');
     }
 
-    const parsed = new Date(value + 'T00:00:00Z');
-    if (isNaN(parsed.getTime())) {
-      throw new BadRequestException('Invalid date value');
+    const dt = DateTime.fromISO(value, { zone: 'utc' });
+    if (!dt.isValid) {
+      throw new BadRequestException(`Invalid date value: ${dt.invalidReason}`);
     }
 
     return value;

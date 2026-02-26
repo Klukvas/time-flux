@@ -7,9 +7,16 @@ import { CategoriesModule } from '../categories/categories.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { DaysModule } from '../days/days.module.js';
 import { S3Module } from '../s3/s3.module.js';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module.js';
 
 @Module({
-  imports: [CategoriesModule, AuthModule, DaysModule, S3Module],
+  imports: [
+    CategoriesModule,
+    AuthModule,
+    DaysModule,
+    S3Module,
+    SubscriptionsModule,
+  ],
   controllers: [EventGroupsController, EventPeriodsController],
   providers: [EventGroupsService, EventGroupsRepository],
   exports: [EventGroupsRepository],

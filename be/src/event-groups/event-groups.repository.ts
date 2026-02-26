@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
-const categorySelect = { select: { id: true, name: true, color: true } } as const;
+const categorySelect = {
+  select: { id: true, name: true, color: true },
+} as const;
 
 const groupInclude = {
   category: categorySelect,
@@ -22,6 +24,10 @@ export class EventGroupsRepository {
 
   // ─── EventGroup ────────────────────────────────────────────
 
+  async countGroupsByUserId(userId: string) {
+    return this.prisma.eventGroup.count({ where: { userId } });
+  }
+
   async findGroupByIdAndUserId(id: string, userId: string, tx?: any) {
     const client = tx ?? this.prisma;
     return client.eventGroup.findFirst({
@@ -39,7 +45,12 @@ export class EventGroupsRepository {
   }
 
   async createGroup(
-    data: { userId: string; categoryId: string; title: string; description?: string },
+    data: {
+      userId: string;
+      categoryId: string;
+      title: string;
+      description?: string;
+    },
     tx?: any,
   ) {
     const client = tx ?? this.prisma;
@@ -62,8 +73,8 @@ export class EventGroupsRepository {
     });
   }
 
-  async deleteGroup(id: string) {
-    return this.prisma.eventGroup.delete({ where: { id } });
+  async deleteGroup(id: string, userId: string) {
+    return this.prisma.eventGroup.delete({ where: { id, userId } });
   }
 
   async countPeriodsForGroup(groupId: string): Promise<number> {
@@ -88,7 +99,11 @@ export class EventGroupsRepository {
     });
   }
 
-  async findActivePeriodForGroup(groupId: string, excludePeriodId?: string, tx?: any) {
+  async findActivePeriodForGroup(
+    groupId: string,
+    excludePeriodId?: string,
+    tx?: any,
+  ) {
     const client = tx ?? this.prisma;
     return client.eventPeriod.findFirst({
       where: {
@@ -100,7 +115,12 @@ export class EventGroupsRepository {
   }
 
   async createPeriod(
-    data: { eventGroupId: string; startDate: Date; endDate?: Date; comment?: string },
+    data: {
+      eventGroupId: string;
+      startDate: Date;
+      endDate?: Date;
+      comment?: string;
+    },
     tx?: any,
   ) {
     const client = tx ?? this.prisma;
@@ -123,11 +143,17 @@ export class EventGroupsRepository {
     });
   }
 
-  async deletePeriod(id: string) {
-    return this.prisma.eventPeriod.delete({ where: { id } });
+  async deletePeriod(id: string, userId: string) {
+    return this.prisma.eventPeriod.delete({
+      where: { id, eventGroup: { userId } },
+    });
   }
 
-  async findClosedPeriodsForGroup(groupId: string, excludePeriodId?: string, tx?: any) {
+  async findClosedPeriodsForGroup(
+    groupId: string,
+    excludePeriodId?: string,
+    tx?: any,
+  ) {
     const client = tx ?? this.prisma;
     return client.eventPeriod.findMany({
       where: {
@@ -152,10 +178,7 @@ export class EventGroupsRepository {
                 ...(from
                   ? [
                       {
-                        OR: [
-                          { endDate: { gte: from } },
-                          { endDate: null },
-                        ],
+                        OR: [{ endDate: { gte: from } }, { endDate: null }],
                       },
                     ]
                   : []),
@@ -168,15 +191,16 @@ export class EventGroupsRepository {
     });
   }
 
-  async findPeriodsOverlapping(userId: string, rangeStart: Date, rangeEnd: Date) {
+  async findPeriodsOverlapping(
+    userId: string,
+    rangeStart: Date,
+    rangeEnd: Date,
+  ) {
     return this.prisma.eventPeriod.findMany({
       where: {
         eventGroup: { userId },
         startDate: { lte: rangeEnd },
-        OR: [
-          { endDate: { gte: rangeStart } },
-          { endDate: null },
-        ],
+        OR: [{ endDate: { gte: rangeStart } }, { endDate: null }],
       },
       include: periodInclude,
       orderBy: { startDate: 'desc' },

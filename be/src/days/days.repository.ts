@@ -8,15 +8,31 @@ export class DaysRepository {
   private readonly dayInclude = {
     dayState: { select: { id: true, name: true, color: true } },
     media: {
-      select: { id: true, s3Key: true, fileName: true, contentType: true, size: true, createdAt: true },
+      select: {
+        id: true,
+        s3Key: true,
+        fileName: true,
+        contentType: true,
+        size: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: 'asc' as const },
     },
   };
 
-  async upsert(userId: string, date: Date, data: { dayStateId?: string | null; mainMediaId?: string | null }) {
+  async upsert(
+    userId: string,
+    date: Date,
+    data: {
+      dayStateId?: string | null;
+      mainMediaId?: string | null;
+      comment?: string | null;
+    },
+  ) {
     const update: Record<string, unknown> = {};
     if (data.dayStateId !== undefined) update.dayStateId = data.dayStateId;
     if (data.mainMediaId !== undefined) update.mainMediaId = data.mainMediaId;
+    if (data.comment !== undefined) update.comment = data.comment;
 
     return this.prisma.day.upsert({
       where: { userId_date: { userId, date } },
@@ -29,10 +45,15 @@ export class DaysRepository {
   async upsertLocation(
     userId: string,
     date: Date,
-    data: { locationName?: string | null; latitude?: number | null; longitude?: number | null },
+    data: {
+      locationName?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
+    },
   ) {
     const update: Record<string, unknown> = {};
-    if (data.locationName !== undefined) update.locationName = data.locationName;
+    if (data.locationName !== undefined)
+      update.locationName = data.locationName;
     if (data.latitude !== undefined) update.latitude = data.latitude;
     if (data.longitude !== undefined) update.longitude = data.longitude;
 

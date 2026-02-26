@@ -16,6 +16,7 @@
     "@lifespan/i18n": "*",
     "@lifespan/theme": "*",
     "@lifespan/utils": "*",
+    "@paddle/paddle-js": "^1.6.2",
     "@tanstack/react-query": "^5.62.0",
     "@vis.gl/react-google-maps": "^1.7.1",
     "axios": "^1.7.9",

@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useOnboarding, useTimeline, useTranslation, useWeekTimeline } from '@lifespan/hooks';
 import {
-  buildWeekGrid,
-  groupTimelineHorizontal,
-} from '@lifespan/domain';
+  useOnboarding,
+  useTimeline,
+  useTranslation,
+  useWeekTimeline,
+} from '@lifespan/hooks';
+import { buildWeekGrid, groupTimelineHorizontal } from '@lifespan/domain';
 import type { HorizontalTimelineWeek } from '@lifespan/domain';
 import type { DayMedia } from '@lifespan/api';
 import {
@@ -25,6 +27,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import { DayCircle } from '@/components/ui/day-circle';
 import { SegmentedControl } from '@/components/ui/segmented-control';
+import { TimelineSkeleton } from '@/components/ui/skeleton';
 import { OnThisDaySection } from '@/components/timeline/on-this-day';
 import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
@@ -36,7 +39,10 @@ const MODE_OPTIONS: { value: TimelineMode; label: string }[] = [
 ];
 
 /** Derive registration date (YYYY-MM-DD) from user's createdAt ISO string, in their timezone. */
-function getRegistrationDate(createdAt: string | undefined, timezone: string): string | undefined {
+function getRegistrationDate(
+  createdAt: string | undefined,
+  timezone: string,
+): string | undefined {
   if (!createdAt) return undefined;
   return DateTime.fromISO(createdAt).setZone(timezone).toISODate() ?? undefined;
 }
@@ -54,7 +60,9 @@ export function TimelineView() {
   );
 
   const [currentDate, setCurrentDate] = useState(todayISO());
-  const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>({});
+  const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>(
+    {},
+  );
 
   const navigateToDayPage = useCallback(
     (date: string) => {
@@ -96,7 +104,10 @@ export function TimelineView() {
   return (
     <div>
       {/* On This Day — memory resurfacing */}
-      <OnThisDaySection onMemoryClick={handleMemoryClick} selectedDate={activeMemoryDate} />
+      <OnThisDaySection
+        onMemoryClick={handleMemoryClick}
+        selectedDate={activeMemoryDate}
+      />
 
       {/* Header */}
       <div className="mb-6 space-y-3">
@@ -130,7 +141,11 @@ export function TimelineView() {
 
         {/* Controls row — wraps on mobile */}
         <div className="flex flex-wrap items-center gap-3">
-          <SegmentedControl value={timelineMode} onChange={setTimelineMode} options={MODE_OPTIONS} />
+          <SegmentedControl
+            value={timelineMode}
+            onChange={setTimelineMode}
+            options={MODE_OPTIONS}
+          />
 
           {/* Date range filter for Horizontal mode */}
           {timelineMode === 'horizontal' && (
@@ -141,7 +156,10 @@ export function TimelineView() {
                 value={dateRange.from ?? ''}
                 min={registrationDate}
                 onChange={(e) =>
-                  setDateRange((p) => ({ ...p, from: e.target.value || undefined }))
+                  setDateRange((p) => ({
+                    ...p,
+                    from: e.target.value || undefined,
+                  }))
                 }
               />
               <span className="text-content-tertiary">—</span>
@@ -151,11 +169,18 @@ export function TimelineView() {
                 value={dateRange.to ?? ''}
                 min={registrationDate}
                 onChange={(e) =>
-                  setDateRange((p) => ({ ...p, to: e.target.value || undefined }))
+                  setDateRange((p) => ({
+                    ...p,
+                    to: e.target.value || undefined,
+                  }))
                 }
               />
               {(dateRange.from || dateRange.to) && (
-                <Button variant="ghost" size="sm" onClick={() => setDateRange({})}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDateRange({})}
+                >
                   Clear
                 </Button>
               )}
@@ -188,7 +213,10 @@ export function TimelineView() {
 type DayClickHandler = (date: string) => void;
 
 /** Get the URL of the main (cover) image, falling back to the first image. */
-function getMainImageUrl(media: DayMedia[], mainMediaId?: string | null): string | undefined {
+function getMainImageUrl(
+  media: DayMedia[],
+  mainMediaId?: string | null,
+): string | undefined {
   if (mainMediaId) {
     const main = media.find((m) => m.id === mainMediaId);
     if (main?.url) return main.url;
@@ -214,7 +242,7 @@ function HorizontalMode({
     [data, registrationDate],
   );
 
-  if (isLoading) return <Spinner />;
+  if (isLoading) return <TimelineSkeleton />;
   if (error) return <ErrorMessage />;
 
   if (data) {
@@ -260,106 +288,122 @@ function HorizontalTimeline({
   return (
     <div>
       <div>
-      {/* Day headers */}
-      <div className="mb-3 grid grid-cols-7 gap-1 sm:gap-2 px-1">
-        {dayLabels.map((label) => (
-          <div key={label} className="text-center text-xs font-medium text-content-tertiary">
-            <span className="hidden sm:inline">{label}</span>
-            <span className="sm:hidden">{label[0]}</span>
-          </div>
-        ))}
-      </div>
+        {/* Day headers */}
+        <div className="mb-3 grid grid-cols-7 gap-1 sm:gap-2 px-1">
+          {dayLabels.map((label) => (
+            <div
+              key={label}
+              className="text-center text-xs font-medium text-content-tertiary"
+            >
+              <span className="hidden sm:inline">{label}</span>
+              <span className="sm:hidden">{label[0]}</span>
+            </div>
+          ))}
+        </div>
 
-      {/* Week rows */}
-      <div className="space-y-6">
-        {weeks.map((week) => {
-          const colCount = week.days.length;
-          const isPartialWeek = colCount < 7;
-          // For partial first week, offset columns to align to the right (end of week)
-          const colOffset = isPartialWeek ? 7 - colCount : 0;
+        {/* Week rows */}
+        <div className="space-y-6">
+          {weeks.map((week) => {
+            const colCount = week.days.length;
+            const isPartialWeek = colCount < 7;
+            // For partial first week, offset columns to align to the right (end of week)
+            const colOffset = isPartialWeek ? 7 - colCount : 0;
 
-          return (
-          <div key={week.weekStart}>
-            {/* Period bars above day circles */}
-            {week.periods.length > 0 && (
-              <div
-                className="relative mb-1.5"
-                style={{ minHeight: `${Math.max(1, week.periods.length) * 22}px` }}
-              >
-                {week.periods.map((wp, idx) => (
+            return (
+              <div key={week.weekStart}>
+                {/* Period bars above day circles */}
+                {week.periods.length > 0 && (
                   <div
-                    key={wp.period.id}
-                    className="absolute rounded-full truncate px-2 text-xs font-medium"
+                    className="relative mb-1.5"
                     style={{
-                      left: `${((wp.startCol + colOffset) / 7) * 100}%`,
-                      width: `${(wp.span / 7) * 100}%`,
-                      top: `${idx * 22}px`,
-                      backgroundColor: hexToRgba(wp.period.category.color, 0.2),
-                      color: wp.period.category.color,
-                      height: '18px',
-                      lineHeight: '18px',
+                      minHeight: `${Math.max(1, week.periods.length) * 22}px`,
                     }}
-                    title={`${wp.period.eventGroup.title}${wp.period.comment ? `: ${wp.period.comment}` : ''}`}
                   >
-                    {wp.span > 1 ? wp.period.eventGroup.title : ''}
+                    {week.periods.map((wp, idx) => (
+                      <div
+                        key={wp.period.id}
+                        className="absolute rounded-full truncate px-2 text-xs font-medium"
+                        style={{
+                          left: `${((wp.startCol + colOffset) / 7) * 100}%`,
+                          width: `${(wp.span / 7) * 100}%`,
+                          top: `${idx * 22}px`,
+                          backgroundColor: hexToRgba(
+                            wp.period.category.color,
+                            0.2,
+                          ),
+                          color: wp.period.category.color,
+                          height: '18px',
+                          lineHeight: '18px',
+                        }}
+                        title={`${wp.period.eventGroup.title}${wp.period.comment ? `: ${wp.period.comment}` : ''}`}
+                      >
+                        {wp.span > 1 ? wp.period.eventGroup.title : ''}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                )}
 
-            {/* Day circles row with connecting line */}
-            <div className="relative grid grid-cols-7 gap-1 sm:gap-2">
-              <div className="absolute top-1/2 left-[7%] right-[7%] h-px bg-edge-light -translate-y-2" />
+                {/* Day circles row with connecting line */}
+                <div className="relative grid grid-cols-7 gap-1 sm:gap-2">
+                  <div className="absolute top-1/2 left-[7%] right-[7%] h-px bg-edge-light -translate-y-2" />
 
-              {/* Empty spacer cells for partial first week */}
-              {isPartialWeek && Array.from({ length: colOffset }).map((_, i) => (
-                <div key={`spacer-${i}`} />
-              ))}
+                  {/* Empty spacer cells for partial first week */}
+                  {isPartialWeek &&
+                    Array.from({ length: colOffset }).map((_, i) => (
+                      <div key={`spacer-${i}`} />
+                    ))}
 
-              {week.days.map((day) => {
-                const disabled = isBeyondTomorrow(day.date);
-                const isRegistrationDay = registrationDate === day.date;
-                return (
-                <div key={day.date} className="relative flex flex-col items-center gap-1">
-                  <DayCircle
-                    date={day.date}
-                    color={day.dayState?.color}
-                    imageUrl={getMainImageUrl(day.media, day.mainMediaId)}
-                    size="md"
-                    label={`${formatDate(day.date)} — ${day.dayState?.name ?? 'No mood'}`}
-                    onClick={disabled ? undefined : () => onDayClick(day.date)}
-                    disabled={disabled}
-                  />
-                  <span
-                    className={`text-xs ${
-                      isToday(day.date)
-                        ? 'font-bold text-accent'
-                        : disabled
-                          ? 'text-content-tertiary/50'
-                          : 'text-content-tertiary'
-                    }`}
-                  >
-                    {day.dayNumber}
-                  </span>
-                  {isRegistrationDay && (
-                    <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium text-accent">
-                      {t('timeline.journey_begins')}
-                    </span>
-                  )}
+                  {week.days.map((day) => {
+                    const disabled = isBeyondTomorrow(day.date);
+                    const isRegistrationDay = registrationDate === day.date;
+                    return (
+                      <div
+                        key={day.date}
+                        className="relative flex flex-col items-center gap-1"
+                      >
+                        <DayCircle
+                          date={day.date}
+                          color={day.dayState?.color}
+                          imageUrl={getMainImageUrl(day.media, day.mainMediaId)}
+                          size="md"
+                          label={`${formatDate(day.date)} — ${day.dayState?.name ?? 'No mood'}`}
+                          onClick={
+                            disabled ? undefined : () => onDayClick(day.date)
+                          }
+                          disabled={disabled}
+                        />
+                        <span
+                          className={`text-xs ${
+                            isToday(day.date)
+                              ? 'font-bold text-accent'
+                              : disabled
+                                ? 'text-content-tertiary/50'
+                                : 'text-content-tertiary'
+                          }`}
+                        >
+                          {day.dayNumber}
+                        </span>
+                        {isRegistrationDay && (
+                          <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium text-accent">
+                            {t('timeline.journey_begins')}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-                );
-              })}
-            </div>
 
-            {/* Week date range label */}
-            <div className={`mt-1 text-right text-xs text-content-tertiary ${week.days.length < 7 ? 'mt-5' : ''}`}>
-              {formatDate(week.weekStart, 'MMM d')} —{' '}
-              {formatDate(week.weekEnd, 'MMM d')}
-            </div>
-          </div>
-          );
-        })}
-      </div>
+                {/* Week date range label */}
+                <div
+                  className={`mt-1 text-right text-xs text-content-tertiary ${week.days.length < 7 ? 'mt-5' : ''}`}
+                >
+                  {formatDate(week.weekStart, 'MMM d')} —{' '}
+                  {formatDate(week.weekEnd, 'MMM d')}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -388,7 +432,7 @@ function WeekMode({
     return grid;
   }, [weekData, registrationDate]);
 
-  if (isLoading) return <Spinner />;
+  if (isLoading) return <TimelineSkeleton />;
 
   if (weekData) {
     return (
@@ -401,54 +445,59 @@ function WeekMode({
           {weekDays.map((day) => {
             const disabled = isBeyondTomorrow(day.date);
             return (
-            <button
-              key={day.date}
-              onClick={disabled ? undefined : () => onDayClick(day.date)}
-              disabled={disabled}
-              className={`rounded-xl border border-edge p-3 md:p-4 text-center transition-all ${
-                disabled ? 'opacity-40 cursor-default' : 'hover:shadow-md'
-              } ${
-                isToday(day.date) ? 'ring-2 ring-accent' : ''
-              } bg-surface-card`}
-            >
-              <p className="text-xs font-medium text-content-secondary">
-                {formatDayShort(day.date)}
-              </p>
-              <p className="text-xl font-bold text-content md:text-2xl">{formatDayNumber(day.date)}</p>
+              <button
+                key={day.date}
+                onClick={disabled ? undefined : () => onDayClick(day.date)}
+                disabled={disabled}
+                className={`rounded-xl border border-edge p-3 md:p-4 text-center transition-all ${
+                  disabled ? 'opacity-40 cursor-default' : 'hover:shadow-md'
+                } ${
+                  isToday(day.date) ? 'ring-2 ring-accent' : ''
+                } bg-surface-card`}
+              >
+                <p className="text-xs font-medium text-content-secondary">
+                  {formatDayShort(day.date)}
+                </p>
+                <p className="text-xl font-bold text-content md:text-2xl">
+                  {formatDayNumber(day.date)}
+                </p>
 
-              <div className="mt-2 flex justify-center">
-                <DayCircle
-                  date={day.date}
-                  color={day.dayState?.color}
-                  imageUrl={getMainImageUrl(day.media, day.mainMediaId)}
-                  size="lg"
-                  label={day.dayState?.name ?? 'No mood'}
-                />
-              </div>
-
-              {day.periods.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {day.periods.slice(0, 3).map((period) => (
-                    <div
-                      key={period.id}
-                      className="rounded-md px-2 py-0.5 text-xs font-medium truncate"
-                      style={{
-                        backgroundColor: hexToRgba(period.category.color, 0.15),
-                        color: period.category.color,
-                      }}
-                      title={`${period.eventGroup.title}${period.comment ? `: ${period.comment}` : ''}`}
-                    >
-                      {period.eventGroup.title}
-                    </div>
-                  ))}
-                  {day.periods.length > 3 && (
-                    <p className="text-center text-xs text-content-tertiary">
-                      +{day.periods.length - 3} more
-                    </p>
-                  )}
+                <div className="mt-2 flex justify-center">
+                  <DayCircle
+                    date={day.date}
+                    color={day.dayState?.color}
+                    imageUrl={getMainImageUrl(day.media, day.mainMediaId)}
+                    size="lg"
+                    label={day.dayState?.name ?? 'No mood'}
+                  />
                 </div>
-              )}
-            </button>
+
+                {day.periods.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {day.periods.slice(0, 3).map((period) => (
+                      <div
+                        key={period.id}
+                        className="rounded-md px-2 py-0.5 text-xs font-medium truncate"
+                        style={{
+                          backgroundColor: hexToRgba(
+                            period.category.color,
+                            0.15,
+                          ),
+                          color: period.category.color,
+                        }}
+                        title={`${period.eventGroup.title}${period.comment ? `: ${period.comment}` : ''}`}
+                      >
+                        {period.eventGroup.title}
+                      </div>
+                    ))}
+                    {day.periods.length > 3 && (
+                      <p className="text-center text-xs text-content-tertiary">
+                        +{day.periods.length - 3} more
+                      </p>
+                    )}
+                  </div>
+                )}
+              </button>
             );
           })}
         </div>
@@ -461,16 +510,10 @@ function WeekMode({
 
 // ─── Shared UI Helpers ─────────────────────────────────────
 
-function Spinner() {
-  return (
-    <div className="flex justify-center py-16">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
-    </div>
-  );
-}
-
 function ErrorMessage() {
   return (
-    <div className="py-16 text-center text-sm text-danger">Failed to load timeline.</div>
+    <div className="py-16 text-center text-sm text-danger">
+      Failed to load timeline.
+    </div>
   );
 }

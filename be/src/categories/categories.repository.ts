@@ -18,16 +18,25 @@ export class CategoriesRepository {
     });
   }
 
-  async create(data: { userId: string; name: string; color: string; order?: number; isSystem?: boolean }) {
+  async create(data: {
+    userId: string;
+    name: string;
+    color: string;
+    order?: number;
+    isSystem?: boolean;
+  }) {
     return this.prisma.category.create({ data });
   }
 
-  async update(id: string, data: { name?: string; color?: string; order?: number }) {
+  async update(
+    id: string,
+    data: { name?: string; color?: string; order?: number },
+  ) {
     return this.prisma.category.update({ where: { id }, data });
   }
 
-  async delete(id: string) {
-    return this.prisma.category.delete({ where: { id } });
+  async delete(id: string, userId: string) {
+    return this.prisma.category.delete({ where: { id, userId } });
   }
 
   async countByUserId(userId: string) {

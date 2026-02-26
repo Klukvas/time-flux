@@ -1,5 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { DayQueryParams, UpdateDayLocationRequest, UpsertDayRequest } from '@lifespan/api';
+import type {
+  DayQueryParams,
+  UpdateDayLocationRequest,
+  UpsertDayRequest,
+} from '@lifespan/api';
 import { QUERY_KEYS, STALE_TIMES } from '@lifespan/constants';
 import { useApi } from './api-context';
 
@@ -21,6 +25,8 @@ export function useUpsertDay() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['days'] });
       qc.invalidateQueries({ queryKey: ['timeline'] });
+      qc.invalidateQueries({ queryKey: ['memories'] });
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.moodOverview });
     },
   });
 }
@@ -29,11 +35,17 @@ export function useUpdateDayLocation() {
   const api = useApi();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ date, data }: { date: string; data: UpdateDayLocationRequest }) =>
-      api.days.updateLocation(date, data),
+    mutationFn: ({
+      date,
+      data,
+    }: {
+      date: string;
+      data: UpdateDayLocationRequest;
+    }) => api.days.updateLocation(date, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['days'] });
       qc.invalidateQueries({ queryKey: ['timeline'] });
+      qc.invalidateQueries({ queryKey: ['memories'] });
     },
   });
 }

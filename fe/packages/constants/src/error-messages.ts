@@ -18,7 +18,8 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   FUTURE_DATE: 'Cannot add entries for dates more than one day in the future.',
   PERIOD_OVERLAP: 'An active period already exists in this chapter.',
   CATEGORY_IN_USE: 'This category cannot be deleted because it has chapters.',
-  DAY_STATE_IN_USE: 'This day state cannot be deleted because it is assigned to days.',
+  DAY_STATE_IN_USE:
+    'This day state cannot be deleted because it is assigned to days.',
   VALIDATION_ERROR: 'Please check your input and try again.',
   UNAUTHORIZED: 'Invalid email or password.',
   FORBIDDEN: 'You do not have permission to perform this action.',
@@ -26,4 +27,9 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   USER_CREATION_FAILED: 'Failed to create account. Please try again.',
   INTERNAL_ERROR: 'Something went wrong. Please try again later.',
   HTTP_ERROR: 'A network error occurred. Please try again.',
+  QUOTA_EXCEEDED: 'You have reached the limit for your current plan.',
+  FEATURE_LOCKED: 'This feature requires a higher subscription tier.',
+  SUBSCRIPTION_NOT_FOUND: 'No active subscription found.',
+  PADDLE_NOT_CONFIGURED: 'Billing is temporarily unavailable.',
+  PADDLE_CANCEL_ERROR: 'Failed to cancel subscription. Please try again.',
 };

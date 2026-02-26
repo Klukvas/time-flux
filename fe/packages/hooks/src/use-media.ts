@@ -16,12 +16,18 @@ export function useCreateDayMedia() {
   const api = useApi();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ date, data }: { date: string; data: CreateDayMediaRequest }) =>
-      api.media.create(date, data),
+    mutationFn: ({
+      date,
+      data,
+    }: {
+      date: string;
+      data: CreateDayMediaRequest;
+    }) => api.media.create(date, data),
     onSuccess: (_result, { date }) => {
       qc.invalidateQueries({ queryKey: QUERY_KEYS.dayMedia(date) });
       qc.invalidateQueries({ queryKey: ['days'] });
       qc.invalidateQueries({ queryKey: ['timeline'] });
+      qc.invalidateQueries({ queryKey: ['memories'] });
     },
   });
 }
@@ -36,6 +42,7 @@ export function useDeleteDayMedia() {
       qc.invalidateQueries({ queryKey: QUERY_KEYS.dayMedia(date) });
       qc.invalidateQueries({ queryKey: ['days'] });
       qc.invalidateQueries({ queryKey: ['timeline'] });
+      qc.invalidateQueries({ queryKey: ['memories'] });
     },
   });
 }

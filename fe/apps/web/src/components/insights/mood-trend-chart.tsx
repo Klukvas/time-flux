@@ -16,14 +16,17 @@ interface MoodTrendChartProps {
 }
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return `${d.getMonth() + 1}/${d.getDate()}`;
+  const parts = dateStr.split('-');
+  return `${Number(parts[1])}/${Number(parts[2])}`;
 }
 
 export function MoodTrendChart({ data }: MoodTrendChartProps) {
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <LineChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+      <LineChart
+        data={data}
+        margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
+      >
         <CartesianGrid
           strokeDasharray="3 3"
           stroke="var(--color-edge, #e5e7eb)"
@@ -32,7 +35,10 @@ export function MoodTrendChart({ data }: MoodTrendChartProps) {
         <XAxis
           dataKey="date"
           tickFormatter={formatDate}
-          tick={{ fontSize: 11, fill: 'var(--color-content-tertiary, #9ca3af)' }}
+          tick={{
+            fontSize: 11,
+            fill: 'var(--color-content-tertiary, #9ca3af)',
+          }}
           axisLine={{ stroke: 'var(--color-edge, #e5e7eb)' }}
           tickLine={false}
           interval="preserveStartEnd"
@@ -40,7 +46,10 @@ export function MoodTrendChart({ data }: MoodTrendChartProps) {
         <YAxis
           domain={[0, 10]}
           ticks={[0, 2, 4, 6, 8, 10]}
-          tick={{ fontSize: 11, fill: 'var(--color-content-tertiary, #9ca3af)' }}
+          tick={{
+            fontSize: 11,
+            fill: 'var(--color-content-tertiary, #9ca3af)',
+          }}
           axisLine={false}
           tickLine={false}
         />

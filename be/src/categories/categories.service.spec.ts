@@ -4,12 +4,20 @@ import { CategoriesRepository } from './categories.repository.js';
 import {
   CategoryInUseError,
   CategoryNotFoundError,
+  QuotaExceededError,
   RecommendationNotFoundError,
 } from '../common/errors/app.error.js';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
   let repo: jest.Mocked<CategoriesRepository>;
+  let subscriptionsService: { assertResourceLimit: jest.Mock };
+  let mockTx: {
+    eventGroup: { count: jest.Mock };
+    category: { delete: jest.Mock };
+  };
 
   const userId = 'user-1';
 
@@ -25,6 +33,15 @@ describe('CategoriesService', () => {
   };
 
   beforeEach(async () => {
+    subscriptionsService = {
+      assertResourceLimit: jest.fn(),
+    };
+
+    mockTx = {
+      eventGroup: { count: jest.fn().mockResolvedValue(0) },
+      category: { delete: jest.fn().mockResolvedValue(undefined) },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CategoriesService,
@@ -40,6 +57,18 @@ describe('CategoriesService', () => {
             countEventGroupsForCategory: jest.fn(),
           },
         },
+        {
+          provide: SubscriptionsService,
+          useValue: subscriptionsService,
+        },
+        {
+          provide: PrismaService,
+          useValue: {
+            $transaction: jest.fn((cb: (tx: any) => Promise<any>) =>
+              cb(mockTx),
+            ),
+          },
+        },
       ],
     }).compile();
 
@@ -52,18 +81,22 @@ describe('CategoriesService', () => {
   describe('delete', () => {
     it('should reject deleting category with chapters (EventGroupInUse)', async () => {
       repo.findByIdAndUserId.mockResolvedValue(mockCategory);
-      repo.countEventGroupsForCategory.mockResolvedValue(5);
+      mockTx.eventGroup.count.mockResolvedValue(5);
 
-      await expect(service.delete(userId, 'cat-1')).rejects.toThrow(CategoryInUseError);
+      await expect(service.delete(userId, 'cat-1')).rejects.toThrow(
+        CategoryInUseError,
+      );
     });
 
     it('should allow deleting category with zero chapters', async () => {
       repo.findByIdAndUserId.mockResolvedValue(mockCategory);
-      repo.countEventGroupsForCategory.mockResolvedValue(0);
-      repo.delete.mockResolvedValue(undefined as any);
+      mockTx.eventGroup.count.mockResolvedValue(0);
+      mockTx.category.delete.mockResolvedValue(undefined);
 
       await expect(service.delete(userId, 'cat-1')).resolves.toBeUndefined();
-      expect(repo.delete).toHaveBeenCalledWith('cat-1');
+      expect(mockTx.category.delete).toHaveBeenCalledWith({
+        where: { id: 'cat-1', userId },
+      });
     });
 
     it('should reject deleting non-existent category', async () => {
@@ -108,7 +141,10 @@ describe('CategoriesService', () => {
       repo.countByUserId.mockResolvedValue(0);
       repo.create.mockResolvedValue(mockCategory);
 
-      await service.createFromRecommendation(userId, { key: 'work' as any, name: 'Work' });
+      await service.createFromRecommendation(userId, {
+        key: 'work' as any,
+        name: 'Work',
+      });
 
       expect(repo.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -119,8 +155,66 @@ describe('CategoriesService', () => {
 
     it('should reject invalid recommendation key', async () => {
       await expect(
-        service.createFromRecommendation(userId, { key: 'invalid_key' as any, name: 'Bad' }),
+        service.createFromRecommendation(userId, {
+          key: 'invalid_key' as any,
+          name: 'Bad',
+        }),
       ).rejects.toThrow(RecommendationNotFoundError);
+    });
+  });
+
+  // ─── QUOTA ENFORCEMENT ────────────────────────────────────
+
+  describe('quota enforcement', () => {
+    it('should throw QuotaExceededError when at limit on create', async () => {
+      repo.countByUserId.mockResolvedValue(5);
+      subscriptionsService.assertResourceLimit.mockRejectedValue(
+        new QuotaExceededError({
+          resource: 'categories',
+          current: 5,
+          limit: 5,
+          tier: 'FREE',
+        }),
+      );
+
+      await expect(
+        service.create(userId, { name: 'Over Limit', color: '#FF0000' }),
+      ).rejects.toThrow(QuotaExceededError);
+    });
+
+    it('should throw QuotaExceededError when at limit on createFromRecommendation', async () => {
+      repo.countByUserId.mockResolvedValue(5);
+      subscriptionsService.assertResourceLimit.mockRejectedValue(
+        new QuotaExceededError({
+          resource: 'categories',
+          current: 5,
+          limit: 5,
+          tier: 'FREE',
+        }),
+      );
+
+      await expect(
+        service.createFromRecommendation(userId, {
+          key: 'work' as any,
+          name: 'Work',
+        }),
+      ).rejects.toThrow(QuotaExceededError);
+    });
+
+    it('should allow create when under limit', async () => {
+      repo.countByUserId.mockResolvedValue(3);
+      repo.create.mockResolvedValue(mockCategory);
+      subscriptionsService.assertResourceLimit.mockResolvedValue(undefined);
+
+      await expect(
+        service.create(userId, { name: 'New', color: '#FF0000' }),
+      ).resolves.toBeDefined();
+
+      expect(subscriptionsService.assertResourceLimit).toHaveBeenCalledWith(
+        userId,
+        'categories',
+        3,
+      );
     });
   });
 

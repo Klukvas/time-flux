@@ -11,9 +11,11 @@ export const QUERY_KEYS = {
     params ? (['timeline', params] as const) : (['timeline'] as const),
   week: (date: string) => ['timeline', 'week', date] as const,
   onThisDay: ['memories', 'on-this-day'] as const,
-  memoriesContext: (mode: string, date: string) => ['memories', mode, date] as const,
+  memoriesContext: (mode: string, date: string) =>
+    ['memories', mode, date] as const,
   recommendations: ['recommendations'] as const,
   moodOverview: ['analytics', 'mood-overview'] as const,
+  subscription: ['subscription'] as const,
 };
 
 export const STALE_TIMES = {
@@ -25,6 +27,7 @@ export const STALE_TIMES = {
   memories: 5 * 60 * 1000,
   recommendations: 10 * 60 * 1000,
   analytics: 5 * 60 * 1000,
+  subscription: 30 * 1000,
 };
 
 export const DATE_FORMAT = 'yyyy-MM-dd';

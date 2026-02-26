@@ -5,9 +5,10 @@ import { DaysRepository } from './days.repository.js';
 import { DayStatesModule } from '../day-states/day-states.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { S3Module } from '../s3/s3.module.js';
+import { PrismaModule } from '../prisma/prisma.module.js';
 
 @Module({
-  imports: [DayStatesModule, AuthModule, S3Module],
+  imports: [DayStatesModule, AuthModule, S3Module, PrismaModule],
   controllers: [DaysController],
   providers: [DaysService, DaysRepository],
   exports: [DaysRepository],

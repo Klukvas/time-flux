@@ -5,6 +5,10 @@ import { PrismaService } from '../prisma/prisma.service.js';
 export class MediaRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async countByUserId(userId: string) {
+    return this.prisma.dayMedia.count({ where: { userId } });
+  }
+
   async create(data: {
     dayId: string;
     userId: string;
@@ -51,7 +55,13 @@ export class MediaRepository {
       where: { userId_date: { userId, date } },
       create: { userId, date },
       update: {},
-      select: { id: true, userId: true, date: true, dayStateId: true, mainMediaId: true },
+      select: {
+        id: true,
+        userId: true,
+        date: true,
+        dayStateId: true,
+        mainMediaId: true,
+      },
     });
   }
 

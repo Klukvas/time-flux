@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createApiClient, createApi } from '@lifespan/api';
 import { ApiContext } from '@lifespan/hooks';
@@ -22,11 +22,22 @@ export function ApiProvider({ children }: { children: React.ReactNode }) {
   const setTokens = useAuthStore((s) => s.setTokens);
   const logout = useAuthStore((s) => s.logout);
 
+  const tokenRef = useRef(token);
+  const refreshTokenRef = useRef(refreshToken);
+
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
+
+  useEffect(() => {
+    refreshTokenRef.current = refreshToken;
+  }, [refreshToken]);
+
   const api = useMemo(() => {
     const client = createApiClient({
       baseURL: API_BASE_URL,
-      getToken: () => token,
-      getRefreshToken: () => refreshToken,
+      getToken: () => tokenRef.current,
+      getRefreshToken: () => refreshTokenRef.current,
       onTokenRefreshed: (newAccess, newRefresh) => {
         setTokens(newAccess, newRefresh);
       },
@@ -36,7 +47,7 @@ export function ApiProvider({ children }: { children: React.ReactNode }) {
       },
     });
     return createApi(client);
-  }, [token, refreshToken, setTokens, logout]);
+  }, [setTokens, logout]);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -5,11 +5,18 @@ import toast from 'react-hot-toast';
 import type { DayState } from '@lifespan/api';
 import { extractApiError } from '@lifespan/api';
 import { getUserMessage } from '@lifespan/domain';
-import { useCreateDayStateFromRecommendation, useDayStates, useDeleteDayState, useRecommendations, useTranslation } from '@lifespan/hooks';
+import {
+  useCreateDayStateFromRecommendation,
+  useDayStates,
+  useDeleteDayState,
+  useRecommendations,
+  useTranslation,
+} from '@lifespan/hooks';
 import { contrastTextColor } from '@lifespan/utils';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { DayStatesSkeleton } from '@/components/ui/skeleton';
 import { DayStateFormModal } from './day-state-form-modal';
 
 export function DayStatesList() {
@@ -21,7 +28,9 @@ export function DayStatesList() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingDayState, setEditingDayState] = useState<DayState | null>(null);
-  const [deletingDayState, setDeletingDayState] = useState<DayState | null>(null);
+  const [deletingDayState, setDeletingDayState] = useState<DayState | null>(
+    null,
+  );
   const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set());
   const [suggestionsDismissed, setSuggestionsDismissed] = useState(false);
   const [creatingKey, setCreatingKey] = useState<string | null>(null);
@@ -61,7 +70,9 @@ export function DayStatesList() {
   const handleAddAll = async () => {
     setAddingAll(true);
     try {
-      const colors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
+      const colors = new Set(
+        (dayStates ?? []).map((ds) => ds.color.toLowerCase()),
+      );
       const remaining = (recommendations?.moods ?? []).filter(
         (s) => !dismissedKeys.has(s.key) && !colors.has(s.color.toLowerCase()),
       );
@@ -78,25 +89,32 @@ export function DayStatesList() {
     }
   };
 
-  const existingColors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
-  const visibleRecommendations = (recommendations?.moods ?? []).filter(
-    (s) => !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  const existingColors = new Set(
+    (dayStates ?? []).map((ds) => ds.color.toLowerCase()),
   );
-  const showRecommendations = !suggestionsDismissed && visibleRecommendations.length > 0;
+  const visibleRecommendations = (recommendations?.moods ?? []).filter(
+    (s) =>
+      !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  );
+  const showRecommendations =
+    !suggestionsDismissed && visibleRecommendations.length > 0;
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
-      </div>
-    );
+    return <DayStatesSkeleton />;
   }
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-content">{t('day_states.title')}</h1>
-        <Button onClick={() => { setEditingDayState(null); setFormOpen(true); }}>
+        <h1 className="text-2xl font-bold text-content">
+          {t('day_states.title')}
+        </h1>
+        <Button
+          onClick={() => {
+            setEditingDayState(null);
+            setFormOpen(true);
+          }}
+        >
           + {t('day_states.create')}
         </Button>
       </div>
@@ -106,7 +124,12 @@ export function DayStatesList() {
           title={t('day_states.empty.title')}
           description={t('day_states.empty.description')}
           action={
-            <Button onClick={() => { setEditingDayState(null); setFormOpen(true); }}>
+            <Button
+              onClick={() => {
+                setEditingDayState(null);
+                setFormOpen(true);
+              }}
+            >
               + {t('day_states.create')}
             </Button>
           }
@@ -149,9 +172,24 @@ export function DayStatesList() {
                       />
                       {name}
                       {isCreating && (
-                        <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        <svg
+                          className="h-3 w-3 animate-spin"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          />
                         </svg>
                       )}
                     </button>
@@ -161,8 +199,18 @@ export function DayStatesList() {
                       className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary transition-colors"
                       title="Dismiss"
                     >
-                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -212,7 +260,9 @@ export function DayStatesList() {
                 <div className="min-w-0">
                   <p className="truncate font-medium text-content">{ds.name}</p>
                   <p className="text-xs text-content-secondary">
-                    {ds.isSystem ? t('categories.system_label') : t('categories.custom_label')}
+                    {ds.isSystem
+                      ? t('categories.system_label')
+                      : t('categories.custom_label')}
                   </p>
                 </div>
               </div>
@@ -220,7 +270,10 @@ export function DayStatesList() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => { setEditingDayState(ds); setFormOpen(true); }}
+                  onClick={() => {
+                    setEditingDayState(ds);
+                    setFormOpen(true);
+                  }}
                 >
                   {t('common.edit')}
                 </Button>
@@ -240,7 +293,10 @@ export function DayStatesList() {
 
       <DayStateFormModal
         open={formOpen}
-        onClose={() => { setFormOpen(false); setEditingDayState(null); }}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingDayState(null);
+        }}
         dayState={editingDayState}
       />
 
@@ -249,7 +305,9 @@ export function DayStatesList() {
         onClose={() => setDeletingDayState(null)}
         onConfirm={handleDelete}
         title={t('day_states.delete')}
-        message={t('day_states.confirm_delete_message', { name: deletingDayState?.name ?? '' })}
+        message={t('day_states.confirm_delete_message', {
+          name: deletingDayState?.name ?? '',
+        })}
         loading={deleteDayState.isPending}
       />
     </div>

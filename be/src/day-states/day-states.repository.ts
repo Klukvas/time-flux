@@ -18,16 +18,26 @@ export class DayStatesRepository {
     });
   }
 
-  async create(data: { userId: string; name: string; color: string; order?: number; score: number; isSystem?: boolean }) {
+  async create(data: {
+    userId: string;
+    name: string;
+    color: string;
+    order?: number;
+    score: number;
+    isSystem?: boolean;
+  }) {
     return this.prisma.dayState.create({ data });
   }
 
-  async update(id: string, data: { name?: string; color?: string; order?: number; score?: number }) {
+  async update(
+    id: string,
+    data: { name?: string; color?: string; order?: number; score?: number },
+  ) {
     return this.prisma.dayState.update({ where: { id }, data });
   }
 
-  async delete(id: string) {
-    return this.prisma.dayState.delete({ where: { id } });
+  async delete(id: string, userId: string) {
+    return this.prisma.dayState.delete({ where: { id, userId } });
   }
 
   async countByUserId(userId: string) {

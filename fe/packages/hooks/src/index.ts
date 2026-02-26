@@ -4,8 +4,18 @@ export type { I18nContextValue } from './i18n-context';
 export { ThemeContext, useTheme } from './theme-context';
 export type { ThemeContextValue } from './theme-context';
 export { useLogin, useRegister } from './use-auth';
-export { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from './use-categories';
-export { useCreateDayState, useDayStates, useDeleteDayState, useUpdateDayState } from './use-day-states';
+export {
+  useCategories,
+  useCreateCategory,
+  useDeleteCategory,
+  useUpdateCategory,
+} from './use-categories';
+export {
+  useCreateDayState,
+  useDayStates,
+  useDeleteDayState,
+  useUpdateDayState,
+} from './use-day-states';
 export { useDays, useUpdateDayLocation, useUpsertDay } from './use-days';
 export { useCreateDayMedia, useDayMedia, useDeleteDayMedia } from './use-media';
 export {
@@ -34,3 +44,4 @@ export {
   useCreateDayStateFromRecommendation,
 } from './use-recommendations';
 export { useMoodOverview } from './use-analytics';
+export { useSubscription, useCancelSubscription } from './use-subscriptions';

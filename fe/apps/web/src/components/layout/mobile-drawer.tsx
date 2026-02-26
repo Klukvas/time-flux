@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTranslation, useTheme } from '@lifespan/hooks';
+import { useTranslation, useTheme, useSubscription } from '@lifespan/hooks';
 import type { Language } from '@lifespan/i18n';
 import { SUPPORTED_LANGUAGES } from '@lifespan/i18n';
 import { useAuthStore } from '@/stores/auth-store';
@@ -19,6 +19,8 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
   const pathname = usePathname();
   const { t, language, setLanguage } = useTranslation();
   const { theme, setTheme } = useTheme();
+  const { data: subscription } = useSubscription();
+  const tier = subscription?.tier ?? 'FREE';
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const mobileOpen = useSidebarStore((s) => s.mobileOpen);
@@ -70,8 +72,18 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
             className="rounded-lg p-1.5 text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors"
             aria-label="Close navigation"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -92,8 +104,18 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
                     : 'text-content-secondary hover:bg-surface-secondary hover:text-content'
                 } ${highlighted ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface-card' : ''}`}
               >
-                <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                <svg
+                  className="h-5 w-5 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d={item.icon}
+                  />
                 </svg>
                 <span>{t(item.labelKey)}</span>
               </Link>
@@ -117,8 +139,18 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
                     : 'text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary'
                 }`}
               >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={opt.icon} />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d={opt.icon}
+                  />
                 </svg>
               </button>
             ))}
@@ -145,13 +177,38 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
 
           {/* User + logout */}
           <div className="mt-3 border-t border-edge pt-3">
-            <div className="mb-2 truncate text-sm text-content-secondary">{user?.email}</div>
+            <div className="mb-2 flex items-center gap-2 min-w-0">
+              <span className="truncate text-sm text-content-secondary">
+                {user?.email}
+              </span>
+              <span
+                className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none ${
+                  tier === 'PREMIUM'
+                    ? 'bg-amber-100 text-amber-700'
+                    : tier === 'PRO'
+                      ? 'bg-violet-100 text-violet-700'
+                      : 'bg-surface-secondary text-content-tertiary'
+                }`}
+              >
+                {tier}
+              </span>
+            </div>
             <button
               onClick={logout}
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-content-secondary hover:bg-surface-secondary hover:text-content"
             >
-              <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <svg
+                className="h-5 w-5 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
               </svg>
               {t('auth.logout')}
             </button>

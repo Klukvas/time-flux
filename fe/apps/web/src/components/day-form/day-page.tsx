@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { extractApiError } from '@lifespan/api';
@@ -68,7 +68,10 @@ export function DayPage({ date }: DayPageProps) {
 
   const registrationDate = useMemo(() => {
     if (!user?.createdAt) return undefined;
-    return DateTime.fromISO(user.createdAt).setZone(user.timezone).toISODate() ?? undefined;
+    return (
+      DateTime.fromISO(user.createdAt).setZone(user.timezone).toISODate() ??
+      undefined
+    );
   }, [user?.createdAt, user?.timezone]);
 
   // Redirect to registration date if navigating before it
@@ -93,11 +96,19 @@ export function DayPage({ date }: DayPageProps) {
   const dayRecord = daysData?.[0] ?? null;
   const [showLocationModal, setShowLocationModal] = useState(false);
 
-  const [selectedDayStateId, setSelectedDayStateId] = useState<string | null>(null);
-  const [selectedMainMediaId, setSelectedMainMediaId] = useState<string | null>(null);
+  const [selectedDayStateId, setSelectedDayStateId] = useState<string | null>(
+    null,
+  );
+  const [selectedMainMediaId, setSelectedMainMediaId] = useState<string | null>(
+    null,
+  );
+  const mainMediaIdRef = useRef(selectedMainMediaId);
+  mainMediaIdRef.current = selectedMainMediaId;
   const [comment, setComment] = useState('');
   const [localMediaItems, setLocalMediaItems] = useState<MediaItem[]>([]);
-  const [initialized, setInitialized] = useState(false);
+  const [initializedForDate, setInitializedForDate] = useState<string | null>(
+    null,
+  );
 
   const overlappingPeriods = useMemo(() => {
     if (!allGroups) return [];
@@ -116,7 +127,9 @@ export function DayPage({ date }: DayPageProps) {
     [overlappingPeriods],
   );
 
-  const [videoThumbnails, setVideoThumbnails] = useState<Record<string, string>>({});
+  const [videoThumbnails, setVideoThumbnails] = useState<
+    Record<string, string>
+  >({});
 
   const allMediaItems = useMemo(() => {
     const persisted = (existingMedia ?? []).map((m) => {
@@ -130,38 +143,53 @@ export function DayPage({ date }: DayPageProps) {
     return [...persisted, ...localMediaItems];
   }, [existingMedia, localMediaItems, videoThumbnails]);
 
-  // Initialize state from existing media
+  // Initialize state from existing media (only when data is for the current date)
   useEffect(() => {
-    if (!initialized && existingMedia) {
+    if (initializedForDate !== date && existingMedia) {
       const cover = existingMedia.find((m) => isImageType(m.contentType));
-      if (cover && !selectedMainMediaId) {
+      if (cover) {
         setSelectedMainMediaId(cover.id);
-      } else if (!cover && existingMedia.length > 0) {
+      } else if (existingMedia.length > 0) {
         // Only videos exist — extract first frame as visual preview
-        const firstVideo = existingMedia.find((m) => isVideoType(m.contentType));
+        const firstVideo = existingMedia.find((m) =>
+          isVideoType(m.contentType),
+        );
         if (firstVideo) {
           setSelectedMainMediaId(firstVideo.id);
           extractVideoThumbnail(firstVideo.url).then((thumb) => {
             if (thumb) {
-              setVideoThumbnails((prev) => ({ ...prev, [firstVideo.id]: thumb }));
+              setVideoThumbnails((prev) => ({
+                ...prev,
+                [firstVideo.id]: thumb,
+              }));
             }
           });
         }
       }
-      setInitialized(true);
+      setInitializedForDate(date);
     }
-  }, [existingMedia, initialized, selectedMainMediaId]);
+  }, [existingMedia, initializedForDate, date]);
 
-  // Reset when date changes
+  // Track which date has been initialized with server data
+  const initializedDateRef = useRef<string | null>(null);
+
+  // Reset when date changes, then initialize from server data
   useEffect(() => {
-    setSelectedDayStateId(null);
-    setSelectedMainMediaId(null);
-    setComment('');
-    setLocalMediaItems([]);
-    setInitialized(false);
-  }, [date]);
+    if (initializedDateRef.current !== date) {
+      setSelectedDayStateId(null);
+      setSelectedMainMediaId(null);
+      setComment('');
+      setLocalMediaItems([]);
+      setInitializedForDate(null);
+      initializedDateRef.current = null;
+    }
 
-
+    if (dayRecord && initializedDateRef.current !== date) {
+      setComment(dayRecord.comment ?? '');
+      setSelectedDayStateId(dayRecord.dayState?.id ?? null);
+      initializedDateRef.current = date;
+    }
+  }, [date, dayRecord]);
 
   const handleAddMedia = useCallback(
     async (files: File[]) => {
@@ -187,22 +215,30 @@ export function DayPage({ date }: DayPageProps) {
             },
           });
 
-          if (!selectedMainMediaId && isImageType(item.file!.type)) {
+          if (!mainMediaIdRef.current && isImageType(item.file!.type)) {
             setSelectedMainMediaId(saved.id);
           }
 
           setLocalMediaItems((prev) => prev.filter((m) => m.id !== item.id));
           if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
         } catch {
+          if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
           setLocalMediaItems((prev) =>
             prev.map((m) =>
-              m.id === item.id ? { ...m, uploading: false, error: 'Upload failed' } : m,
+              m.id === item.id
+                ? {
+                    ...m,
+                    uploading: false,
+                    error: 'Upload failed',
+                    previewUrl: '',
+                  }
+                : m,
             ),
           );
         }
       }
     },
-    [upload, createDayMedia, date, selectedMainMediaId],
+    [upload, createDayMedia, date],
   );
 
   const handleRemoveMedia = useCallback(
@@ -229,7 +265,14 @@ export function DayPage({ date }: DayPageProps) {
 
   const handleSave = () => {
     upsertDay.mutate(
-      { date, data: { dayStateId: selectedDayStateId, mainMediaId: selectedMainMediaId } },
+      {
+        date,
+        data: {
+          dayStateId: selectedDayStateId,
+          mainMediaId: selectedMainMediaId,
+          comment: comment || null,
+        },
+      },
       {
         onSuccess: () => toast.success(t('day_form.day_updated')),
         onError: (err) => toast.error(getUserMessage(extractApiError(err))),
@@ -238,23 +281,31 @@ export function DayPage({ date }: DayPageProps) {
   };
 
   const handleClearMood = () => {
+    const previousId = selectedDayStateId;
     setSelectedDayStateId(null);
     upsertDay.mutate(
       { date, data: { dayStateId: null, mainMediaId: selectedMainMediaId } },
       {
         onSuccess: () => toast.success(t('day_form.mood_cleared')),
-        onError: (err) => toast.error(getUserMessage(extractApiError(err))),
+        onError: (err) => {
+          setSelectedDayStateId(previousId);
+          toast.error(getUserMessage(extractApiError(err)));
+        },
       },
     );
   };
 
   const handleSelectMood = (id: string) => {
+    const previousId = selectedDayStateId;
     setSelectedDayStateId(id);
     upsertDay.mutate(
       { date, data: { dayStateId: id, mainMediaId: selectedMainMediaId } },
       {
         onSuccess: () => toast.success(t('day_form.day_updated')),
-        onError: (err) => toast.error(getUserMessage(extractApiError(err))),
+        onError: (err) => {
+          setSelectedDayStateId(previousId);
+          toast.error(getUserMessage(extractApiError(err)));
+        },
       },
     );
   };
@@ -273,9 +324,20 @@ export function DayPage({ date }: DayPageProps) {
     router.push('/timeline');
   };
 
-  const handleSaveLocation = (data: { locationName: string; latitude?: number; longitude?: number }) => {
+  const handleSaveLocation = (data: {
+    locationName: string;
+    latitude?: number;
+    longitude?: number;
+  }) => {
     updateLocation.mutate(
-      { date, data: { locationName: data.locationName, latitude: data.latitude ?? null, longitude: data.longitude ?? null } },
+      {
+        date,
+        data: {
+          locationName: data.locationName,
+          latitude: data.latitude ?? null,
+          longitude: data.longitude ?? null,
+        },
+      },
       {
         onSuccess: () => {
           toast.success(t('day_form.location_updated'));
@@ -309,7 +371,8 @@ export function DayPage({ date }: DayPageProps) {
   const today = isToday(date);
   const futureDisabled = isBeyondTomorrow(date);
   const isPending = upsertDay.isPending;
-  const memories = memoriesData?.memories ?? [];
+  const memories =
+    (memoriesData?.type === 'day' ? memoriesData.memories : []) ?? [];
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
@@ -321,8 +384,18 @@ export function DayPage({ date }: DayPageProps) {
             onClick={handleBack}
             className="flex items-center gap-1.5 rounded-lg border border-edge px-3 py-1.5 text-sm text-content hover:bg-surface-secondary"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             {t('day_form.back_to_timeline')}
           </button>
@@ -359,7 +432,11 @@ export function DayPage({ date }: DayPageProps) {
             <h1 className="text-2xl font-bold text-content">
               {formatDate(date, 'cccc, MMMM d, yyyy')}
             </h1>
-            <CalendarPopover value={date} onChange={handleDatePick} minDate={registrationDate} />
+            <CalendarPopover
+              value={date}
+              onChange={handleDatePick}
+              minDate={registrationDate}
+            />
           </div>
           {today && (
             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
@@ -398,16 +475,27 @@ export function DayPage({ date }: DayPageProps) {
                   onClick={() => router.push(`/timeline/day/${memory.date}`)}
                   className="group w-full rounded-xl border border-edge bg-surface-card p-3 text-left transition-all hover:border-accent/30 hover:shadow-md"
                 >
-                  <p className="mb-2 text-xs font-medium text-accent">{label}</p>
+                  <p className="mb-2 text-xs font-medium text-accent">
+                    {label}
+                  </p>
                   <div className="flex items-center gap-3">
-                    <DayCircle date={memory.date} color={memory.mood?.color} size="md" />
+                    <DayCircle
+                      date={memory.date}
+                      color={memory.mood?.color}
+                      size="md"
+                    />
                     <div className="min-w-0 flex-1">
                       {memory.mood && (
-                        <p className="text-sm font-medium text-content">{memory.mood.name}</p>
+                        <p className="text-sm font-medium text-content">
+                          {memory.mood.name}
+                        </p>
                       )}
                       {memory.mediaCount > 0 && (
                         <p className="text-xs text-content-secondary">
-                          {memory.mediaCount} {memory.mediaCount === 1 ? t('memories.photo') : t('memories.photos')}
+                          {memory.mediaCount}{' '}
+                          {memory.mediaCount === 1
+                            ? t('memories.photo')
+                            : t('memories.photos')}
                         </p>
                       )}
                     </div>
@@ -422,7 +510,9 @@ export function DayPage({ date }: DayPageProps) {
       <div className="space-y-6">
         {/* Mood Picker */}
         <div>
-          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('day_form.mood')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-content-secondary">
+            {t('day_form.mood')}
+          </h3>
           <div className="flex flex-wrap gap-2">
             {dayStates?.map((ds) => (
               <button
@@ -463,7 +553,9 @@ export function DayPage({ date }: DayPageProps) {
 
         {/* Media Section — Carousel + Upload */}
         <div>
-          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('day_form.photos_videos')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-content-secondary">
+            {t('day_form.photos_videos')}
+          </h3>
 
           {/* Carousel for existing + uploading media */}
           {allMediaItems.length > 0 && (
@@ -491,11 +583,15 @@ export function DayPage({ date }: DayPageProps) {
 
         {/* Location */}
         <div>
-          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('day_form.location')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-content-secondary">
+            {t('day_form.location')}
+          </h3>
           {dayRecord?.locationName ? (
             <div className="flex items-center gap-3 rounded-lg border border-edge bg-surface-card px-3 py-2.5">
               <span className="text-base">📍</span>
-              <span className="min-w-0 flex-1 truncate text-sm text-content">{dayRecord.locationName}</span>
+              <span className="min-w-0 flex-1 truncate text-sm text-content">
+                {dayRecord.locationName}
+              </span>
               <div className="flex shrink-0 items-center gap-2">
                 {dayRecord.latitude != null && dayRecord.longitude != null && (
                   <a
@@ -528,7 +624,9 @@ export function DayPage({ date }: DayPageProps) {
             </div>
           ) : (
             <div className="flex items-center gap-2 rounded-lg border border-dashed border-edge px-3 py-2.5">
-              <span className="flex-1 text-sm text-content-tertiary">{t('day_form.no_location')}</span>
+              <span className="flex-1 text-sm text-content-tertiary">
+                {t('day_form.no_location')}
+              </span>
               {!futureDisabled && (
                 <button
                   onClick={() => setShowLocationModal(true)}
@@ -553,7 +651,9 @@ export function DayPage({ date }: DayPageProps) {
 
         {/* Comment */}
         <div>
-          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('day_form.comment')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-content-secondary">
+            {t('day_form.comment')}
+          </h3>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
@@ -571,7 +671,9 @@ export function DayPage({ date }: DayPageProps) {
         {/* Active Chapters Section */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-content-secondary">{t('chapters.title')}</h3>
+            <h3 className="text-sm font-medium text-content-secondary">
+              {t('chapters.title')}
+            </h3>
             <button
               onClick={() => router.push('/chapters')}
               className="text-xs font-medium text-accent hover:underline"
@@ -584,7 +686,9 @@ export function DayPage({ date }: DayPageProps) {
               {overlappingPeriods.map((period) => (
                 <button
                   key={period.id}
-                  onClick={() => router.push(`/chapters/${period.eventGroup.id}`)}
+                  onClick={() =>
+                    router.push(`/chapters/${period.eventGroup.id}`)
+                  }
                   className="flex w-full items-center gap-2 rounded-lg border border-edge px-3 py-2 text-left text-sm transition-colors hover:bg-surface-secondary"
                   style={{
                     borderLeftWidth: 3,
@@ -602,7 +706,9 @@ export function DayPage({ date }: DayPageProps) {
                     {period.eventGroup.title}
                   </span>
                   {period.comment && (
-                    <span className="truncate text-content-secondary">{period.comment}</span>
+                    <span className="truncate text-content-secondary">
+                      {period.comment}
+                    </span>
                   )}
                   {period.endDate === null && (
                     <span className="ml-auto flex items-center gap-1 text-xs text-success">
@@ -614,7 +720,9 @@ export function DayPage({ date }: DayPageProps) {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-content-tertiary">{t('chapters.empty.description')}</p>
+            <p className="text-sm text-content-tertiary">
+              {t('chapters.empty.description')}
+            </p>
           )}
 
           {/* Searchable chapter selector dropdown */}

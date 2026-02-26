@@ -13,6 +13,7 @@ import {
   useTranslation,
 } from '@lifespan/hooks';
 import { formatDateRange, hexToRgba, isImageType } from '@lifespan/utils';
+import { ChapterDetailsSkeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ChapterFormModal } from './chapter-form-modal';
@@ -34,7 +35,9 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
   const [periodFormOpen, setPeriodFormOpen] = useState(false);
   const [editingPeriod, setEditingPeriod] = useState<EventPeriod | null>(null);
   const [closingPeriod, setClosingPeriod] = useState<EventPeriod | null>(null);
-  const [deletingPeriod, setDeletingPeriod] = useState<EventPeriod | null>(null);
+  const [deletingPeriod, setDeletingPeriod] = useState<EventPeriod | null>(
+    null,
+  );
   const [deletingGroup, setDeletingGroup] = useState(false);
 
   const handleDeleteGroup = () => {
@@ -63,11 +66,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
-      </div>
-    );
+    return <ChapterDetailsSkeleton />;
   }
 
   if (error || !details) {
@@ -89,8 +88,18 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
         onClick={() => router.push('/chapters')}
         className="mb-4 flex items-center gap-1 text-sm text-content-secondary hover:text-content"
       >
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
         </svg>
         {t('chapters.title')}
       </button>
@@ -100,7 +109,9 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-bold text-content">{details.title}</h1>
+              <h1 className="text-2xl font-bold text-content">
+                {details.title}
+              </h1>
               <span
                 className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"
                 style={{
@@ -112,11 +123,17 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
               </span>
             </div>
             {details.description && (
-              <p className="mt-2 text-sm text-content-secondary">{details.description}</p>
+              <p className="mt-2 text-sm text-content-secondary">
+                {details.description}
+              </p>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setEditGroupOpen(true)}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setEditGroupOpen(true)}
+            >
               {t('common.edit')}
             </Button>
             <Button
@@ -135,12 +152,20 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
       {details.totalDays > 0 && (
         <div className="mb-6 flex items-center gap-6 rounded-lg border border-edge bg-surface-card p-4">
           <div>
-            <p className="text-2xl font-bold text-content">{details.totalDays}</p>
-            <p className="text-xs text-content-tertiary">{t('chapters.details.total_days')}</p>
+            <p className="text-2xl font-bold text-content">
+              {details.totalDays}
+            </p>
+            <p className="text-xs text-content-tertiary">
+              {t('chapters.details.total_days')}
+            </p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-content">{details.periods.length}</p>
-            <p className="text-xs text-content-tertiary">{t('chapters.details.periods')}</p>
+            <p className="text-2xl font-bold text-content">
+              {details.periods.length}
+            </p>
+            <p className="text-xs text-content-tertiary">
+              {t('chapters.details.periods')}
+            </p>
           </div>
         </div>
       )}
@@ -158,7 +183,9 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                   className="h-3 w-3 rounded-full shrink-0"
                   style={{ backgroundColor: stat.dayStateColor }}
                 />
-                <span className="text-sm text-content w-24 truncate">{stat.dayStateName}</span>
+                <span className="text-sm text-content w-24 truncate">
+                  {stat.dayStateName}
+                </span>
                 <div className="flex-1 h-2 rounded-full bg-surface-secondary overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all"
@@ -187,16 +214,28 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
           {/* Stats grid */}
           <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-lg border border-edge bg-surface-card p-3 text-center">
-              <p className="text-xl font-bold text-content">{details.analytics.totalDays}</p>
-              <p className="text-xs text-content-tertiary">{t('insights.total_days')}</p>
+              <p className="text-xl font-bold text-content">
+                {details.analytics.totalDays}
+              </p>
+              <p className="text-xs text-content-tertiary">
+                {t('insights.total_days')}
+              </p>
             </div>
             <div className="rounded-lg border border-edge bg-surface-card p-3 text-center">
-              <p className="text-xl font-bold text-content">{details.analytics.totalPeriods}</p>
-              <p className="text-xs text-content-tertiary">{t('insights.total_periods')}</p>
+              <p className="text-xl font-bold text-content">
+                {details.analytics.totalPeriods}
+              </p>
+              <p className="text-xs text-content-tertiary">
+                {t('insights.total_periods')}
+              </p>
             </div>
             <div className="rounded-lg border border-edge bg-surface-card p-3 text-center">
-              <p className="text-xl font-bold text-content">{details.analytics.totalMedia}</p>
-              <p className="text-xs text-content-tertiary">{t('insights.total_media')}</p>
+              <p className="text-xl font-bold text-content">
+                {details.analytics.totalMedia}
+              </p>
+              <p className="text-xs text-content-tertiary">
+                {t('insights.total_media')}
+              </p>
             </div>
             <div className="rounded-lg border border-edge bg-surface-card p-3 text-center">
               <p className="text-xl font-bold text-content">
@@ -204,7 +243,9 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                   ? details.analytics.averageMoodScore.toFixed(1)
                   : '—'}
               </p>
-              <p className="text-xs text-content-tertiary">{t('insights.average_mood_score')}</p>
+              <p className="text-xs text-content-tertiary">
+                {t('insights.average_mood_score')}
+              </p>
             </div>
           </div>
 
@@ -217,11 +258,16 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="w-20 truncate text-xs text-content">{item.moodName}</span>
+                  <span className="w-20 truncate text-xs text-content">
+                    {item.moodName}
+                  </span>
                   <div className="flex-1 h-1.5 rounded-full bg-surface-secondary overflow-hidden">
                     <div
                       className="h-full rounded-full"
-                      style={{ width: `${item.percentage}%`, backgroundColor: item.color }}
+                      style={{
+                        width: `${item.percentage}%`,
+                        backgroundColor: item.color,
+                      }}
                     />
                   </div>
                   <span className="w-14 text-right text-xs text-content-tertiary">
@@ -244,18 +290,27 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                   const endDate = new Date(d.end);
                   const totalDaysInRange = Math.max(
                     1,
-                    Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
+                    Math.ceil(
+                      (endDate.getTime() - startDate.getTime()) /
+                        (1000 * 60 * 60 * 24),
+                    ) + 1,
                   );
-                  const pct = Math.round((d.activeDays / totalDaysInRange) * 100);
+                  const pct = Math.round(
+                    (d.activeDays / totalDaysInRange) * 100,
+                  );
 
                   return (
-                    <div key={i} className="rounded-lg border border-edge bg-surface-card px-3 py-2">
+                    <div
+                      key={i}
+                      className="rounded-lg border border-edge bg-surface-card px-3 py-2"
+                    >
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-content-secondary">
                           {d.start} — {d.end}
                         </span>
                         <span className="text-content-tertiary">
-                          {t('insights.active_days', { count: d.activeDays })} ({pct}%)
+                          {t('insights.active_days', { count: d.activeDays })} (
+                          {pct}%)
                         </span>
                       </div>
                       <div className="mt-1.5 h-1.5 rounded-full bg-surface-secondary overflow-hidden">
@@ -281,14 +336,19 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
           </h2>
           <Button
             size="sm"
-            onClick={() => { setEditingPeriod(null); setPeriodFormOpen(true); }}
+            onClick={() => {
+              setEditingPeriod(null);
+              setPeriodFormOpen(true);
+            }}
           >
             + {t('periods.create')}
           </Button>
         </div>
 
         {sortedPeriods.length === 0 ? (
-          <p className="text-sm text-content-tertiary">{t('chapters.details.no_data')}</p>
+          <p className="text-sm text-content-tertiary">
+            {t('chapters.details.no_data')}
+          </p>
         ) : (
           <div className="space-y-2">
             {sortedPeriods.map((period) => {
@@ -311,7 +371,9 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                       )}
                     </div>
                     {period.comment && (
-                      <p className="mt-0.5 truncate text-xs text-content-secondary">{period.comment}</p>
+                      <p className="mt-0.5 truncate text-xs text-content-secondary">
+                        {period.comment}
+                      </p>
                     )}
                   </div>
                   <div className="ml-2 flex shrink-0 items-center gap-1 sm:ml-4 sm:gap-2">
@@ -321,20 +383,47 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                         size="sm"
                         onClick={() => setClosingPeriod(period)}
                       >
-                        <span className="hidden sm:inline">{t('common.close')}</span>
-                        <svg className="h-4 w-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                        <span className="hidden sm:inline">
+                          {t('common.close')}
+                        </span>
+                        <svg
+                          className="h-4 w-4 sm:hidden"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </Button>
                     )}
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => { setEditingPeriod(period); setPeriodFormOpen(true); }}
+                      onClick={() => {
+                        setEditingPeriod(period);
+                        setPeriodFormOpen(true);
+                      }}
                     >
-                      <span className="hidden sm:inline">{t('common.edit')}</span>
-                      <svg className="h-4 w-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                      <span className="hidden sm:inline">
+                        {t('common.edit')}
+                      </span>
+                      <svg
+                        className="h-4 w-4 sm:hidden"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"
+                        />
                       </svg>
                     </Button>
                     <Button
@@ -343,9 +432,21 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                       className="text-danger hover:text-danger-hover"
                       onClick={() => setDeletingPeriod(period)}
                     >
-                      <span className="hidden sm:inline">{t('common.delete')}</span>
-                      <svg className="h-4 w-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                      <span className="hidden sm:inline">
+                        {t('common.delete')}
+                      </span>
+                      <svg
+                        className="h-4 w-4 sm:hidden"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                        />
                       </svg>
                     </Button>
                   </div>
@@ -369,7 +470,11 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                 className="aspect-square overflow-hidden rounded-lg border border-edge bg-surface-secondary"
               >
                 {isImageType(m.contentType) ? (
-                  <img src={m.url} alt={m.fileName} className="h-full w-full object-cover" />
+                  <img
+                    src={m.url}
+                    alt={m.fileName}
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-xs text-content-tertiary">
                     {m.contentType.split('/')[1]?.toUpperCase() ?? 'FILE'}
@@ -390,7 +495,10 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
 
       <PeriodFormModal
         open={periodFormOpen}
-        onClose={() => { setPeriodFormOpen(false); setEditingPeriod(null); }}
+        onClose={() => {
+          setPeriodFormOpen(false);
+          setEditingPeriod(null);
+        }}
         groupId={groupId}
         period={editingPeriod}
       />

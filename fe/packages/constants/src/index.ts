@@ -14,3 +14,10 @@ export {
   QUERY_KEYS,
   STALE_TIMES,
 } from './defaults';
+export { TIER_LIMITS } from './tier-limits';
+export type {
+  SubscriptionTier,
+  TierLimitResource,
+  TierFeature,
+  TierLimits,
+} from './tier-limits';

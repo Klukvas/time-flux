@@ -8,9 +8,13 @@ import { TimelineQueryDto, WeekQueryDto } from './dto/timeline-query.dto.js';
 import { InvalidDateRangeError } from '../common/errors/app.error.js';
 
 function formatPeriod(period: any, timezone: string) {
-  const startDate = DateTime.fromJSDate(period.startDate, { zone: 'utc' }).setZone(timezone).toISODate()!;
+  const startDate = DateTime.fromJSDate(period.startDate, { zone: 'utc' })
+    .setZone(timezone)
+    .toISODate()!;
   const endDate = period.endDate
-    ? DateTime.fromJSDate(period.endDate, { zone: 'utc' }).setZone(timezone).toISODate()!
+    ? DateTime.fromJSDate(period.endDate, { zone: 'utc' })
+        .setZone(timezone)
+        .toISODate()!
     : null;
   return {
     id: period.id,
@@ -37,10 +41,18 @@ export class TimelineService {
   ) {}
 
   private async formatMedia(m: any) {
+    let url: string | null = null;
+    try {
+      url = await this.s3Service.getPresignedReadUrl(m.s3Key);
+    } catch (err) {
+      this.logger.warn(
+        `Failed to generate presigned URL for s3Key=${m.s3Key}: ${err}`,
+      );
+    }
     return {
       id: m.id,
       s3Key: m.s3Key,
-      url: await this.s3Service.getPresignedReadUrl(m.s3Key),
+      url,
       fileName: m.fileName,
       contentType: m.contentType,
       size: m.size,
@@ -50,10 +62,17 @@ export class TimelineService {
 
   private async formatDay(day: any) {
     return {
+      id: day.id,
       date: day.date.toISOString().split('T')[0],
       dayState: day.dayState,
       mainMediaId: day.mainMediaId ?? null,
-      media: await Promise.all((day.media ?? []).map((m: any) => this.formatMedia(m))),
+      locationName: day.locationName ?? null,
+      latitude: day.latitude ?? null,
+      longitude: day.longitude ?? null,
+      comment: day.comment ?? null,
+      media: await Promise.all(
+        (day.media ?? []).map((m: any) => this.formatMedia(m)),
+      ),
     };
   }
 
@@ -85,7 +104,11 @@ export class TimelineService {
     const toDate = new Date(to.toISODate()! + 'T00:00:00Z');
 
     const [periods, days] = await Promise.all([
-      this.eventGroupsRepository.findPeriodsWithDateRange(userId, fromUTC, toUTC),
+      this.eventGroupsRepository.findPeriodsWithDateRange(
+        userId,
+        fromUTC,
+        toUTC,
+      ),
       this.daysRepository.findByUserIdAndDateRange(userId, fromDate, toDate),
     ]);
 
@@ -109,8 +132,16 @@ export class TimelineService {
     const sundayDate = new Date(sunday.toISODate()! + 'T00:00:00Z');
 
     const [periods, existingDays] = await Promise.all([
-      this.eventGroupsRepository.findPeriodsWithDateRange(userId, mondayUTC, sundayUTC),
-      this.daysRepository.findByUserIdAndDateRange(userId, mondayDate, sundayDate),
+      this.eventGroupsRepository.findPeriodsWithDateRange(
+        userId,
+        mondayUTC,
+        sundayUTC,
+      ),
+      this.daysRepository.findByUserIdAndDateRange(
+        userId,
+        mondayDate,
+        sundayDate,
+      ),
     ]);
 
     const dayMap = new Map<string, any>();
@@ -124,10 +155,17 @@ export class TimelineService {
       const dateStr = d.toISODate()!;
       const existing = dayMap.get(dateStr);
       days.push({
+        id: existing?.id ?? null,
         date: dateStr,
         dayState: existing?.dayState ?? null,
         mainMediaId: existing?.mainMediaId ?? null,
-        media: await Promise.all((existing?.media ?? []).map((m: any) => this.formatMedia(m))),
+        locationName: existing?.locationName ?? null,
+        latitude: existing?.latitude ?? null,
+        longitude: existing?.longitude ?? null,
+        comment: existing?.comment ?? null,
+        media: await Promise.all(
+          (existing?.media ?? []).map((m: any) => this.formatMedia(m)),
+        ),
       });
     }
 

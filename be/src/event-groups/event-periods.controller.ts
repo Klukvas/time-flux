@@ -1,5 +1,21 @@
-import { Body, Controller, Delete, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { EventGroupsService } from './event-groups.service.js';
@@ -14,6 +30,10 @@ export class EventPeriodsController {
   constructor(private readonly service: EventGroupsService) {}
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update event period' })
+  @ApiParam({ name: 'id', description: 'Event period UUID' })
+  @ApiResponse({ status: 200, description: 'Period updated' })
+  @ApiResponse({ status: 404, description: 'Period not found' })
   update(
     @CurrentUser() user: { sub: string },
     @Param('id') id: string,
@@ -23,11 +43,20 @@ export class EventPeriodsController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete event period' })
+  @ApiParam({ name: 'id', description: 'Event period UUID' })
+  @ApiResponse({ status: 204, description: 'Period deleted' })
+  @ApiResponse({ status: 404, description: 'Period not found' })
   remove(@CurrentUser() user: { sub: string }, @Param('id') id: string) {
     return this.service.deletePeriod(user.sub, id);
   }
 
   @Post(':id/close')
+  @ApiOperation({ summary: 'Close an active event period' })
+  @ApiParam({ name: 'id', description: 'Event period UUID' })
+  @ApiResponse({ status: 200, description: 'Period closed' })
+  @ApiResponse({ status: 404, description: 'Period not found' })
   close(
     @CurrentUser() user: { sub: string },
     @Param('id') id: string,

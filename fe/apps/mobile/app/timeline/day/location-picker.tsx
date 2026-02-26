@@ -19,10 +19,19 @@ import { extractApiError } from '@lifespan/api';
 import { getUserMessage } from '@lifespan/domain';
 import { useTranslation, useUpdateDayLocation } from '@lifespan/hooks';
 import { MAX_LOCATION_NAME_LENGTH } from '@lifespan/constants';
+import Constants from 'expo-constants';
 import { colors, fontSize, spacing, borderRadius } from '@/lib/theme';
 
-// TODO: Move to app config / Constants.expoConfig
-const GOOGLE_MAPS_API_KEY = 'GOOGLE_MAPS_API_KEY';
+const GOOGLE_MAPS_API_KEY: string =
+  (Constants.expoConfig?.ios?.config as Record<string, string> | undefined)
+    ?.googleMapsApiKey ??
+  (
+    Constants.expoConfig?.android?.config?.googleMaps as
+      | Record<string, string>
+      | undefined
+  )?.apiKey ??
+  process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ??
+  '';
 
 const DEFAULT_REGION: Region = {
   latitude: 48.4647,
@@ -31,27 +40,49 @@ const DEFAULT_REGION: Region = {
   longitudeDelta: 20,
 };
 
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 export default function LocationPickerScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const {
-    date,
-    lat: initLat,
-    lng: initLng,
-    name: initName,
-  } = useLocalSearchParams<{
+  const params = useLocalSearchParams<{
     date: string;
     lat?: string;
     lng?: string;
     name?: string;
   }>();
 
+  // Normalize date param (handle array from expo-router)
+  const rawDate = Array.isArray(params.date) ? params.date[0] : params.date;
+  const date = rawDate && ISO_DATE_REGEX.test(rawDate) ? rawDate : undefined;
+  const initLat = Array.isArray(params.lat) ? params.lat[0] : params.lat;
+  const initLng = Array.isArray(params.lng) ? params.lng[0] : params.lng;
+  const initName = Array.isArray(params.name) ? params.name[0] : params.name;
+
   const updateLocation = useUpdateDayLocation();
+
+  if (!date) {
+    return (
+      <>
+        <Stack.Screen options={{ headerShown: true, title: 'Invalid Date' }} />
+        <View style={styles.container}>
+          <Text style={{ textAlign: 'center', marginTop: 40 }}>
+            Invalid date parameter
+          </Text>
+        </View>
+      </>
+    );
+  }
   const mapRef = useRef<MapView>(null);
 
   const hasInitial = initLat != null && initLng != null;
-  const [marker, setMarker] = useState<{ latitude: number; longitude: number } | null>(
-    hasInitial ? { latitude: parseFloat(initLat!), longitude: parseFloat(initLng!) } : null,
+  const [marker, setMarker] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(
+    hasInitial
+      ? { latitude: parseFloat(initLat!), longitude: parseFloat(initLng!) }
+      : null,
   );
   const [locationName, setLocationName] = useState(initName ?? '');
   const [detecting, setDetecting] = useState(false);
@@ -74,7 +105,9 @@ export default function LocationPickerScreen() {
       if (geo) {
         const parts = [geo.city, geo.region, geo.country].filter(Boolean);
         setLocationName(
-          parts.length > 0 ? parts.join(', ') : `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+          parts.length > 0
+            ? parts.join(', ')
+            : `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
         );
       } else {
         setLocationName(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
@@ -94,7 +127,9 @@ export default function LocationPickerScreen() {
         return;
       }
 
-      const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const pos = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
       const { latitude, longitude } = pos.coords;
       setMarker({ latitude, longitude });
       mapRef.current?.animateToRegion(
@@ -103,7 +138,10 @@ export default function LocationPickerScreen() {
       );
 
       try {
-        const [geo] = await Location.reverseGeocodeAsync({ latitude, longitude });
+        const [geo] = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
         if (geo) {
           const parts = [geo.city, geo.region, geo.country].filter(Boolean);
           setLocationName(
@@ -135,7 +173,8 @@ export default function LocationPickerScreen() {
       },
       {
         onSuccess: () => router.back(),
-        onError: (err) => Alert.alert('Error', getUserMessage(extractApiError(err))),
+        onError: (err) =>
+          Alert.alert('Error', getUserMessage(extractApiError(err))),
       },
     );
   };
@@ -163,7 +202,12 @@ export default function LocationPickerScreen() {
                 setMarker({ latitude: lat, longitude: lng });
                 setLocationName(details.formatted_address ?? _data.description);
                 mapRef.current?.animateToRegion(
-                  { latitude: lat, longitude: lng, latitudeDelta: 0.01, longitudeDelta: 0.01 },
+                  {
+                    latitude: lat,
+                    longitude: lng,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  },
                   500,
                 );
               }
@@ -197,7 +241,9 @@ export default function LocationPickerScreen() {
           {/* Hint overlay */}
           {!marker && (
             <View style={styles.hintOverlay}>
-              <Text style={styles.hintText}>{t('day_form.tap_to_place_pin')}</Text>
+              <Text style={styles.hintText}>
+                {t('day_form.tap_to_place_pin')}
+              </Text>
             </View>
           )}
         </View>
@@ -213,7 +259,9 @@ export default function LocationPickerScreen() {
             {detecting ? (
               <ActivityIndicator size="small" color={colors.brand[500]} />
             ) : (
-              <Text style={styles.currentLocationText}>{t('day_form.use_current_location')}</Text>
+              <Text style={styles.currentLocationText}>
+                {t('day_form.use_current_location')}
+              </Text>
             )}
           </Pressable>
 
@@ -241,7 +289,9 @@ export default function LocationPickerScreen() {
             </Pressable>
             <Pressable
               onPress={handleSave}
-              disabled={!locationName.trim() || !marker || updateLocation.isPending}
+              disabled={
+                !locationName.trim() || !marker || updateLocation.isPending
+              }
               style={[
                 styles.saveBtn,
                 (!locationName.trim() || !marker) && styles.saveBtnDisabled,

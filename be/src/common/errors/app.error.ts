@@ -12,27 +12,24 @@ export class AppError extends Error {
   }
 }
 
-export class UserNotFoundError extends AppError {
-  constructor() {
-    super('USER_NOT_FOUND', HttpStatus.NOT_FOUND, 'User not found');
-  }
-}
-
-export class EventNotFoundError extends AppError {
-  constructor() {
-    super('EVENT_NOT_FOUND', HttpStatus.NOT_FOUND, 'Event not found');
-  }
-}
-
 export class EventAlreadyClosedError extends AppError {
   constructor() {
-    super('EVENT_ALREADY_CLOSED', HttpStatus.CONFLICT, 'Event is already closed');
+    super(
+      'EVENT_ALREADY_CLOSED',
+      HttpStatus.CONFLICT,
+      'Event is already closed',
+    );
   }
 }
 
 export class InvalidDateRangeError extends AppError {
   constructor(details?: Record<string, unknown>) {
-    super('INVALID_DATE_RANGE', HttpStatus.BAD_REQUEST, 'end_date must not be before start_date', details);
+    super(
+      'INVALID_DATE_RANGE',
+      HttpStatus.BAD_REQUEST,
+      'end_date must not be before start_date',
+      details,
+    );
   }
 }
 
@@ -53,7 +50,7 @@ export class PeriodOverlapError extends AppError {
     super(
       'PERIOD_OVERLAP',
       HttpStatus.CONFLICT,
-      'Only one active period per event group is allowed',
+      'Period overlaps with an existing period in this chapter',
       details,
     );
   }
@@ -72,7 +69,11 @@ export class CategoryInUseError extends AppError {
 
 export class EventGroupNotFoundError extends AppError {
   constructor() {
-    super('EVENT_GROUP_NOT_FOUND', HttpStatus.NOT_FOUND, 'Event group not found');
+    super(
+      'EVENT_GROUP_NOT_FOUND',
+      HttpStatus.NOT_FOUND,
+      'Event group not found',
+    );
   }
 }
 
@@ -89,7 +90,11 @@ export class EventGroupInUseError extends AppError {
 
 export class EventPeriodNotFoundError extends AppError {
   constructor() {
-    super('EVENT_PERIOD_NOT_FOUND', HttpStatus.NOT_FOUND, 'Event period not found');
+    super(
+      'EVENT_PERIOD_NOT_FOUND',
+      HttpStatus.NOT_FOUND,
+      'Event period not found',
+    );
   }
 }
 
@@ -117,7 +122,12 @@ export class DayStateInUseError extends AppError {
 
 export class ValidationError extends AppError {
   constructor(details?: Record<string, unknown>) {
-    super('VALIDATION_ERROR', HttpStatus.BAD_REQUEST, 'Validation failed', details);
+    super(
+      'VALIDATION_ERROR',
+      HttpStatus.BAD_REQUEST,
+      'Validation failed',
+      details,
+    );
   }
 }
 
@@ -133,12 +143,6 @@ export class ForbiddenError extends AppError {
   }
 }
 
-export class DayNotFoundError extends AppError {
-  constructor() {
-    super('DAY_NOT_FOUND', HttpStatus.NOT_FOUND, 'Day not found');
-  }
-}
-
 export class MediaNotFoundError extends AppError {
   constructor() {
     super('MEDIA_NOT_FOUND', HttpStatus.NOT_FOUND, 'Media not found');
@@ -147,25 +151,45 @@ export class MediaNotFoundError extends AppError {
 
 export class InvalidFileTypeError extends AppError {
   constructor(details?: Record<string, unknown>) {
-    super('INVALID_FILE_TYPE', HttpStatus.BAD_REQUEST, 'File type is not allowed', details);
+    super(
+      'INVALID_FILE_TYPE',
+      HttpStatus.BAD_REQUEST,
+      'File type is not allowed',
+      details,
+    );
   }
 }
 
 export class FileTooLargeError extends AppError {
   constructor(details?: Record<string, unknown>) {
-    super('FILE_TOO_LARGE', HttpStatus.BAD_REQUEST, 'File exceeds the maximum allowed size', details);
+    super(
+      'FILE_TOO_LARGE',
+      HttpStatus.BAD_REQUEST,
+      'File exceeds the maximum allowed size',
+      details,
+    );
   }
 }
 
 export class FutureDateError extends AppError {
   constructor(details?: Record<string, unknown>) {
-    super('FUTURE_DATE', HttpStatus.BAD_REQUEST, 'Cannot create or modify entries for dates more than one day in the future', details);
+    super(
+      'FUTURE_DATE',
+      HttpStatus.BAD_REQUEST,
+      'Cannot create or modify entries for dates more than one day in the future',
+      details,
+    );
   }
 }
 
 export class RecommendationNotFoundError extends AppError {
   constructor(details?: Record<string, unknown>) {
-    super('RECOMMENDATION_NOT_FOUND', HttpStatus.BAD_REQUEST, 'Unknown recommendation key', details);
+    super(
+      'RECOMMENDATION_NOT_FOUND',
+      HttpStatus.BAD_REQUEST,
+      'Unknown recommendation key',
+      details,
+    );
   }
 }
 
@@ -177,12 +201,74 @@ export class GoogleAuthFailedError extends AppError {
 
 export class UserCreationFailedError extends AppError {
   constructor(details?: Record<string, unknown>) {
-    super('USER_CREATION_FAILED', HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to create user account', details);
+    super(
+      'USER_CREATION_FAILED',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to create user account',
+      details,
+    );
   }
 }
 
 export class InternalError extends AppError {
   constructor() {
-    super('INTERNAL_ERROR', HttpStatus.INTERNAL_SERVER_ERROR, 'Internal server error');
+    super(
+      'INTERNAL_ERROR',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      'Internal server error',
+    );
+  }
+}
+
+export class QuotaExceededError extends AppError {
+  constructor(details?: Record<string, unknown>) {
+    super(
+      'QUOTA_EXCEEDED',
+      HttpStatus.FORBIDDEN,
+      'You have reached the limit for your current plan',
+      details,
+    );
+  }
+}
+
+export class FeatureLockedError extends AppError {
+  constructor(details?: Record<string, unknown>) {
+    super(
+      'FEATURE_LOCKED',
+      HttpStatus.FORBIDDEN,
+      'This feature requires a higher subscription tier',
+      details,
+    );
+  }
+}
+
+export class SubscriptionNotFoundError extends AppError {
+  constructor() {
+    super(
+      'SUBSCRIPTION_NOT_FOUND',
+      HttpStatus.NOT_FOUND,
+      'Subscription not found',
+    );
+  }
+}
+
+export class PaddleNotConfiguredError extends AppError {
+  constructor() {
+    super(
+      'PADDLE_NOT_CONFIGURED',
+      HttpStatus.SERVICE_UNAVAILABLE,
+      'Paddle billing is not configured',
+    );
+  }
+}
+
+export class PaddleCancelError extends AppError {
+  constructor(details?: Record<string, unknown>) {
+    super(
+      'PADDLE_CANCEL_ERROR',
+      HttpStatus.BAD_GATEWAY,
+      'Failed to cancel subscription via Paddle',
+      details,
+    );
   }
 }

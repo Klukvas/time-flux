@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Dimensions,
@@ -15,10 +15,12 @@ import {
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { extractApiError } from '@lifespan/api';
 import { getPeriodsForDate, getUserMessage } from '@lifespan/domain';
 import {
+  useCreatePeriod,
   useDayMedia,
   useDays,
   useDayStates,
@@ -89,6 +91,7 @@ function DayContent({ date }: { date: string }) {
   const { data: daysData } = useDays({ from: date, to: date });
   const upsertDay = useUpsertDay();
   const updateLocation = useUpdateDayLocation();
+  const createPeriod = useCreatePeriod();
 
   const dayRecord = daysData?.[0] ?? null;
 
@@ -123,15 +126,28 @@ function DayContent({ date }: { date: string }) {
 
   const mediaItems = useMemo(() => existingMedia ?? [], [existingMedia]);
 
+  // Track which date has been initialized with server data
+  const initializedDateRef = useRef<string | null>(null);
+
+  // Reset when date changes, then initialize from server data
   useEffect(() => {
-    setComment('');
-  }, [date]);
+    if (initializedDateRef.current !== date) {
+      setComment('');
+      initializedDateRef.current = null;
+    }
+
+    if (dayRecord && initializedDateRef.current !== date) {
+      setComment(dayRecord.comment ?? '');
+      initializedDateRef.current = date;
+    }
+  }, [date, dayRecord]);
 
   const handleSetMood = (dayStateId: string | null) => {
     upsertDay.mutate(
-      { date, data: { dayStateId } },
+      { date, data: { dayStateId, comment: comment || null } },
       {
-        onError: (err) => Alert.alert('Error', getUserMessage(extractApiError(err))),
+        onError: (err) =>
+          Alert.alert('Error', getUserMessage(extractApiError(err))),
       },
     );
   };
@@ -144,8 +160,10 @@ function DayContent({ date }: { date: string }) {
   const handleDateChange = (_: unknown, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      const iso = selectedDate.toISOString().slice(0, 10);
-      router.replace(`/timeline/day/${iso}`);
+      const y = selectedDate.getFullYear();
+      const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const d = String(selectedDate.getDate()).padStart(2, '0');
+      router.replace(`/timeline/day/${y}-${m}-${d}`);
     }
   };
 
@@ -162,7 +180,8 @@ function DayContent({ date }: { date: string }) {
       { date, data: { locationName: null, latitude: null, longitude: null } },
       {
         onSuccess: () => Alert.alert('', t('day_form.location_removed')),
-        onError: (err) => Alert.alert('Error', getUserMessage(extractApiError(err))),
+        onError: (err) =>
+          Alert.alert('Error', getUserMessage(extractApiError(err))),
       },
     );
   };
@@ -206,7 +225,9 @@ function DayContent({ date }: { date: string }) {
       <Pressable style={styles.header} onPress={() => setShowDatePicker(true)}>
         <Text style={styles.dayLabel}>{formatDayShort(date)}</Text>
         <View style={styles.dateRow}>
-          <Text style={styles.dateTitle}>{formatDate(date, 'cccc, MMMM d, yyyy')}</Text>
+          <Text style={styles.dateTitle}>
+            {formatDate(date, 'cccc, MMMM d, yyyy')}
+          </Text>
           <View style={styles.calendarIcon}>
             <Text style={styles.calendarIconText}>📅</Text>
           </View>
@@ -260,7 +281,9 @@ function DayContent({ date }: { date: string }) {
                   <View
                     style={[
                       styles.memoryDot,
-                      { backgroundColor: memory.mood?.color ?? colors.gray[200] },
+                      {
+                        backgroundColor: memory.mood?.color ?? colors.gray[200],
+                      },
                     ]}
                   />
                   <View>
@@ -270,7 +293,9 @@ function DayContent({ date }: { date: string }) {
                     {memory.mediaCount > 0 && (
                       <Text style={styles.memoryMediaCount}>
                         {memory.mediaCount}{' '}
-                        {memory.mediaCount === 1 ? t('memories.photo') : t('memories.photos')}
+                        {memory.mediaCount === 1
+                          ? t('memories.photo')
+                          : t('memories.photos')}
                       </Text>
                     )}
                   </View>
@@ -288,7 +313,10 @@ function DayContent({ date }: { date: string }) {
             styles.largeMoodCircle,
             today && styles.largeMoodToday,
             dayData?.dayState?.color
-              ? { backgroundColor: dayData.dayState.color, borderColor: dayData.dayState.color }
+              ? {
+                  backgroundColor: dayData.dayState.color,
+                  borderColor: dayData.dayState.color,
+                }
               : { borderColor: colors.gray[300] },
           ]}
         />
@@ -314,7 +342,10 @@ function DayContent({ date }: { date: string }) {
                 style={styles.mediaThumbnail}
               >
                 {isImageType(item.contentType) && item.url ? (
-                  <Image source={{ uri: item.url }} style={styles.mediaThumbnailImage} />
+                  <Image
+                    source={{ uri: item.url }}
+                    style={styles.mediaThumbnailImage}
+                  />
                 ) : (
                   <View style={styles.mediaVideoPlaceholder}>
                     <Text style={styles.mediaPlayIcon}>▶</Text>
@@ -346,7 +377,9 @@ function DayContent({ date }: { date: string }) {
         {dayRecord?.locationName ? (
           <View style={styles.locationCard}>
             <Text style={styles.locationPin}>📍</Text>
-            <Text style={styles.locationName} numberOfLines={1}>{dayRecord.locationName}</Text>
+            <Text style={styles.locationName} numberOfLines={1}>
+              {dayRecord.locationName}
+            </Text>
             <View style={styles.locationActions}>
               {dayRecord.latitude != null && dayRecord.longitude != null && (
                 <Pressable
@@ -356,16 +389,25 @@ function DayContent({ date }: { date: string }) {
                     )
                   }
                 >
-                  <Text style={styles.locationActionLink}>{t('day_form.view_on_map')}</Text>
+                  <Text style={styles.locationActionLink}>
+                    {t('day_form.view_on_map')}
+                  </Text>
                 </Pressable>
               )}
               {!futureDisabled && (
                 <>
                   <Pressable onPress={handleOpenLocationPicker}>
-                    <Text style={styles.locationActionText}>{t('day_form.change_location')}</Text>
+                    <Text style={styles.locationActionText}>
+                      {t('day_form.change_location')}
+                    </Text>
                   </Pressable>
-                  <Pressable onPress={handleRemoveLocation} disabled={updateLocation.isPending}>
-                    <Text style={styles.locationActionDanger}>{t('day_form.remove_location')}</Text>
+                  <Pressable
+                    onPress={handleRemoveLocation}
+                    disabled={updateLocation.isPending}
+                  >
+                    <Text style={styles.locationActionDanger}>
+                      {t('day_form.remove_location')}
+                    </Text>
                   </Pressable>
                 </>
               )}
@@ -373,10 +415,14 @@ function DayContent({ date }: { date: string }) {
           </View>
         ) : (
           <View style={styles.locationEmpty}>
-            <Text style={styles.locationEmptyText}>{t('day_form.no_location')}</Text>
+            <Text style={styles.locationEmptyText}>
+              {t('day_form.no_location')}
+            </Text>
             {!futureDisabled && (
               <Pressable onPress={handleOpenLocationPicker}>
-                <Text style={styles.locationAddText}>+ {t('day_form.add_location')}</Text>
+                <Text style={styles.locationAddText}>
+                  + {t('day_form.add_location')}
+                </Text>
               </Pressable>
             )}
           </View>
@@ -424,9 +470,30 @@ function DayContent({ date }: { date: string }) {
             placeholderTextColor={colors.gray[400]}
             style={styles.commentInput}
           />
-          <Text style={styles.charCount}>
-            {comment.length}/{MAX_COMMENT_LENGTH}
-          </Text>
+          <View style={styles.commentFooter}>
+            <Text style={styles.charCount}>
+              {comment.length}/{MAX_COMMENT_LENGTH}
+            </Text>
+            <Pressable
+              onPress={() =>
+                upsertDay.mutate(
+                  { date, data: { comment: comment || null } },
+                  {
+                    onSuccess: () => Alert.alert('', t('day_form.day_updated')),
+                    onError: (err) =>
+                      Alert.alert(
+                        'Error',
+                        getUserMessage(extractApiError(err)),
+                      ),
+                  },
+                )
+              }
+              disabled={upsertDay.isPending}
+              style={styles.saveCommentBtn}
+            >
+              <Text style={styles.saveCommentText}>{t('common.save')}</Text>
+            </Pressable>
+          </View>
         </View>
       )}
 
@@ -452,7 +519,9 @@ function DayContent({ date }: { date: string }) {
                     { backgroundColor: hexToRgba(period.category.color, 0.15) },
                   ]}
                 >
-                  <Text style={[styles.badgeText, { color: period.category.color }]}>
+                  <Text
+                    style={[styles.badgeText, { color: period.category.color }]}
+                  >
                     {period.eventGroup.title}
                   </Text>
                 </View>
@@ -469,17 +538,24 @@ function DayContent({ date }: { date: string }) {
             </View>
           ))
         ) : (
-          <Text style={styles.emptyText}>{t('chapters.empty.description')}</Text>
+          <Text style={styles.emptyText}>
+            {t('chapters.empty.description')}
+          </Text>
         )}
 
         {/* Searchable chapter selector */}
         {!futureDisabled && (
           <View style={styles.chapterSelectorContainer}>
             <Pressable
-              onPress={() => { setShowChapterSearch(true); setChapterQuery(''); }}
+              onPress={() => {
+                setShowChapterSearch(true);
+                setChapterQuery('');
+              }}
               style={styles.addChapterBtn}
             >
-              <Text style={styles.addChapterText}>+ {t('day_form.add_chapter')}</Text>
+              <Text style={styles.addChapterText}>
+                + {t('day_form.add_chapter')}
+              </Text>
             </Pressable>
           </View>
         )}
@@ -494,7 +570,9 @@ function DayContent({ date }: { date: string }) {
       >
         <View style={styles.chapterSearchModal}>
           <View style={styles.chapterSearchHeader}>
-            <Text style={styles.chapterSearchTitle}>{t('day_form.add_chapter')}</Text>
+            <Text style={styles.chapterSearchTitle}>
+              {t('day_form.add_chapter')}
+            </Text>
             <Pressable onPress={() => setShowChapterSearch(false)}>
               <Text style={styles.chapterSearchClose}>{t('common.close')}</Text>
             </Pressable>
@@ -516,15 +594,36 @@ function DayContent({ date }: { date: string }) {
                 <Pressable
                   onPress={() => {
                     setShowChapterSearch(false);
-                    router.push(`/chapter/${item.id}`);
+                    if (isActive) {
+                      router.push(`/chapter/${item.id}`);
+                    } else {
+                      createPeriod.mutate(
+                        { groupId: item.id, data: { startDate: date } },
+                        {
+                          onSuccess: () =>
+                            Alert.alert('', t('day_form.chapter_added')),
+                          onError: (err) =>
+                            Alert.alert(
+                              'Error',
+                              getUserMessage(extractApiError(err)),
+                            ),
+                        },
+                      );
+                    }
                   }}
                   style={styles.chapterSearchItem}
                 >
                   <View
-                    style={[styles.chapterDot, { backgroundColor: item.category.color }]}
+                    style={[
+                      styles.chapterDot,
+                      { backgroundColor: item.category.color },
+                    ]}
                   />
                   <Text
-                    style={[styles.chapterItemText, isActive && styles.chapterItemActive]}
+                    style={[
+                      styles.chapterItemText,
+                      isActive && styles.chapterItemActive,
+                    ]}
                     numberOfLines={1}
                   >
                     {item.title}
@@ -533,10 +632,17 @@ function DayContent({ date }: { date: string }) {
                     <View
                       style={[
                         styles.chapterActiveBadge,
-                        { backgroundColor: hexToRgba(item.category.color, 0.15) },
+                        {
+                          backgroundColor: hexToRgba(item.category.color, 0.15),
+                        },
                       ]}
                     >
-                      <Text style={[styles.chapterActiveBadgeText, { color: item.category.color }]}>
+                      <Text
+                        style={[
+                          styles.chapterActiveBadgeText,
+                          { color: item.category.color },
+                        ]}
+                      >
                         {t('periods.active')}
                       </Text>
                     </View>
@@ -545,7 +651,9 @@ function DayContent({ date }: { date: string }) {
               );
             }}
             ListEmptyComponent={
-              <Text style={styles.chapterSearchEmpty}>{t('day_form.no_chapters_found')}</Text>
+              <Text style={styles.chapterSearchEmpty}>
+                {t('day_form.no_chapters_found')}
+              </Text>
             }
           />
         </View>
@@ -562,14 +670,24 @@ interface MediaViewerModalProps {
   onClose: () => void;
 }
 
-function MediaViewerModal({ items, initialIndex, onClose }: MediaViewerModalProps) {
+function MediaViewerModal({
+  items,
+  initialIndex,
+  onClose,
+}: MediaViewerModalProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const insets = useSafeAreaInsets();
 
   return (
-    <Modal visible animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+    <Modal
+      visible
+      animationType="fade"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
       <View style={styles.viewerContainer}>
         {/* Header */}
-        <View style={styles.viewerHeader}>
+        <View style={[styles.viewerHeader, { paddingTop: insets.top }]}>
           <Pressable onPress={onClose} style={styles.viewerCloseBtn}>
             <Text style={styles.viewerCloseText}>✕</Text>
           </Pressable>
@@ -593,7 +711,9 @@ function MediaViewerModal({ items, initialIndex, onClose }: MediaViewerModalProp
           })}
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={(e) => {
-            const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+            const idx = Math.round(
+              e.nativeEvent.contentOffset.x / SCREEN_WIDTH,
+            );
             setCurrentIndex(idx);
           }}
           renderItem={({ item }) => (
@@ -671,8 +791,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     marginTop: spacing.sm,
   },
-  todayDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.brand[500] },
-  todayText: { fontSize: fontSize.xs, fontWeight: '500', color: colors.brand[700] },
+  todayDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.brand[500],
+  },
+  todayText: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    color: colors.brand[700],
+  },
   futureBadge: {
     backgroundColor: '#FEE2E2',
     borderRadius: borderRadius.full,
@@ -697,10 +826,22 @@ const styles = StyleSheet.create({
     color: colors.brand[500],
     marginBottom: spacing.sm,
   },
-  memoryContent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  memoryContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   memoryDot: { width: 32, height: 32, borderRadius: 16 },
-  memoryMood: { fontSize: fontSize.sm, fontWeight: '500', color: colors.gray[900] },
-  memoryMediaCount: { fontSize: fontSize.xs, color: colors.gray[500], marginTop: 2 },
+  memoryMood: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    color: colors.gray[900],
+  },
+  memoryMediaCount: {
+    fontSize: fontSize.xs,
+    color: colors.gray[500],
+    marginTop: 2,
+  },
 
   // Large mood
   largeMoodContainer: { alignItems: 'center', marginVertical: spacing.lg },
@@ -877,11 +1018,26 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     minHeight: 80,
   },
+  commentFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.xs,
+  },
   charCount: {
     fontSize: fontSize.xs,
     color: colors.gray[400],
-    textAlign: 'right',
-    marginTop: spacing.xs,
+  },
+  saveCommentBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.brand[500],
+  },
+  saveCommentText: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    color: '#fff',
   },
 
   // Period cards
@@ -899,9 +1055,22 @@ const styles = StyleSheet.create({
   },
   badgeText: { fontSize: fontSize.xs, fontWeight: '600' },
   activeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.green[500] },
-  activeText: { fontSize: fontSize.xs, fontWeight: '500', color: colors.green[600] },
-  periodComment: { fontSize: fontSize.sm, color: colors.gray[700], marginTop: spacing.xs },
+  activeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.green[500],
+  },
+  activeText: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    color: colors.green[600],
+  },
+  periodComment: {
+    fontSize: fontSize.sm,
+    color: colors.gray[700],
+    marginTop: spacing.xs,
+  },
 
   // Chapter selector
   chapterSelectorContainer: { marginTop: spacing.sm },
@@ -1004,7 +1173,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
-    paddingTop: 50,
     paddingBottom: spacing.md,
   },
   viewerCloseBtn: {
