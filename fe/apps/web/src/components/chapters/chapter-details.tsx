@@ -3,16 +3,16 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import type { EventGroup, EventPeriod } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage } from '@lifespan/domain';
+import type { EventGroup, EventPeriod } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage } from '@timeflux/domain';
 import {
   useDeleteEventGroup,
   useDeletePeriod,
   useEventGroupDetails,
   useTranslation,
-} from '@lifespan/hooks';
-import { formatDateRange, hexToRgba, isImageType } from '@lifespan/utils';
+} from '@timeflux/hooks';
+import { formatDateRange, hexToRgba, isImageType } from '@timeflux/utils';
 import { ChapterDetailsSkeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';

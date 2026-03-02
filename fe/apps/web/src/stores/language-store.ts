@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { Language } from '@lifespan/i18n';
-import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from '@lifespan/i18n';
+import type { Language } from '@timeflux/i18n';
+import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from '@timeflux/i18n';
 
 interface LanguageState {
   language: Language;
@@ -8,7 +8,7 @@ interface LanguageState {
   hydrate: () => void;
 }
 
-const STORAGE_KEY = 'lifespan_language';
+const STORAGE_KEY = 'timeflux_language';
 
 function detectLanguage(): Language {
   if (typeof navigator === 'undefined') return DEFAULT_LANGUAGE;
@@ -29,7 +29,10 @@ export const useLanguageStore = create<LanguageState>((set) => ({
 
   hydrate: () => {
     const stored = localStorage.getItem(STORAGE_KEY) as Language | null;
-    const language = stored && SUPPORTED_LANGUAGES.includes(stored) ? stored : detectLanguage();
+    const language =
+      stored && SUPPORTED_LANGUAGES.includes(stored)
+        ? stored
+        : detectLanguage();
     localStorage.setItem(STORAGE_KEY, language);
     document.documentElement.lang = language;
     set({ language });

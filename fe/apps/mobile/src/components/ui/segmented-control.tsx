@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useTheme } from '@lifespan/hooks';
+import { useTheme } from '@timeflux/hooks';
 import { borderRadius, fontSize, spacing } from '@/lib/theme';
 
 interface SegmentedControlProps<T extends string> {
@@ -38,7 +38,11 @@ export function SegmentedControl<T extends string>({
             <Text
               style={[
                 styles.label,
-                { color: isActive ? tokens.colors.text : tokens.colors.textSecondary },
+                {
+                  color: isActive
+                    ? tokens.colors.text
+                    : tokens.colors.textSecondary,
+                },
               ]}
             >
               {opt.label}

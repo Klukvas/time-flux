@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/style.css';
 import { DateTime } from 'luxon';
-import { useTranslation } from '@lifespan/hooks';
+import { useTranslation } from '@timeflux/hooks';
 import { Button } from './button';
 
 interface CalendarPopoverProps {
@@ -13,7 +13,11 @@ interface CalendarPopoverProps {
   minDate?: string; // ISO date string YYYY-MM-DD — disables dates before this
 }
 
-export function CalendarPopover({ value, onChange, minDate }: CalendarPopoverProps) {
+export function CalendarPopover({
+  value,
+  onChange,
+  minDate,
+}: CalendarPopoverProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [tempDate, setTempDate] = useState<string>(value);
@@ -32,7 +36,10 @@ export function CalendarPopover({ value, onChange, minDate }: CalendarPopoverPro
   useEffect(() => {
     if (!open) return;
     const handleClick = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -66,13 +73,19 @@ export function CalendarPopover({ value, onChange, minDate }: CalendarPopoverPro
 
   return (
     <div ref={containerRef} className="relative inline-block">
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => setOpen((o) => !o)}
-      >
-        <svg className="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <Button variant="secondary" size="sm" onClick={() => setOpen((o) => !o)}>
+        <svg
+          className="mr-1.5 h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
         {t('day_form.pick_date')}
       </Button>
@@ -86,15 +99,17 @@ export function CalendarPopover({ value, onChange, minDate }: CalendarPopoverPro
             defaultMonth={selectedJS}
             disabled={{
               after: todayJS,
-              ...(minDate ? { before: DateTime.fromISO(minDate).toJSDate() } : {}),
+              ...(minDate
+                ? { before: DateTime.fromISO(minDate).toJSDate() }
+                : {}),
             }}
             showOutsideDays
             classNames={{
-              root: 'rdp-lifespan text-content text-sm',
-              day: 'rdp-lifespan-day',
-              today: 'rdp-lifespan-today',
-              selected: 'rdp-lifespan-selected',
-              outside: 'rdp-lifespan-outside',
+              root: 'rdp-timeflux text-content text-sm',
+              day: 'rdp-timeflux-day',
+              today: 'rdp-timeflux-today',
+              selected: 'rdp-timeflux-selected',
+              outside: 'rdp-timeflux-outside',
               chevron: 'fill-content-secondary',
             }}
           />

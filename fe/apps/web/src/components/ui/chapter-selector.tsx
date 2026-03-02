@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEventGroups, useTranslation } from '@lifespan/hooks';
-import { hexToRgba } from '@lifespan/utils';
+import { useEventGroups, useTranslation } from '@timeflux/hooks';
+import { hexToRgba } from '@timeflux/utils';
 
 interface ChapterSelectorProps {
   /** Period IDs already attached to this day */

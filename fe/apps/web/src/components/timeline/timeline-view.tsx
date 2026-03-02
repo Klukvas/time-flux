@@ -7,10 +7,10 @@ import {
   useTimeline,
   useTranslation,
   useWeekTimeline,
-} from '@lifespan/hooks';
-import { buildWeekGrid, groupTimelineHorizontal } from '@lifespan/domain';
-import type { HorizontalTimelineWeek } from '@lifespan/domain';
-import type { DayMedia } from '@lifespan/api';
+} from '@timeflux/hooks';
+import { buildWeekGrid, groupTimelineHorizontal } from '@timeflux/domain';
+import type { HorizontalTimelineWeek } from '@timeflux/domain';
+import type { DayMedia } from '@timeflux/api';
 import {
   addDays,
   formatDate,
@@ -21,7 +21,7 @@ import {
   isImageType,
   isToday,
   todayISO,
-} from '@lifespan/utils';
+} from '@timeflux/utils';
 import { DateTime } from 'luxon';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';

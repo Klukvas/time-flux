@@ -1,13 +1,18 @@
 import { Redirect, Tabs } from 'expo-router';
 import { useAuthStore } from '@/stores/auth-store';
 import { Loading } from '@/components/ui/loading';
-import { useTheme, useTranslation } from '@lifespan/hooks';
+import { useTheme, useTranslation } from '@timeflux/hooks';
 import { Text } from 'react-native';
 
 function TabIcon({ name, focused }: { name: string; focused: boolean }) {
   const { tokens } = useTheme();
   return (
-    <Text style={{ fontSize: 10, color: focused ? tokens.colors.accent : tokens.colors.textTertiary }}>
+    <Text
+      style={{
+        fontSize: 10,
+        color: focused ? tokens.colors.accent : tokens.colors.textTertiary,
+      }}
+    >
       {name}
     </Text>
   );

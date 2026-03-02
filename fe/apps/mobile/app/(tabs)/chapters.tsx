@@ -11,22 +11,22 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import type { EventGroup } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
+import type { EventGroup } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
 import {
   getUserMessage,
   validateTitle,
   validateDescription,
-} from '@lifespan/domain';
+} from '@timeflux/domain';
 import {
   useCategories,
   useCreateEventGroup,
   useDeleteEventGroup,
   useEventGroups,
   useUpdateEventGroup,
-} from '@lifespan/hooks';
-import { formatDateRange, hexToRgba } from '@lifespan/utils';
-import { MAX_TITLE_LENGTH, MAX_DESCRIPTION_LENGTH } from '@lifespan/constants';
+} from '@timeflux/hooks';
+import { formatDateRange, hexToRgba } from '@timeflux/utils';
+import { MAX_TITLE_LENGTH, MAX_DESCRIPTION_LENGTH } from '@timeflux/constants';
 import { Loading } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

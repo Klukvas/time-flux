@@ -6,8 +6,8 @@ import {
   validateMediaFile,
   isImageType,
   isVideoType,
-} from '@lifespan/utils';
-import type { MediaItem } from '@lifespan/utils';
+} from '@timeflux/utils';
+import type { MediaItem } from '@timeflux/utils';
 
 interface MediaUploaderProps {
   items: MediaItem[];

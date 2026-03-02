@@ -1,4 +1,4 @@
-import type { ErrorCode } from '@lifespan/api';
+import type { ErrorCode } from '@timeflux/api';
 
 /** Maps backend error codes to i18n translation keys. */
 export const ERROR_TRANSLATION_KEYS: Record<ErrorCode, string> = {

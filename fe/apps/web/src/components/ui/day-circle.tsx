@@ -1,6 +1,6 @@
 'use client';
 
-import { isToday } from '@lifespan/utils';
+import { isToday } from '@timeflux/utils';
 
 interface DayCircleProps {
   date: string;
@@ -19,7 +19,16 @@ const sizeClasses = {
   lg: 'h-12 w-12',
 } as const;
 
-export function DayCircle({ date, color, imageUrl, selected, disabled, size = 'md', label, onClick }: DayCircleProps) {
+export function DayCircle({
+  date,
+  color,
+  imageUrl,
+  selected,
+  disabled,
+  size = 'md',
+  label,
+  onClick,
+}: DayCircleProps) {
   const today = isToday(date);
   const hasImage = !!imageUrl;
   const hasColor = !!color;
@@ -34,7 +43,10 @@ export function DayCircle({ date, color, imageUrl, selected, disabled, size = 'm
     ${disabled ? 'opacity-40' : ''}
   `;
 
-  const inlineStyle = !hasImage && hasColor ? { backgroundColor: color!, borderColor: color! } : undefined;
+  const inlineStyle =
+    !hasImage && hasColor
+      ? { backgroundColor: color!, borderColor: color! }
+      : undefined;
 
   const content = hasImage ? (
     <img src={imageUrl!} alt="" className="h-full w-full object-cover" />

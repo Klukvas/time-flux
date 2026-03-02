@@ -6,8 +6,8 @@ import type {
   EventGroupQueryParams,
   UpdateEventGroupRequest,
   UpdateEventPeriodRequest,
-} from '@lifespan/api';
-import { QUERY_KEYS, STALE_TIMES } from '@lifespan/constants';
+} from '@timeflux/api';
+import { QUERY_KEYS, STALE_TIMES } from '@timeflux/constants';
 import { useApi } from './api-context';
 
 export function useEventGroups(params?: EventGroupQueryParams) {
@@ -80,8 +80,13 @@ export function useCreatePeriod() {
   const api = useApi();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ groupId, data }: { groupId: string; data: CreateEventPeriodRequest }) =>
-      api.eventGroups.createPeriod(groupId, data),
+    mutationFn: ({
+      groupId,
+      data,
+    }: {
+      groupId: string;
+      data: CreateEventPeriodRequest;
+    }) => api.eventGroups.createPeriod(groupId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['event-groups'] });
       qc.invalidateQueries({ queryKey: ['timeline'] });
@@ -94,8 +99,13 @@ export function useUpdatePeriod() {
   const api = useApi();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateEventPeriodRequest }) =>
-      api.eventGroups.updatePeriod(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateEventPeriodRequest;
+    }) => api.eventGroups.updatePeriod(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['event-groups'] });
       qc.invalidateQueries({ queryKey: ['timeline'] });

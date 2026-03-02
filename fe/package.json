@@ -1,5 +1,5 @@
 {
-  "name": "lifespan-frontend",
+  "name": "timeflux-frontend",
   "private": true,
   "workspaces": [
     "packages/*",

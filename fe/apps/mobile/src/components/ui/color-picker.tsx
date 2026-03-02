@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { useTheme } from '@lifespan/hooks';
-import { BASE_COLORS, contrastTextColor, generateShades } from '@lifespan/utils';
+import { useTheme } from '@timeflux/hooks';
+import {
+  BASE_COLORS,
+  contrastTextColor,
+  generateShades,
+} from '@timeflux/utils';
 import { borderRadius, fontSize, spacing } from '@/lib/theme';
 
 interface ColorPickerProps {
@@ -48,17 +52,36 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
                   alignItems: 'center',
                   justifyContent: 'center',
                 },
-                isSelected && { borderColor: borderSelected, transform: [{ scale: 1.15 }] },
-                isExpanded && !isSelected && { borderColor: borderExpanded, transform: [{ scale: 1.15 }] },
+                isSelected && {
+                  borderColor: borderSelected,
+                  transform: [{ scale: 1.15 }],
+                },
+                isExpanded &&
+                  !isSelected && {
+                    borderColor: borderExpanded,
+                    transform: [{ scale: 1.15 }],
+                  },
               ]}
             >
               {isSelected && !isExpanded && (
-                <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: contrastTextColor(base.hex) }}>
+                <Text
+                  style={{
+                    fontSize: fontSize.sm,
+                    fontWeight: '700',
+                    color: contrastTextColor(base.hex),
+                  }}
+                >
                   ✓
                 </Text>
               )}
               {isExpanded && (
-                <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: contrastTextColor(base.hex) }}>
+                <Text
+                  style={{
+                    fontSize: fontSize.xs,
+                    fontWeight: '700',
+                    color: contrastTextColor(base.hex),
+                  }}
+                >
                   ▾
                 </Text>
               )}
@@ -80,7 +103,14 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
             paddingVertical: spacing.sm,
           }}
         >
-          <Text style={{ fontSize: fontSize.xs, fontWeight: '500', color: shadeLabel, marginRight: spacing.xs }}>
+          <Text
+            style={{
+              fontSize: fontSize.xs,
+              fontWeight: '500',
+              color: shadeLabel,
+              marginRight: spacing.xs,
+            }}
+          >
             {BASE_COLORS[expandedIndex].label}
           </Text>
           <View style={{ flexDirection: 'row', gap: spacing.xs + 2 }}>
@@ -101,11 +131,20 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
                       alignItems: 'center',
                       justifyContent: 'center',
                     },
-                    selected && { borderColor: borderSelected, transform: [{ scale: 1.15 }] },
+                    selected && {
+                      borderColor: borderSelected,
+                      transform: [{ scale: 1.15 }],
+                    },
                   ]}
                 >
                   {selected && (
-                    <Text style={{ fontSize: fontSize.xs, fontWeight: '700', color: contrastTextColor(shade) }}>
+                    <Text
+                      style={{
+                        fontSize: fontSize.xs,
+                        fontWeight: '700',
+                        color: contrastTextColor(shade),
+                      }}
+                    >
                       ✓
                     </Text>
                   )}

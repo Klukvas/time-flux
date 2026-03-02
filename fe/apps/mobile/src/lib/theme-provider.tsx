@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
-import { getThemeTokens } from '@lifespan/theme';
-import { ThemeContext } from '@lifespan/hooks';
+import { getThemeTokens } from '@timeflux/theme';
+import { ThemeContext } from '@timeflux/hooks';
 import { useThemeStore } from '@/stores/theme-store';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {

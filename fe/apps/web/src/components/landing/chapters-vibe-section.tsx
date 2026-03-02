@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslation } from '@lifespan/hooks';
+import { useTranslation } from '@timeflux/hooks';
 
 const CARDS = [
   {
@@ -8,28 +8,60 @@ const CARDS = [
     gradient: 'from-blue-500/20 to-indigo-500/10',
     glow: 'hover:shadow-blue-500/10',
     barColor: '#3B82F6',
-    dots: ['#22C55E', '#84CC16', '#FACC15', '#F97316', '#EF4444', '#FACC15', '#84CC16'],
+    dots: [
+      '#22C55E',
+      '#84CC16',
+      '#FACC15',
+      '#F97316',
+      '#EF4444',
+      '#FACC15',
+      '#84CC16',
+    ],
   },
   {
     key: 'relationships',
     gradient: 'from-pink-500/20 to-rose-500/10',
     glow: 'hover:shadow-pink-500/10',
     barColor: '#EC4899',
-    dots: ['#EC4899', '#22C55E', '#22C55E', '#84CC16', '#22C55E', '#FACC15', '#22C55E'],
+    dots: [
+      '#EC4899',
+      '#22C55E',
+      '#22C55E',
+      '#84CC16',
+      '#22C55E',
+      '#FACC15',
+      '#22C55E',
+    ],
   },
   {
     key: 'health',
     gradient: 'from-emerald-500/20 to-teal-500/10',
     glow: 'hover:shadow-emerald-500/10',
     barColor: '#10B981',
-    dots: ['#FACC15', '#84CC16', '#22C55E', '#22C55E', '#22C55E', '#84CC16', '#22C55E'],
+    dots: [
+      '#FACC15',
+      '#84CC16',
+      '#22C55E',
+      '#22C55E',
+      '#22C55E',
+      '#84CC16',
+      '#22C55E',
+    ],
   },
   {
     key: 'travel',
     gradient: 'from-cyan-500/20 to-sky-500/10',
     glow: 'hover:shadow-cyan-500/10',
     barColor: '#0EA5E9',
-    dots: ['#22C55E', '#22C55E', '#84CC16', '#22C55E', '#22C55E', '#22C55E', '#84CC16'],
+    dots: [
+      '#22C55E',
+      '#22C55E',
+      '#84CC16',
+      '#22C55E',
+      '#22C55E',
+      '#22C55E',
+      '#84CC16',
+    ],
   },
 ];
 

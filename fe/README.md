@@ -114,7 +114,7 @@ EXPO_PUBLIC_API_URL=http://localhost:3000
 
 ## Package Details
 
-### `@lifespan/api`
+### `@timeflux/api`
 Typed HTTP client built on Axios. Creates an API instance with automatic JWT injection and 401 handling.
 
 - `createApiClient(config)` — creates Axios instance with interceptors
@@ -122,7 +122,7 @@ Typed HTTP client built on Axios. Creates an API instance with automatic JWT inj
 - `extractApiError(error)` — extracts structured error from Axios error
 - Full TypeScript types for all request/response DTOs
 
-### `@lifespan/domain`
+### `@timeflux/domain`
 Pure business logic functions:
 
 - `groupTimelineByMonth(data)` — groups timeline response by month
@@ -132,7 +132,7 @@ Pure business logic functions:
 - `getUserMessage(error)` — maps error_code to user-friendly string
 - `validateEmail/Password/Name/Color/Comment/DateRange` — form validation
 
-### `@lifespan/hooks`
+### `@timeflux/hooks`
 TanStack Query hooks for all API operations:
 
 - `useTimeline(params?)`, `useWeekTimeline(params)`
@@ -145,7 +145,7 @@ TanStack Query hooks for all API operations:
 - `useTranslation()`, `useTheme()` — i18n and theme contexts
 - `ApiContext` + `useApi()` — provides API instance to hooks
 
-### `@lifespan/i18n`
+### `@timeflux/i18n`
 Internationalization:
 
 - Supported languages: English (`en`), Ukrainian (`uk`)
@@ -154,7 +154,7 @@ Internationalization:
 - Auto-detection of browser language on first launch
 - Persistent language preference via localStorage
 
-### `@lifespan/theme`
+### `@timeflux/theme`
 Theme tokens for light and dark modes:
 
 - `getThemeTokens(resolvedTheme)` — returns semantic color tokens
@@ -162,13 +162,13 @@ Theme tokens for light and dark modes:
 - CSS variables defined in `globals.css` and toggled via `data-theme` attribute
 - System theme detection with live media query listener
 
-### `@lifespan/utils`
+### `@timeflux/utils`
 Pure utility functions:
 
 - Date formatting: `formatDate`, `formatDayShort`, `formatDayNumber`, `formatMonthYear`, `formatDateRange`, `formatRelative`, `todayISO`, `isToday`, `durationInDays`
 - Color helpers: `hexToRgba`, `isLightColor`, `contrastTextColor`, `COLOR_PALETTE`
 
-### `@lifespan/constants`
+### `@timeflux/constants`
 Shared constants:
 
 - `QUERY_KEYS` — TanStack Query key factories
@@ -202,11 +202,11 @@ Shared constants:
 
 | Store | Key | Purpose |
 |-------|-----|---------|
-| `auth-store` | `lifespan_token`, `lifespan_user` | JWT token and user object |
-| `theme-store` | `lifespan_theme` | Theme preference (system/light/dark) |
-| `language-store` | `lifespan_language` | Language code (en/uk) |
-| `sidebar-store` | `lifespan_sidebar_collapsed` | Sidebar expanded/collapsed state |
-| `view-store` | `lifespan_timeline_mode` | Timeline display mode |
+| `auth-store` | `timeflux_token`, `timeflux_user` | JWT token and user object |
+| `theme-store` | `timeflux_theme` | Theme preference (system/light/dark) |
+| `language-store` | `timeflux_language` | Language code (en/uk) |
+| `sidebar-store` | `timeflux_sidebar_collapsed` | Sidebar expanded/collapsed state |
+| `view-store` | `timeflux_timeline_mode` | Timeline display mode |
 
 ## Onboarding Flow
 
@@ -226,5 +226,5 @@ Each highlight step visually rings the corresponding sidebar item and shows an e
 ## Demo
 
 Use the backend demo user:
-- Email: `demo@lifespan.app`
+- Email: `demo@timeflux.app`
 - Password: `demo1234`

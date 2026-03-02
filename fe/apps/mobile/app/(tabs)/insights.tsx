@@ -5,8 +5,8 @@ import {
   useSubscription,
   useTranslation,
   useTheme,
-} from '@lifespan/hooks';
-import type { WeekdayInsights } from '@lifespan/api';
+} from '@timeflux/hooks';
+import type { WeekdayInsights } from '@timeflux/api';
 import { Loading } from '@/components/ui/loading';
 import { colors, fontSize, spacing, borderRadius } from '@/lib/theme';
 import { LineChart, Grid } from 'react-native-svg-charts';

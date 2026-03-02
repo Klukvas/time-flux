@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
-import { useTranslation } from '@lifespan/hooks';
+import { useTranslation } from '@timeflux/hooks';
 
 interface PlacesAutocompleteProps {
   onPlaceSelect: (place: { lat: number; lng: number; name: string }) => void;

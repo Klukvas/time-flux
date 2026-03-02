@@ -3,13 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { extractApiError } from '@lifespan/api';
+import { extractApiError } from '@timeflux/api';
 import type {
   CreateDayMediaRequest,
   DayContextMemory,
   DayMedia,
-} from '@lifespan/api';
-import { getPeriodsForDate, getUserMessage } from '@lifespan/domain';
+} from '@timeflux/api';
+import { getPeriodsForDate, getUserMessage } from '@timeflux/domain';
 import {
   useCreateDayMedia,
   useCreatePeriod,
@@ -23,7 +23,7 @@ import {
   useTranslation,
   useUpdateDayLocation,
   useUpsertDay,
-} from '@lifespan/hooks';
+} from '@timeflux/hooks';
 import {
   addDays,
   extractVideoThumbnail,
@@ -34,9 +34,9 @@ import {
   isToday,
   isVideoType,
   todayISO,
-} from '@lifespan/utils';
-import type { MediaItem } from '@lifespan/utils';
-import { MAX_COMMENT_LENGTH } from '@lifespan/constants';
+} from '@timeflux/utils';
+import type { MediaItem } from '@timeflux/utils';
+import { MAX_COMMENT_LENGTH } from '@timeflux/constants';
 import { Button } from '@/components/ui/button';
 import { MediaUploader } from '@/components/ui/media-uploader';
 import { MediaCarousel } from '@/components/ui/media-carousel';

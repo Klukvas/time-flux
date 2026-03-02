@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { createApiClient, createApi } from '@lifespan/api';
+import { createApiClient, createApi } from '@timeflux/api';
 import { useAuthStore } from '@/stores/auth-store';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';

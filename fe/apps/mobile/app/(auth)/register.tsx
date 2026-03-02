@@ -11,13 +11,13 @@ import {
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { extractApiError } from '@lifespan/api';
+import { extractApiError } from '@timeflux/api';
 import {
   getUserMessage,
   validateEmail,
   validatePassword,
-} from '@lifespan/domain';
-import { useRegister } from '@lifespan/hooks';
+} from '@timeflux/domain';
+import { useRegister } from '@timeflux/hooks';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,7 +68,7 @@ export default function RegisterScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Text style={styles.title}>LifeSpan</Text>
+          <Text style={styles.title}>TimeFlux</Text>
           <Text style={styles.subtitle}>Your visual life timeline</Text>
         </View>
 

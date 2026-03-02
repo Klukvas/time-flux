@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useOnThisDay, useTranslation } from '@lifespan/hooks';
-import type { Memory } from '@lifespan/api';
+import { useOnThisDay, useTranslation } from '@timeflux/hooks';
+import type { Memory } from '@timeflux/api';
 import { DayCircle } from '@/components/ui/day-circle';
 
 interface OnThisDaySectionProps {
@@ -10,7 +10,10 @@ interface OnThisDaySectionProps {
   selectedDate?: string | null;
 }
 
-export function OnThisDaySection({ onMemoryClick, selectedDate }: OnThisDaySectionProps) {
+export function OnThisDaySection({
+  onMemoryClick,
+  selectedDate,
+}: OnThisDaySectionProps) {
   const { data } = useOnThisDay();
   const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
@@ -83,11 +86,7 @@ function MemoryCard({
       <div className="flex items-center gap-3">
         {/* Mood circle */}
         <div className="flex-shrink-0">
-          <DayCircle
-            date={memory.date}
-            color={memory.mood?.color}
-            size="lg"
-          />
+          <DayCircle date={memory.date} color={memory.mood?.color} size="lg" />
         </div>
 
         {/* Content */}
@@ -100,7 +99,10 @@ function MemoryCard({
 
           {memory.mediaCount > 0 && (
             <p className="text-xs text-content-secondary mt-0.5">
-              {memory.mediaCount} {memory.mediaCount === 1 ? t('memories.photo') : t('memories.photos')}
+              {memory.mediaCount}{' '}
+              {memory.mediaCount === 1
+                ? t('memories.photo')
+                : t('memories.photos')}
             </p>
           )}
         </div>

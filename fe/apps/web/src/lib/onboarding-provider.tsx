@@ -1,13 +1,17 @@
 'use client';
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { OnboardingContext, useApi } from '@lifespan/hooks';
-import type { OnboardingStorage } from '@lifespan/hooks';
+import { OnboardingContext, useApi } from '@timeflux/hooks';
+import type { OnboardingStorage } from '@timeflux/hooks';
 import { useAuthStore } from '@/stores/auth-store';
 
-const LEGACY_KEY = 'lifespan_onboarding_completed';
+const LEGACY_KEY = 'timeflux_onboarding_completed';
 
-export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+export function OnboardingProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const api = useApi();
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.token);
@@ -27,7 +31,13 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   // Migrate legacy localStorage flag to backend
   useEffect(() => {
     const legacy = localStorage.getItem(LEGACY_KEY);
-    if (legacy === 'true' && user && !user.onboardingCompleted && token && refreshToken) {
+    if (
+      legacy === 'true' &&
+      user &&
+      !user.onboardingCompleted &&
+      token &&
+      refreshToken
+    ) {
       setAuth(token, refreshToken, { ...user, onboardingCompleted: true });
       api.auth.completeOnboarding().catch(() => {});
       localStorage.removeItem(LEGACY_KEY);
@@ -42,6 +52,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   );
 
   return (
-    <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>
+    <OnboardingContext.Provider value={value}>
+      {children}
+    </OnboardingContext.Provider>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslation } from '@lifespan/hooks';
+import { useTranslation } from '@timeflux/hooks';
 
 interface FinalCTAProps {
   isAuthenticated: boolean;

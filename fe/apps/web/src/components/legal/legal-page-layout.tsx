@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslation } from '@lifespan/hooks';
+import { useTranslation } from '@timeflux/hooks';
 import { useLanguageStore } from '@/stores/language-store';
 import { useThemeStore } from '@/stores/theme-store';
-import type { ThemePreference } from '@lifespan/theme';
+import type { ThemePreference } from '@timeflux/theme';
 
 const THEME_OPTIONS: { value: ThemePreference; icon: string }[] = [
   { value: 'light', icon: '\u2600\uFE0F' },
@@ -29,7 +29,7 @@ export function LegalPageLayout({ children }: LegalPageLayoutProps) {
       <header className="sticky top-0 z-50 border-b border-edge/50 bg-surface/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
           <Link href="/" className="text-xl font-bold text-accent">
-            LifeSpan
+            TimeFlux
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -76,7 +76,7 @@ export function LegalPageLayout({ children }: LegalPageLayoutProps) {
 
       {/* Footer */}
       <footer className="border-t border-edge px-4 py-8 text-center text-xs text-content-tertiary">
-        LifeSpan &copy; {new Date().getFullYear()}
+        TimeFlux &copy; {new Date().getFullYear()}
         {' \u00B7 '}
         <Link href="/blog" className="underline hover:text-content-secondary">
           Blog

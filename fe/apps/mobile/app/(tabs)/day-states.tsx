@@ -8,11 +8,18 @@ import {
   Text,
   View,
 } from 'react-native';
-import type { DayState } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage } from '@lifespan/domain';
-import { useCreateDayStateFromRecommendation, useDayStates, useDeleteDayState, useRecommendations, useTranslation, useTheme } from '@lifespan/hooks';
-import { contrastTextColor } from '@lifespan/utils';
+import type { DayState } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage } from '@timeflux/domain';
+import {
+  useCreateDayStateFromRecommendation,
+  useDayStates,
+  useDeleteDayState,
+  useRecommendations,
+  useTranslation,
+  useTheme,
+} from '@timeflux/hooks';
+import { contrastTextColor } from '@timeflux/utils';
 import { Loading } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -47,17 +54,22 @@ export default function DayStatesScreen() {
   };
 
   const handleDelete = (dayState: DayState) => {
-    Alert.alert(t('day_states.delete'), t('day_states.confirm_delete_message', { name: dayState.name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () =>
-          deleteDayState.mutate(dayState.id, {
-            onError: (err) => Alert.alert('Error', getUserMessage(extractApiError(err))),
-          }),
-      },
-    ]);
+    Alert.alert(
+      t('day_states.delete'),
+      t('day_states.confirm_delete_message', { name: dayState.name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () =>
+            deleteDayState.mutate(dayState.id, {
+              onError: (err) =>
+                Alert.alert('Error', getUserMessage(extractApiError(err))),
+            }),
+        },
+      ],
+    );
   };
 
   const handleAcceptRecommendation = async (key: string) => {
@@ -80,7 +92,9 @@ export default function DayStatesScreen() {
   const handleAddAll = async () => {
     setAddingAll(true);
     try {
-      const colors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
+      const colors = new Set(
+        (dayStates ?? []).map((ds) => ds.color.toLowerCase()),
+      );
       const remaining = (recommendations?.moods ?? []).filter(
         (s) => !dismissedKeys.has(s.key) && !colors.has(s.color.toLowerCase()),
       );
@@ -96,11 +110,15 @@ export default function DayStatesScreen() {
     }
   };
 
-  const existingColors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
-  const visibleRecommendations = (recommendations?.moods ?? []).filter(
-    (s) => !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  const existingColors = new Set(
+    (dayStates ?? []).map((ds) => ds.color.toLowerCase()),
   );
-  const showRecommendations = !suggestionsDismissed && visibleRecommendations.length > 0;
+  const visibleRecommendations = (recommendations?.moods ?? []).filter(
+    (s) =>
+      !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  );
+  const showRecommendations =
+    !suggestionsDismissed && visibleRecommendations.length > 0;
 
   if (isLoading) return <Loading />;
 
@@ -112,7 +130,11 @@ export default function DayStatesScreen() {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <View>
-            <Button title={`+ ${t('day_states.create')}`} onPress={openCreate} style={{ marginBottom: spacing.lg }} />
+            <Button
+              title={`+ ${t('day_states.create')}`}
+              onPress={openCreate}
+              style={{ marginBottom: spacing.lg }}
+            />
 
             {/* Recommendations panel */}
             {showRecommendations && !dayStates?.length && (
@@ -122,11 +144,29 @@ export default function DayStatesScreen() {
                   description={t('day_states.empty.description')}
                 />
 
-                <View style={[styles.suggestionsCard, { backgroundColor: tokens.colors.bgCard, borderColor: tokens.colors.border }]}>
-                  <Text style={[styles.suggestionsTitle, { color: tokens.colors.text }]}>
+                <View
+                  style={[
+                    styles.suggestionsCard,
+                    {
+                      backgroundColor: tokens.colors.bgCard,
+                      borderColor: tokens.colors.border,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.suggestionsTitle,
+                      { color: tokens.colors.text },
+                    ]}
+                  >
                     {t('day_states.recommendations.title')}
                   </Text>
-                  <Text style={[styles.suggestionsDesc, { color: tokens.colors.textSecondary }]}>
+                  <Text
+                    style={[
+                      styles.suggestionsDesc,
+                      { color: tokens.colors.textSecondary },
+                    ]}
+                  >
                     {t('day_states.recommendations.description')}
                   </Text>
 
@@ -141,18 +181,46 @@ export default function DayStatesScreen() {
                             disabled={addingAll || isCreating}
                             style={({ pressed }) => [
                               styles.suggestionChip,
-                              { borderColor: tokens.colors.border, opacity: pressed || addingAll || isCreating ? 0.6 : 1 },
+                              {
+                                borderColor: tokens.colors.border,
+                                opacity:
+                                  pressed || addingAll || isCreating ? 0.6 : 1,
+                              },
                             ]}
                           >
-                            <View style={[styles.suggestionDot, { backgroundColor: s.color }]} />
-                            <Text style={[styles.suggestionText, { color: tokens.colors.text }]}>{name}</Text>
-                            {isCreating && <ActivityIndicator size="small" style={{ marginLeft: 4 }} />}
+                            <View
+                              style={[
+                                styles.suggestionDot,
+                                { backgroundColor: s.color },
+                              ]}
+                            />
+                            <Text
+                              style={[
+                                styles.suggestionText,
+                                { color: tokens.colors.text },
+                              ]}
+                            >
+                              {name}
+                            </Text>
+                            {isCreating && (
+                              <ActivityIndicator
+                                size="small"
+                                style={{ marginLeft: 4 }}
+                              />
+                            )}
                           </Pressable>
                           <Pressable
                             onPress={() => handleDismissRecommendation(s.key)}
                             style={styles.dismissBtn}
                           >
-                            <Text style={{ color: tokens.colors.textTertiary, fontSize: fontSize.sm }}>✕</Text>
+                            <Text
+                              style={{
+                                color: tokens.colors.textTertiary,
+                                fontSize: fontSize.sm,
+                              }}
+                            >
+                              ✕
+                            </Text>
                           </Pressable>
                         </View>
                       );
@@ -167,7 +235,12 @@ export default function DayStatesScreen() {
                       loading={addingAll}
                     />
                     <Pressable onPress={() => setSuggestionsDismissed(true)}>
-                      <Text style={{ color: tokens.colors.textTertiary, fontSize: fontSize.xs }}>
+                      <Text
+                        style={{
+                          color: tokens.colors.textTertiary,
+                          fontSize: fontSize.xs,
+                        }}
+                      >
                         {t('day_states.recommendations.dismiss')}
                       </Text>
                     </Pressable>
@@ -182,7 +255,10 @@ export default function DayStatesScreen() {
                 title={t('day_states.empty.title')}
                 description={t('day_states.empty.description')}
                 action={
-                  <Button title={`+ ${t('day_states.create')}`} onPress={openCreate} />
+                  <Button
+                    title={`+ ${t('day_states.create')}`}
+                    onPress={openCreate}
+                  />
                 }
               />
             )}
@@ -195,14 +271,32 @@ export default function DayStatesScreen() {
             onLongPress={() => handleDelete(ds)}
           >
             <View style={[styles.cardBadge, { backgroundColor: ds.color }]}>
-              <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: contrastTextColor(ds.color) }}>
+              <Text
+                style={{
+                  fontSize: fontSize.sm,
+                  fontWeight: '700',
+                  color: contrastTextColor(ds.color),
+                }}
+              >
                 {ds.name[0]}
               </Text>
             </View>
             <View style={styles.cardInfo}>
-              <Text style={[styles.cardName, { color: tokens.colors.text }]} numberOfLines={1}>{ds.name}</Text>
-              <Text style={[styles.cardLabel, { color: tokens.colors.textSecondary }]}>
-                {ds.isSystem ? t('categories.system_label') : t('categories.custom_label')}
+              <Text
+                style={[styles.cardName, { color: tokens.colors.text }]}
+                numberOfLines={1}
+              >
+                {ds.name}
+              </Text>
+              <Text
+                style={[
+                  styles.cardLabel,
+                  { color: tokens.colors.textSecondary },
+                ]}
+              >
+                {ds.isSystem
+                  ? t('categories.system_label')
+                  : t('categories.custom_label')}
               </Text>
             </View>
           </Pressable>
@@ -211,7 +305,10 @@ export default function DayStatesScreen() {
 
       <DayStateFormModal
         visible={formVisible}
-        onClose={() => { setFormVisible(false); setEditingDayState(null); }}
+        onClose={() => {
+          setFormVisible(false);
+          setEditingDayState(null);
+        }}
         dayState={editingDayState}
       />
     </View>
@@ -250,7 +347,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     marginTop: spacing.lg,
   },
-  suggestionsTitle: { fontSize: fontSize.sm, fontWeight: '600', marginBottom: spacing.xs },
+  suggestionsTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
   suggestionsDesc: { fontSize: fontSize.xs, marginBottom: spacing.lg },
   suggestionsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   suggestionRow: { flexDirection: 'row', alignItems: 'center' },

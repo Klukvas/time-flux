@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { getLocales } from 'expo-localization';
-import type { Language } from '@lifespan/i18n';
-import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from '@lifespan/i18n';
+import type { Language } from '@timeflux/i18n';
+import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from '@timeflux/i18n';
 
 interface LanguageState {
   language: Language;
@@ -11,7 +11,7 @@ interface LanguageState {
   hydrate: () => Promise<void>;
 }
 
-const STORAGE_KEY = 'lifespan_language';
+const STORAGE_KEY = 'timeflux_language';
 
 function detectLanguage(): Language {
   try {

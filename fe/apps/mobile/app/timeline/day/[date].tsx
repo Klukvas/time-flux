@@ -17,8 +17,8 @@ import {
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { extractApiError } from '@lifespan/api';
-import { getPeriodsForDate, getUserMessage } from '@lifespan/domain';
+import { extractApiError } from '@timeflux/api';
+import { getPeriodsForDate, getUserMessage } from '@timeflux/domain';
 import {
   useCreatePeriod,
   useDayMedia,
@@ -30,8 +30,8 @@ import {
   useUpdateDayLocation,
   useUpsertDay,
   useWeekTimeline,
-} from '@lifespan/hooks';
-import { buildWeekGrid } from '@lifespan/domain';
+} from '@timeflux/hooks';
+import { buildWeekGrid } from '@timeflux/domain';
 import {
   addDays,
   formatDate,
@@ -42,8 +42,8 @@ import {
   isToday,
   isVideoType,
   todayISO,
-} from '@lifespan/utils';
-import { MAX_COMMENT_LENGTH } from '@lifespan/constants';
+} from '@timeflux/utils';
+import { MAX_COMMENT_LENGTH } from '@timeflux/constants';
 import { Loading } from '@/components/ui/loading';
 import { colors, fontSize, spacing, borderRadius } from '@/lib/theme';
 

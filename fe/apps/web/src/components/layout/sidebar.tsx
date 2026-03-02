@@ -3,10 +3,10 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTranslation, useTheme, useSubscription } from '@lifespan/hooks';
-import type { ThemePreference } from '@lifespan/theme';
-import type { Language } from '@lifespan/i18n';
-import { SUPPORTED_LANGUAGES } from '@lifespan/i18n';
+import { useTranslation, useTheme, useSubscription } from '@timeflux/hooks';
+import type { ThemePreference } from '@timeflux/theme';
+import type { Language } from '@timeflux/i18n';
+import { SUPPORTED_LANGUAGES } from '@timeflux/i18n';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSidebarStore } from '@/stores/sidebar-store';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { Category } from '@lifespan/api';
+import type { Category } from '@timeflux/api';
 
 interface CategorySelectProps {
   categories: Category[];
@@ -13,7 +13,13 @@ interface CategorySelectProps {
   size?: 'sm' | 'md';
 }
 
-function CategoryOption({ category, size = 'md' }: { category: Category; size?: 'sm' | 'md' }) {
+function CategoryOption({
+  category,
+  size = 'md',
+}: {
+  category: Category;
+  size?: 'sm' | 'md';
+}) {
   const dotSize = size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3';
   return (
     <span className="flex items-center gap-2">
@@ -89,14 +95,21 @@ export function CategorySelect({
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {open && (
         <div className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-edge bg-surface-card py-1 shadow-lg">
           {categories.length === 0 ? (
-            <div className={`${paddingClass} text-content-tertiary ${textClass}`}>
+            <div
+              className={`${paddingClass} text-content-tertiary ${textClass}`}
+            >
               {noItemsText}
             </div>
           ) : (

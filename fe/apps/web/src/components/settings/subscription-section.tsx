@@ -6,8 +6,8 @@ import {
   useTranslation,
   useSubscription,
   useCancelSubscription,
-} from '@lifespan/hooks';
-import type { SubscriptionTier } from '@lifespan/api';
+} from '@timeflux/hooks';
+import type { SubscriptionTier } from '@timeflux/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { openCheckout, PADDLE_PRICES } from '@/lib/paddle';
 import { Modal } from '@/components/ui/modal';

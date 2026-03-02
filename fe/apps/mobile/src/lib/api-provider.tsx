@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createApiClient, createApi } from '@lifespan/api';
-import { ApiContext } from '@lifespan/hooks';
+import { createApiClient, createApi } from '@timeflux/api';
+import { ApiContext } from '@timeflux/hooks';
 import { useAuthStore } from '@/stores/auth-store';
 import { router } from 'expo-router';
 

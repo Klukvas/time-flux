@@ -9,13 +9,13 @@ const nextConfig = {
     },
   },
   transpilePackages: [
-    '@lifespan/api',
-    '@lifespan/constants',
-    '@lifespan/domain',
-    '@lifespan/hooks',
-    '@lifespan/i18n',
-    '@lifespan/theme',
-    '@lifespan/utils',
+    '@timeflux/api',
+    '@timeflux/constants',
+    '@timeflux/domain',
+    '@timeflux/hooks',
+    '@timeflux/i18n',
+    '@timeflux/theme',
+    '@timeflux/utils',
   ],
   async headers() {
     return [

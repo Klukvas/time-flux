@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import type { Category } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage, validateColor, validateName } from '@lifespan/domain';
-import { useCreateCategory, useTranslation, useUpdateCategory } from '@lifespan/hooks';
-import { BASE_COLORS, contrastTextColor } from '@lifespan/utils';
+import type { Category } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage, validateColor, validateName } from '@timeflux/domain';
+import {
+  useCreateCategory,
+  useTranslation,
+  useUpdateCategory,
+} from '@timeflux/hooks';
+import { BASE_COLORS, contrastTextColor } from '@timeflux/utils';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +26,13 @@ interface CategoryFormModalProps {
   initialColor?: string;
 }
 
-export function CategoryFormModal({ open, onClose, category, initialName, initialColor }: CategoryFormModalProps) {
+export function CategoryFormModal({
+  open,
+  onClose,
+  category,
+  initialName,
+  initialColor,
+}: CategoryFormModalProps) {
   const { t } = useTranslation();
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
@@ -57,7 +67,9 @@ export function CategoryFormModal({ open, onClose, category, initialName, initia
     }
 
     const onSuccess = () => {
-      toast.success(isEditing ? t('categories.updated') : t('categories.created'));
+      toast.success(
+        isEditing ? t('categories.updated') : t('categories.created'),
+      );
       onClose();
     };
     const onError = (err: Error) => {
@@ -65,7 +77,10 @@ export function CategoryFormModal({ open, onClose, category, initialName, initia
     };
 
     if (isEditing) {
-      updateCategory.mutate({ id: category.id, data: { name, color } }, { onSuccess, onError });
+      updateCategory.mutate(
+        { id: category.id, data: { name, color } },
+        { onSuccess, onError },
+      );
     } else {
       createCategory.mutate({ name, color }, { onSuccess, onError });
     }
@@ -74,7 +89,11 @@ export function CategoryFormModal({ open, onClose, category, initialName, initia
   const isPending = createCategory.isPending || updateCategory.isPending;
 
   return (
-    <Modal open={open} onClose={onClose} title={isEditing ? t('categories.edit') : t('categories.create')}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={isEditing ? t('categories.edit') : t('categories.create')}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Live preview */}
         <div className="flex items-center gap-3 rounded-lg border border-edge bg-surface-secondary px-4 py-3">
@@ -105,10 +124,17 @@ export function CategoryFormModal({ open, onClose, category, initialName, initia
             {t('categories.form.color')}
           </label>
           <ColorPicker value={color} onChange={setColor} />
-          {errors.color && <p className="mt-1 text-xs text-danger">{errors.color}</p>}
+          {errors.color && (
+            <p className="mt-1 text-xs text-danger">{errors.color}</p>
+          )}
         </div>
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="secondary" type="button" onClick={onClose} disabled={isPending}>
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={onClose}
+            disabled={isPending}
+          >
             {t('common.cancel')}
           </Button>
           <Button type="submit" loading={isPending}>

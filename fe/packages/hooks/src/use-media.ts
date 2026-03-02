@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CreateDayMediaRequest } from '@lifespan/api';
-import { QUERY_KEYS } from '@lifespan/constants';
+import type { CreateDayMediaRequest } from '@timeflux/api';
+import { QUERY_KEYS } from '@timeflux/constants';
 import { useApi } from './api-context';
 
 export function useDayMedia(date: string) {

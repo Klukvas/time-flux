@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { extractApiError } from '@lifespan/api';
+import { extractApiError } from '@timeflux/api';
 import {
   getErrorTranslationKey,
   validateEmail,
   validatePassword,
-} from '@lifespan/domain';
-import { useRegister, useTranslation } from '@lifespan/hooks';
-import { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } from '@lifespan/constants';
+} from '@timeflux/domain';
+import { useRegister, useTranslation } from '@timeflux/hooks';
+import { MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH } from '@timeflux/constants';
 import { useAuthStore } from '@/stores/auth-store';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';

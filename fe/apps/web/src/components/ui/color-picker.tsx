@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { BASE_COLORS, contrastTextColor, generateShades } from '@lifespan/utils';
+import {
+  BASE_COLORS,
+  contrastTextColor,
+  generateShades,
+} from '@timeflux/utils';
 
 interface ColorPickerProps {
   value: string;
@@ -94,9 +98,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
                 key={shade}
                 type="button"
                 className={`h-7 w-7 rounded-full border-2 transition-all hover:scale-110 ${
-                  selected
-                    ? 'border-content scale-110'
-                    : 'border-transparent'
+                  selected ? 'border-content scale-110' : 'border-transparent'
                 }`}
                 style={{ backgroundColor: shade }}
                 onClick={() => handleShadeClick(shade)}

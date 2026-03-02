@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import type { PresignedUrlRequest } from '@lifespan/api';
+import type { PresignedUrlRequest } from '@timeflux/api';
 import { useApi } from './api-context';
-import { generateFileName } from '@lifespan/utils';
+import { generateFileName } from '@timeflux/utils';
 
 export interface UploadResult {
   key: string;

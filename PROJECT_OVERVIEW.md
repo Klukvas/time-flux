@@ -1,6 +1,6 @@
-# LifeSpan — Project Overview
+# TimeFlux — Project Overview
 
-**LifeSpan** is a personal life-tracking application that lets users record daily moods, track life events across categories, attach photos/videos to days, and visualize their life as an interactive timeline.
+**TimeFlux** is a personal life-tracking application that lets users record daily moods, track life events across categories, attach photos/videos to days, and visualize their life as an interactive timeline.
 
 ---
 
@@ -101,7 +101,7 @@
 - **Web:** Interactive Google Maps picker modal (`@vis.gl/react-google-maps`) with Places Autocomplete search, click-to-place pin, "Use Current Location" button, and editable location name
 - **Mobile:** Full-screen map picker screen (`react-native-maps` + `react-native-google-places-autocomplete`) with tap-to-place pin, search, current location, and `expo-location` reverse geocoding
 - Location displayed on Day page with "View on map" link (opens Google Maps), "Change", and "Remove" actions
-- Shared `reverseGeocode()` utility in `@lifespan/utils` for Google Geocoding API
+- Shared `reverseGeocode()` utility in `@timeflux/utils` for Google Geocoding API
 - Requires `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` + `NEXT_PUBLIC_GOOGLE_MAP_ID` env vars (web) and Google Maps API keys in `app.json` (mobile)
 - Google APIs required: Maps JavaScript API, Maps SDK for Android/iOS, Places API (New), Geocoding API
 - Fully backward compatible — existing days without location are unaffected
@@ -287,7 +287,7 @@
 - **robots.ts** — Allow `/`, `/terms`, `/privacy`; disallow all dashboard routes; explicit rules for AI crawlers (GPTBot, ClaudeBot, Google-Extended)
 - **sitemap.ts** — 3 public pages with priority and changeFrequency
 - **manifest.ts** — PWA manifest (standalone, theme color, icon, categories)
-- **Root metadata** — `metadataBase`, title template (`%s | LifeSpan`), OpenGraph, Twitter Cards (`summary_large_image`), canonical URL, keywords, authors, googleBot directives
+- **Root metadata** — `metadataBase`, title template (`%s | TimeFlux`), OpenGraph, Twitter Cards (`summary_large_image`), canonical URL, keywords, authors, googleBot directives
 - **Dynamic OG image** — `opengraph-image.tsx` renders 1200x630 PNG via `next/og` (dark gradient, colored dots, title)
 - **JSON-LD** — `WebApplication` + `Organization` schema.org structured data in root layout
 - **Per-page metadata** — terms/privacy have custom titles, descriptions, canonical URLs; auth callback is noindex
@@ -300,7 +300,7 @@
 ## Architecture at a Glance
 
 ```
-LifeSpan/
+TimeFlux/
 ├── be/                        NestJS backend
 │   ├── src/
 │   │   ├── auth/              Registration, login, JWT, Google OAuth
@@ -519,7 +519,7 @@ Nginx terminates TLS with certificates from Let's Encrypt via certbot. The `ngin
 
 ```bash
 ssh deploy@<server_ip>
-cd /opt/lifespan
+cd /opt/timeflux
 ./scripts/init-ssl.sh yourdomain.com your@email.com
 ```
 
@@ -530,7 +530,7 @@ The script: creates a temporary self-signed cert → starts nginx → requests a
 ```bash
 sudo crontab -e
 # Add this line:
-0 3 * * * /opt/lifespan/scripts/renew-ssl.sh >> /var/log/ssl-renew.log 2>&1
+0 3 * * * /opt/timeflux/scripts/renew-ssl.sh >> /var/log/ssl-renew.log 2>&1
 ```
 
 Certbot checks daily at 3:00 AM, renews only when < 30 days remain.
@@ -593,7 +593,7 @@ Images tagged with `latest` + short commit SHA, pushed to GHCR (configurable to 
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | Production .env |
 | `GOOGLE_CALLBACK_URL` | Google OAuth callback URL | Production .env |
 | `FRONTEND_URL` | Frontend URL for OAuth redirects | Production .env |
-| `DOMAIN` | Domain for SSL certificate (e.g. `app.lifespan.com`) | Production .env / nginx envsubst |
+| `DOMAIN` | Domain for SSL certificate (e.g. `time-flux.com`) | Production .env / nginx envsubst |
 | `PADDLE_API_KEY` | Paddle payments API key | Production .env |
 | `PADDLE_WEBHOOK_SECRET` | Paddle webhook signature verification | Production .env |
 | `PADDLE_ENVIRONMENT` | Paddle environment (`production` or `sandbox`) | Production .env |

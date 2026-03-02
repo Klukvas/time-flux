@@ -523,10 +523,10 @@ const en: TranslationDictionary = {
     terms: {
       acceptance_title: '1. Acceptance of Terms',
       acceptance_text:
-        'By accessing or using LifeSpan ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.',
+        'By accessing or using TimeFlux ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.',
       description_title: '2. Description of Service',
       description_text:
-        'LifeSpan is a personal life-tracking application that allows users to record moods, chapters, memories, and media on an interactive timeline. The Service is provided "as is" and may be updated from time to time.',
+        'TimeFlux is a personal life-tracking application that allows users to record moods, chapters, memories, and media on an interactive timeline. The Service is provided "as is" and may be updated from time to time.',
       accounts_title: '3. User Accounts',
       accounts_text:
         'You must provide accurate information when creating an account. You are responsible for maintaining the confidentiality of your credentials and for all activity under your account. Notify us immediately of any unauthorized use.',
@@ -538,24 +538,24 @@ const en: TranslationDictionary = {
         'You retain ownership of all content you upload (photos, text, media). By using the Service, you grant us a limited license to store, process, and display your content solely for providing the Service. We do not sell or share your content with third parties for advertising purposes.',
       ip_title: '6. Intellectual Property',
       ip_text:
-        'All trademarks, logos, and software constituting the Service are owned by LifeSpan. You may not copy, modify, or distribute any part of the Service without our written permission.',
+        'All trademarks, logos, and software constituting the Service are owned by TimeFlux. You may not copy, modify, or distribute any part of the Service without our written permission.',
       termination_title: '7. Termination',
       termination_text:
         'We may suspend or terminate your account if you violate these Terms or engage in abusive behavior. You may delete your account at any time through Settings. Upon termination, your data will be permanently deleted within 30 days.',
       liability_title: '8. Limitation of Liability',
       liability_text:
-        'To the maximum extent permitted by law, LifeSpan shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Service. Our total liability is limited to the amount you paid in the 12 months preceding the claim.',
+        'To the maximum extent permitted by law, TimeFlux shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Service. Our total liability is limited to the amount you paid in the 12 months preceding the claim.',
       governing_law_title: '9. Governing Law',
       governing_law_text:
         'These Terms shall be governed by and construed in accordance with the laws of the European Union. Any disputes arising from or relating to these Terms or the Service shall be resolved through good-faith negotiation first, and if unresolved, through the courts of the applicable jurisdiction.',
       contact_title: '10. Contact',
       contact_text:
-        'If you have questions about these Terms, contact us at support@lifespan.app.',
+        'If you have questions about these Terms, contact us at support@time-flux.com.',
     },
     privacy: {
       intro_title: '1. Introduction',
       intro_text:
-        'This Privacy Policy explains how LifeSpan ("we", "us", "our") collects, uses, and protects your personal data when you use our Service.',
+        'This Privacy Policy explains how TimeFlux ("we", "us", "our") collects, uses, and protects your personal data when you use our Service.',
       data_collected_title: '2. Data We Collect',
       data_collected_text:
         'We collect the following data: email address and authentication credentials; timezone and language preferences; mood entries, day comments, and chapter information; photos and media you upload; location data (only when you explicitly provide it); and usage analytics (anonymous).',
@@ -573,21 +573,21 @@ const en: TranslationDictionary = {
         'We use local storage and cookies to maintain your session, remember language and theme preferences, and improve the user experience. We do not use third-party tracking cookies.',
       rights_title: '7. Your Rights',
       rights_text:
-        'You have the right to: access all data we hold about you; export your data; correct inaccurate data; delete your account and all associated data; withdraw consent at any time. To exercise these rights, contact us at support@lifespan.app or use the account settings.',
+        'You have the right to: access all data we hold about you; export your data; correct inaccurate data; delete your account and all associated data; withdraw consent at any time. To exercise these rights, contact us at support@time-flux.com or use the account settings.',
       contact_title: '8. Contact',
       contact_text:
-        'For privacy-related inquiries, contact us at support@lifespan.app.',
+        'For privacy-related inquiries, contact us at support@time-flux.com.',
     },
     refund: {
       overview_title: '1. Overview',
       overview_text:
-        'LifeSpan subscriptions are billed through Paddle.com Market Limited ("Paddle"), our Merchant of Record. Paddle processes all refund requests on our behalf. This policy outlines when and how you can request a refund.',
+        'TimeFlux subscriptions are billed through Paddle.com Market Limited ("Paddle"), our Merchant of Record. Paddle processes all refund requests on our behalf. This policy outlines when and how you can request a refund.',
       eligibility_title: '2. Refund Eligibility',
       eligibility_text:
         'You may request a full refund within 14 days of your initial subscription purchase if you are not satisfied with the Service. Refunds are not available after the 14-day window, for renewal charges (since you can cancel anytime before renewal), or if your account was terminated for violating our Terms of Service.',
       how_to_title: '3. How to Request a Refund',
       how_to_text:
-        'To request a refund, email us at support@lifespan.app with your account email and the reason for your request. Alternatively, you can contact Paddle directly through the receipt email you received at the time of purchase. We aim to process all refund requests within 5 business days.',
+        'To request a refund, email us at support@time-flux.com with your account email and the reason for your request. Alternatively, you can contact Paddle directly through the receipt email you received at the time of purchase. We aim to process all refund requests within 5 business days.',
       processing_title: '4. Refund Processing',
       processing_text:
         'Approved refunds are processed by Paddle and returned to the original payment method. Depending on your bank or payment provider, it may take 5–10 business days for the refund to appear on your statement. Once a refund is issued, your subscription will be immediately downgraded to the free plan.',
@@ -599,7 +599,7 @@ const en: TranslationDictionary = {
         'We may update this Refund Policy from time to time. Any changes will be posted on this page with an updated date. Continued use of the Service after changes constitutes acceptance of the revised policy.',
       contact_title: '7. Contact',
       contact_text:
-        'For refund-related questions, contact us at support@lifespan.app.',
+        'For refund-related questions, contact us at support@time-flux.com.',
     },
   },
 

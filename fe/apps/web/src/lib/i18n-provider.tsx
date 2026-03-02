@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { createTranslate } from '@lifespan/i18n';
-import { I18nContext } from '@lifespan/hooks';
+import { createTranslate } from '@timeflux/i18n';
+import { I18nContext } from '@timeflux/hooks';
 import { useLanguageStore } from '@/stores/language-store';
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {

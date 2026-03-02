@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslation } from '@lifespan/hooks';
+import { useTranslation } from '@timeflux/hooks';
 import { LegalPageLayout } from '@/components/legal/legal-page-layout';
 
 const SECTIONS = [

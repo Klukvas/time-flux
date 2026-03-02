@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import type { LoginRequest, RegisterRequest } from '@lifespan/api';
+import type { LoginRequest, RegisterRequest } from '@timeflux/api';
 import { useApi } from './api-context';
 
 export function useLogin() {

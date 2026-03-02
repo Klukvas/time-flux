@@ -3,15 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import type { EventGroup } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage } from '@lifespan/domain';
+import type { EventGroup } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage } from '@timeflux/domain';
 import {
   useDeleteEventGroup,
   useEventGroups,
   useTranslation,
-} from '@lifespan/hooks';
-import { formatDateRange, hexToRgba } from '@lifespan/utils';
+} from '@timeflux/hooks';
+import { formatDateRange, hexToRgba } from '@timeflux/utils';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';

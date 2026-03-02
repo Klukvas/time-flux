@@ -1,8 +1,8 @@
 'use client';
 
-import { useTranslation } from '@lifespan/hooks';
-import { TIER_LIMITS } from '@lifespan/constants';
-import type { SubscriptionTier } from '@lifespan/api';
+import { useTranslation } from '@timeflux/hooks';
+import { TIER_LIMITS } from '@timeflux/constants';
+import type { SubscriptionTier } from '@timeflux/api';
 
 interface PricingCardsProps {
   currentTier: SubscriptionTier;
@@ -26,7 +26,11 @@ function CheckIcon() {
       strokeWidth={2.5}
       stroke="currentColor"
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4.5 12.75l6 6 9-13.5"
+      />
     </svg>
   );
 }
@@ -93,7 +97,9 @@ export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
 
             {/* Header */}
             <div className="mb-5">
-              <h3 className="text-lg font-bold text-content">{planNames[tier]}</h3>
+              <h3 className="text-lg font-bold text-content">
+                {planNames[tier]}
+              </h3>
               <p className="mt-1 text-sm text-content-tertiary">
                 {planDescriptions[tier]}
               </p>
@@ -127,12 +133,16 @@ export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
               <FeatureRow included>
                 {limits.chapters === -1
                   ? t('subscription.chapters_unlimited')
-                  : t('subscription.chapters_limit', { count: limits.chapters })}
+                  : t('subscription.chapters_limit', {
+                      count: limits.chapters,
+                    })}
               </FeatureRow>
               <FeatureRow included>
                 {limits.categories === -1
                   ? t('subscription.categories_unlimited')
-                  : t('subscription.categories_limit', { count: limits.categories })}
+                  : t('subscription.categories_limit', {
+                      count: limits.categories,
+                    })}
               </FeatureRow>
               <FeatureRow included>
                 {limits.dayStates === -1

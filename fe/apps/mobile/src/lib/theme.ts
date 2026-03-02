@@ -1,6 +1,6 @@
 /**
  * Static color palette and layout tokens.
- * For theme-aware semantic colors, use `useTheme().tokens.colors` from @lifespan/hooks.
+ * For theme-aware semantic colors, use `useTheme().tokens.colors` from @timeflux/hooks.
  */
 export const colors = {
   brand: {

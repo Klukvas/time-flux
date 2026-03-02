@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import type { DayState } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage } from '@lifespan/domain';
+import type { DayState } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage } from '@timeflux/domain';
 import {
   useCreateDayStateFromRecommendation,
   useDayStates,
   useDeleteDayState,
   useRecommendations,
   useTranslation,
-} from '@lifespan/hooks';
-import { contrastTextColor } from '@lifespan/utils';
+} from '@timeflux/hooks';
+import { contrastTextColor } from '@timeflux/utils';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';

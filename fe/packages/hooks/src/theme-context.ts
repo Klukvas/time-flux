@@ -1,5 +1,9 @@
 import { createContext, useContext } from 'react';
-import type { ThemePreference, ResolvedTheme, ThemeTokens } from '@lifespan/theme';
+import type {
+  ThemePreference,
+  ResolvedTheme,
+  ThemeTokens,
+} from '@timeflux/theme';
 
 export interface ThemeContextValue {
   /** User preference: 'light' | 'dark' | 'system' */

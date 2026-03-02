@@ -1,7 +1,7 @@
 export const SEO = {
-  siteName: 'LifeSpan',
-  titleTemplate: '%s | LifeSpan',
-  defaultTitle: 'LifeSpan — Visualize Your Life Timeline',
+  siteName: 'TimeFlux',
+  titleTemplate: '%s | TimeFlux',
+  defaultTitle: 'TimeFlux — Visualize Your Life Timeline',
   description:
     'Track your life journey with an interactive visual timeline. Log daily moods, organize life chapters, capture memories, and gain insights into your personal history.',
   keywords: [
@@ -19,7 +19,7 @@ export const SEO = {
   themeColor: '#6366f1',
   locale: 'en_US',
   type: 'website' as const,
-  twitterHandle: '@lifespan_app',
+  twitterHandle: '@timeflux_app',
 } as const;
 
 export function getBaseUrl(): string {

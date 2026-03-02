@@ -11,7 +11,7 @@ export function BlogLayout({ children }: BlogLayoutProps) {
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-4">
             <Link href="/" className="text-xl font-bold text-accent">
-              LifeSpan
+              TimeFlux
             </Link>
             <span className="text-content-tertiary">/</span>
             <Link
@@ -34,7 +34,7 @@ export function BlogLayout({ children }: BlogLayoutProps) {
       <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">{children}</main>
 
       <footer className="border-t border-edge px-4 py-8 text-center text-xs text-content-tertiary">
-        LifeSpan &copy; {new Date().getFullYear()}
+        TimeFlux &copy; {new Date().getFullYear()}
         {' · '}
         <Link href="/blog" className="underline hover:text-content-secondary">
           Blog

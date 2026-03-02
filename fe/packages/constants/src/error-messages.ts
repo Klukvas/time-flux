@@ -1,4 +1,4 @@
-import type { ErrorCode } from '@lifespan/api';
+import type { ErrorCode } from '@timeflux/api';
 
 export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   USER_NOT_FOUND: 'User not found.',

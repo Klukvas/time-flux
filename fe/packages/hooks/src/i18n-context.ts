@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { Language, TranslateFunction } from '@lifespan/i18n';
+import type { Language, TranslateFunction } from '@timeflux/i18n';
 
 export interface I18nContextValue {
   t: TranslateFunction;

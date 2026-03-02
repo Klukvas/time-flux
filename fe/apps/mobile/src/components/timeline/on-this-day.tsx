@@ -1,12 +1,6 @@
-import {
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { useOnThisDay, useTranslation } from '@lifespan/hooks';
-import type { Memory } from '@lifespan/api';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useOnThisDay, useTranslation } from '@timeflux/hooks';
+import type { Memory } from '@timeflux/api';
 import { colors, spacing, fontSize, borderRadius } from '@/lib/theme';
 
 interface OnThisDaySectionProps {
@@ -97,7 +91,10 @@ function MemoryCard({
 
           {memory.mediaCount > 0 && (
             <Text style={styles.mediaCount}>
-              {memory.mediaCount} {memory.mediaCount === 1 ? t('memories.photo') : t('memories.photos')}
+              {memory.mediaCount}{' '}
+              {memory.mediaCount === 1
+                ? t('memories.photo')
+                : t('memories.photos')}
             </Text>
           )}
         </View>

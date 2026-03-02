@@ -1,13 +1,7 @@
 import { useEffect, useRef } from 'react';
-import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { useTranslation } from '@lifespan/hooks';
-import type { OnboardingStep } from '@lifespan/hooks';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from '@timeflux/hooks';
+import type { OnboardingStep } from '@timeflux/hooks';
 import { colors, spacing, fontSize, borderRadius } from '@/lib/theme';
 
 interface OnboardingOverlayProps {
@@ -55,7 +49,12 @@ const NAV_ITEMS = [
   'onboarding.navigation_settings',
 ] as const;
 
-export function OnboardingOverlay({ step, onNext, onSkip, onTryIt }: OnboardingOverlayProps) {
+export function OnboardingOverlay({
+  step,
+  onNext,
+  onSkip,
+  onTryIt,
+}: OnboardingOverlayProps) {
   const { t } = useTranslation();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;

@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import type { Language } from '@lifespan/i18n';
-import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@lifespan/i18n';
-import type { ThemePreference } from '@lifespan/theme';
-import { useTheme, useTranslation } from '@lifespan/hooks';
+import type { Language } from '@timeflux/i18n';
+import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@timeflux/i18n';
+import type { ThemePreference } from '@timeflux/theme';
+import { useTheme, useTranslation } from '@timeflux/hooks';
 import { useAuthStore } from '@/stores/auth-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { borderRadius, fontSize, spacing } from '@/lib/theme';

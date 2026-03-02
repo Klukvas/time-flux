@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ThemePreference, ResolvedTheme } from '@lifespan/theme';
+import type { ThemePreference, ResolvedTheme } from '@timeflux/theme';
 
 interface ThemeState {
   theme: ThemePreference;
@@ -8,11 +8,13 @@ interface ThemeState {
   hydrate: () => void;
 }
 
-const STORAGE_KEY = 'lifespan_theme';
+const STORAGE_KEY = 'timeflux_theme';
 
 function getSystemTheme(): ResolvedTheme {
   if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 }
 
 function resolveTheme(preference: ThemePreference): ResolvedTheme {

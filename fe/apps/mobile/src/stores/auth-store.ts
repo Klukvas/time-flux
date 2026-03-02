@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
-import type { AuthUser } from '@lifespan/api';
+import type { AuthUser } from '@timeflux/api';
 
 interface AuthState {
   token: string | null;
@@ -13,9 +13,9 @@ interface AuthState {
   hydrate: () => Promise<void>;
 }
 
-const TOKEN_KEY = 'lifespan_token';
-const REFRESH_TOKEN_KEY = 'lifespan_refresh_token';
-const USER_KEY = 'lifespan_user';
+const TOKEN_KEY = 'timeflux_token';
+const REFRESH_TOKEN_KEY = 'timeflux_refresh_token';
+const USER_KEY = 'timeflux_user';
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: null,

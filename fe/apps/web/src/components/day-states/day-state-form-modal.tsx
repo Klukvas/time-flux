@@ -2,11 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import type { DayState } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage, validateColor, validateName } from '@lifespan/domain';
-import { useCreateDayState, useTranslation, useUpdateDayState } from '@lifespan/hooks';
-import { BASE_COLORS, contrastTextColor, getMoodEmoji, getMoodLabel } from '@lifespan/utils';
+import type { DayState } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage, validateColor, validateName } from '@timeflux/domain';
+import {
+  useCreateDayState,
+  useTranslation,
+  useUpdateDayState,
+} from '@timeflux/hooks';
+import {
+  BASE_COLORS,
+  contrastTextColor,
+  getMoodEmoji,
+  getMoodLabel,
+} from '@timeflux/utils';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +29,11 @@ interface DayStateFormModalProps {
   dayState?: DayState | null;
 }
 
-export function DayStateFormModal({ open, onClose, dayState }: DayStateFormModalProps) {
+export function DayStateFormModal({
+  open,
+  onClose,
+  dayState,
+}: DayStateFormModalProps) {
   const { t } = useTranslation();
   const createDayState = useCreateDayState();
   const updateDayState = useUpdateDayState();
@@ -58,7 +71,9 @@ export function DayStateFormModal({ open, onClose, dayState }: DayStateFormModal
     }
 
     const onSuccess = () => {
-      toast.success(isEditing ? t('day_states.updated') : t('day_states.created'));
+      toast.success(
+        isEditing ? t('day_states.updated') : t('day_states.created'),
+      );
       onClose();
     };
     const onError = (err: Error) => {
@@ -66,7 +81,10 @@ export function DayStateFormModal({ open, onClose, dayState }: DayStateFormModal
     };
 
     if (isEditing) {
-      updateDayState.mutate({ id: dayState.id, data: { name, color, score } }, { onSuccess, onError });
+      updateDayState.mutate(
+        { id: dayState.id, data: { name, color, score } },
+        { onSuccess, onError },
+      );
     } else {
       createDayState.mutate({ name, color, score }, { onSuccess, onError });
     }
@@ -75,7 +93,11 @@ export function DayStateFormModal({ open, onClose, dayState }: DayStateFormModal
   const isPending = createDayState.isPending || updateDayState.isPending;
 
   return (
-    <Modal open={open} onClose={onClose} title={isEditing ? t('day_states.edit') : t('day_states.create')}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={isEditing ? t('day_states.edit') : t('day_states.create')}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Live preview */}
         <div className="flex items-center gap-3 rounded-lg border border-edge bg-surface-secondary px-4 py-3">
@@ -106,7 +128,9 @@ export function DayStateFormModal({ open, onClose, dayState }: DayStateFormModal
             {t('day_states.form.color')}
           </label>
           <ColorPicker value={color} onChange={setColor} />
-          {errors.color && <p className="mt-1 text-xs text-danger">{errors.color}</p>}
+          {errors.color && (
+            <p className="mt-1 text-xs text-danger">{errors.color}</p>
+          )}
         </div>
 
         {/* Mood Intensity Slider */}
@@ -141,7 +165,12 @@ export function DayStateFormModal({ open, onClose, dayState }: DayStateFormModal
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="secondary" type="button" onClick={onClose} disabled={isPending}>
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={onClose}
+            disabled={isPending}
+          >
             {t('common.cancel')}
           </Button>
           <Button type="submit" loading={isPending}>

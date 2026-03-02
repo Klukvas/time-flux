@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
-import type { Category } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage, validateColor, validateName } from '@lifespan/domain';
+import type { Category } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage, validateColor, validateName } from '@timeflux/domain';
 import {
   useCreateCategory,
   useTranslation,
   useUpdateCategory,
-} from '@lifespan/hooks';
-import { BASE_COLORS, contrastTextColor } from '@lifespan/utils';
+} from '@timeflux/hooks';
+import { BASE_COLORS, contrastTextColor } from '@timeflux/utils';
 import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { Input } from '@/components/ui/input';
-import { useTheme } from '@lifespan/hooks';
+import { useTheme } from '@timeflux/hooks';
 import { borderRadius, fontSize, spacing } from '@/lib/theme';
 
 const DEFAULT_COLOR: string = BASE_COLORS[0].hex;

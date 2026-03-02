@@ -2,12 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import type { EventPeriod } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage, validateComment, validateDateRange } from '@lifespan/domain';
-import { useCreatePeriod, useTranslation, useUpdatePeriod } from '@lifespan/hooks';
-import { todayISO } from '@lifespan/utils';
-import { MAX_COMMENT_LENGTH } from '@lifespan/constants';
+import type { EventPeriod } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import {
+  getUserMessage,
+  validateComment,
+  validateDateRange,
+} from '@timeflux/domain';
+import {
+  useCreatePeriod,
+  useTranslation,
+  useUpdatePeriod,
+} from '@timeflux/hooks';
+import { todayISO } from '@timeflux/utils';
+import { MAX_COMMENT_LENGTH } from '@timeflux/constants';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +27,12 @@ interface PeriodFormModalProps {
   period?: EventPeriod | null;
 }
 
-export function PeriodFormModal({ open, onClose, groupId, period }: PeriodFormModalProps) {
+export function PeriodFormModal({
+  open,
+  onClose,
+  groupId,
+  period,
+}: PeriodFormModalProps) {
   const { t } = useTranslation();
   const createPeriod = useCreatePeriod();
   const updatePeriod = useUpdatePeriod();
@@ -94,7 +107,11 @@ export function PeriodFormModal({ open, onClose, groupId, period }: PeriodFormMo
   const isPending = createPeriod.isPending || updatePeriod.isPending;
 
   return (
-    <Modal open={open} onClose={onClose} title={isEditing ? t('periods.edit') : t('periods.create')}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={isEditing ? t('periods.edit') : t('periods.create')}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <Input
@@ -115,7 +132,10 @@ export function PeriodFormModal({ open, onClose, groupId, period }: PeriodFormMo
         </div>
 
         <div>
-          <label htmlFor="comment" className="mb-1 block text-sm font-medium text-content-secondary">
+          <label
+            htmlFor="comment"
+            className="mb-1 block text-sm font-medium text-content-secondary"
+          >
             {t('periods.form.comment_optional')}
           </label>
           <textarea
@@ -127,12 +147,21 @@ export function PeriodFormModal({ open, onClose, groupId, period }: PeriodFormMo
             className="block w-full rounded-lg border border-edge bg-surface-card px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
             placeholder={t('periods.form.comment_placeholder')}
           />
-          {errors.comment && <p className="mt-1 text-xs text-danger">{errors.comment}</p>}
-          <p className="mt-1 text-right text-xs text-content-tertiary">{comment.length}/{MAX_COMMENT_LENGTH}</p>
+          {errors.comment && (
+            <p className="mt-1 text-xs text-danger">{errors.comment}</p>
+          )}
+          <p className="mt-1 text-right text-xs text-content-tertiary">
+            {comment.length}/{MAX_COMMENT_LENGTH}
+          </p>
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="secondary" type="button" onClick={onClose} disabled={isPending}>
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={onClose}
+            disabled={isPending}
+          >
             {t('common.cancel')}
           </Button>
           <Button type="submit" loading={isPending}>

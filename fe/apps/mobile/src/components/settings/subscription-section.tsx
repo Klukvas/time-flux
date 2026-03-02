@@ -5,12 +5,12 @@ import {
   useTranslation,
   useSubscription,
   useCancelSubscription,
-} from '@lifespan/hooks';
-import { TIER_LIMITS } from '@lifespan/constants';
-import type { SubscriptionTier } from '@lifespan/api';
+} from '@timeflux/hooks';
+import { TIER_LIMITS } from '@timeflux/constants';
+import type { SubscriptionTier } from '@timeflux/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { borderRadius, fontSize, spacing } from '@/lib/theme';
-import { useTheme } from '@lifespan/hooks';
+import { useTheme } from '@timeflux/hooks';
 
 const PAYMENTS_ENABLED = process.env.EXPO_PUBLIC_PAYMENTS_ENABLED === 'true';
 

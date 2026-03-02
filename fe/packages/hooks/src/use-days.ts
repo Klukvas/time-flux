@@ -3,8 +3,8 @@ import type {
   DayQueryParams,
   UpdateDayLocationRequest,
   UpsertDayRequest,
-} from '@lifespan/api';
-import { QUERY_KEYS, STALE_TIMES } from '@lifespan/constants';
+} from '@timeflux/api';
+import { QUERY_KEYS, STALE_TIMES } from '@timeflux/constants';
 import { useApi } from './api-context';
 
 export function useDays(params: DayQueryParams) {

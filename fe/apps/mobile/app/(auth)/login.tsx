@@ -1,11 +1,24 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { Link, router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { extractApiError } from '@lifespan/api';
-import type { AuthUser } from '@lifespan/api';
-import { getUserMessage, validateEmail, validatePassword } from '@lifespan/domain';
-import { useLogin } from '@lifespan/hooks';
+import { extractApiError } from '@timeflux/api';
+import type { AuthUser } from '@timeflux/api';
+import {
+  getUserMessage,
+  validateEmail,
+  validatePassword,
+} from '@timeflux/domain';
+import { useLogin } from '@timeflux/hooks';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +31,9 @@ export default function LoginScreen() {
   const login = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {},
+  );
 
   const handleLogin = () => {
     const emailResult = validateEmail(email);
@@ -47,9 +62,12 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.flex}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
-          <Text style={styles.title}>LifeSpan</Text>
+          <Text style={styles.title}>TimeFlux</Text>
           <Text style={styles.subtitle}>Your visual life timeline</Text>
         </View>
 
@@ -73,15 +91,24 @@ export default function LoginScreen() {
             placeholder="Enter your password"
             secureTextEntry
           />
-          <Button title="Sign In" onPress={handleLogin} loading={login.isPending} />
+          <Button
+            title="Sign In"
+            onPress={handleLogin}
+            loading={login.isPending}
+          />
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>or</Text>
             <View style={styles.dividerLine} />
           </View>
           <Pressable
-            onPress={() => WebBrowser.openBrowserAsync(`${API_BASE_URL}/api/v1/auth/google`)}
-            style={({ pressed }) => [styles.googleButton, { opacity: pressed ? 0.7 : 1 }]}
+            onPress={() =>
+              WebBrowser.openBrowserAsync(`${API_BASE_URL}/api/v1/auth/google`)
+            }
+            style={({ pressed }) => [
+              styles.googleButton,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
           >
             <Text style={styles.googleButtonText}>Continue with Google</Text>
           </Pressable>
@@ -105,8 +132,16 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
   },
   header: { alignItems: 'center', marginBottom: spacing.xxl },
-  title: { fontSize: fontSize.xxxl, fontWeight: 'bold', color: colors.brand[600] },
-  subtitle: { fontSize: fontSize.sm, color: colors.gray[500], marginTop: spacing.xs },
+  title: {
+    fontSize: fontSize.xxxl,
+    fontWeight: 'bold',
+    color: colors.brand[600],
+  },
+  subtitle: {
+    fontSize: fontSize.sm,
+    color: colors.gray[500],
+    marginTop: spacing.xs,
+  },
   card: {
     backgroundColor: colors.white,
     borderRadius: 16,

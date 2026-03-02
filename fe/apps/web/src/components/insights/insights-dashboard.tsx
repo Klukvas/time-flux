@@ -4,7 +4,7 @@ import {
   useMoodOverview,
   useSubscription,
   useTranslation,
-} from '@lifespan/hooks';
+} from '@timeflux/hooks';
 import { MoodTrendChart } from './mood-trend-chart';
 import { InsightsPaywall } from './insights-paywall';
 import { WeekdayInsightsSection } from './weekday-insights';

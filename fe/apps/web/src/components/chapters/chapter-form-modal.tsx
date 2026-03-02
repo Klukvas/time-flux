@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import type { EventGroup } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage, validateTitle, validateDescription } from '@lifespan/domain';
+import type { EventGroup } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import {
+  getUserMessage,
+  validateTitle,
+  validateDescription,
+} from '@timeflux/domain';
 import {
   useCategories,
   useCreateEventGroup,
   useTranslation,
   useUpdateEventGroup,
-} from '@lifespan/hooks';
-import { MAX_TITLE_LENGTH, MAX_DESCRIPTION_LENGTH } from '@lifespan/constants';
+} from '@timeflux/hooks';
+import { MAX_TITLE_LENGTH, MAX_DESCRIPTION_LENGTH } from '@timeflux/constants';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +27,11 @@ interface ChapterFormModalProps {
   group?: EventGroup | null;
 }
 
-export function ChapterFormModal({ open, onClose, group }: ChapterFormModalProps) {
+export function ChapterFormModal({
+  open,
+  onClose,
+  group,
+}: ChapterFormModalProps) {
   const { t } = useTranslation();
   const { data: categories } = useCategories();
   const createGroup = useCreateEventGroup();
@@ -54,7 +62,8 @@ export function ChapterFormModal({ open, onClose, group }: ChapterFormModalProps
     const newErrors: Record<string, string> = {};
     const titleResult = validateTitle(title);
     if (!titleResult.valid) newErrors.title = titleResult.error!;
-    if (!categoryId) newErrors.category = t('chapters.form.select_category_error');
+    if (!categoryId)
+      newErrors.category = t('chapters.form.select_category_error');
     const descResult = validateDescription(description);
     if (!descResult.valid) newErrors.description = descResult.error!;
     if (Object.keys(newErrors).length > 0) {
@@ -97,7 +106,11 @@ export function ChapterFormModal({ open, onClose, group }: ChapterFormModalProps
   const isPending = createGroup.isPending || updateGroup.isPending;
 
   return (
-    <Modal open={open} onClose={onClose} title={isEditing ? t('chapters.edit') : t('chapters.create')}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={isEditing ? t('chapters.edit') : t('chapters.create')}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           id="title"
@@ -124,7 +137,10 @@ export function ChapterFormModal({ open, onClose, group }: ChapterFormModalProps
         </div>
 
         <div>
-          <label htmlFor="description" className="mb-1 block text-sm font-medium text-content-secondary">
+          <label
+            htmlFor="description"
+            className="mb-1 block text-sm font-medium text-content-secondary"
+          >
             {t('chapters.form.description_optional')}
           </label>
           <textarea
@@ -136,12 +152,21 @@ export function ChapterFormModal({ open, onClose, group }: ChapterFormModalProps
             className="block w-full rounded-lg border border-edge bg-surface-card px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
             placeholder={t('chapters.form.description_placeholder')}
           />
-          {errors.description && <p className="mt-1 text-xs text-danger">{errors.description}</p>}
-          <p className="mt-1 text-right text-xs text-content-tertiary">{description.length}/{MAX_DESCRIPTION_LENGTH}</p>
+          {errors.description && (
+            <p className="mt-1 text-xs text-danger">{errors.description}</p>
+          )}
+          <p className="mt-1 text-right text-xs text-content-tertiary">
+            {description.length}/{MAX_DESCRIPTION_LENGTH}
+          </p>
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="secondary" type="button" onClick={onClose} disabled={isPending}>
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={onClose}
+            disabled={isPending}
+          >
             {t('common.cancel')}
           </Button>
           <Button type="submit" loading={isPending}>

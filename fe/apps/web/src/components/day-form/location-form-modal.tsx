@@ -1,10 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { APIProvider, Map, AdvancedMarker, useMap, type MapMouseEvent } from '@vis.gl/react-google-maps';
-import { useTranslation } from '@lifespan/hooks';
-import { MAX_LOCATION_NAME_LENGTH } from '@lifespan/constants';
-import { reverseGeocode } from '@lifespan/utils';
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  useMap,
+  type MapMouseEvent,
+} from '@vis.gl/react-google-maps';
+import { useTranslation } from '@timeflux/hooks';
+import { MAX_LOCATION_NAME_LENGTH } from '@timeflux/constants';
+import { reverseGeocode } from '@timeflux/utils';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { PlacesAutocomplete } from './places-autocomplete';
@@ -17,7 +23,11 @@ const DEFAULT_ZOOM = 4;
 interface LocationFormModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: { locationName: string; latitude?: number; longitude?: number }) => void;
+  onSave: (data: {
+    locationName: string;
+    latitude?: number;
+    longitude?: number;
+  }) => void;
   saving: boolean;
   initialName?: string;
   initialLat?: number;
@@ -52,11 +62,14 @@ export function LocationFormModal({
     : DEFAULT_CENTER;
   const initialZoom = hasInitialCoords ? 15 : DEFAULT_ZOOM;
 
-  const [markerPosition, setMarkerPosition] = useState<google.maps.LatLngLiteral | null>(
-    hasInitialCoords ? { lat: initialLat, lng: initialLng } : null,
-  );
+  const [markerPosition, setMarkerPosition] =
+    useState<google.maps.LatLngLiteral | null>(
+      hasInitialCoords ? { lat: initialLat, lng: initialLng } : null,
+    );
   // panTarget is set only by geolocation/autocomplete (not map clicks) to trigger map panning
-  const [panTarget, setPanTarget] = useState<google.maps.LatLngLiteral | null>(null);
+  const [panTarget, setPanTarget] = useState<google.maps.LatLngLiteral | null>(
+    null,
+  );
   const [name, setName] = useState(initialName);
   const [detecting, setDetecting] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
@@ -66,7 +79,9 @@ export function LocationFormModal({
   useEffect(() => {
     if (open) {
       const hasCoords = initialLat != null && initialLng != null;
-      setMarkerPosition(hasCoords ? { lat: initialLat!, lng: initialLng! } : null);
+      setMarkerPosition(
+        hasCoords ? { lat: initialLat!, lng: initialLng! } : null,
+      );
       setPanTarget(null);
       setName(initialName);
       setError('');
@@ -123,13 +138,16 @@ export function LocationFormModal({
     );
   }, [t]);
 
-  const handlePlaceSelect = useCallback((place: { lat: number; lng: number; name: string }) => {
-    const pos = { lat: place.lat, lng: place.lng };
-    setMarkerPosition(pos);
-    setPanTarget(pos);
-    setName(place.name);
-    setError('');
-  }, []);
+  const handlePlaceSelect = useCallback(
+    (place: { lat: number; lng: number; name: string }) => {
+      const pos = { lat: place.lat, lng: place.lng };
+      setMarkerPosition(pos);
+      setPanTarget(pos);
+      setName(place.name);
+      setError('');
+    },
+    [],
+  );
 
   const handleSubmit = () => {
     if (!name.trim()) return;
@@ -141,11 +159,19 @@ export function LocationFormModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={t('day_form.location_modal_title')} size="lg">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={t('day_form.location_modal_title')}
+      size="lg"
+    >
       <APIProvider apiKey={API_KEY}>
         <div className="space-y-3">
           {/* Places search */}
-          <PlacesAutocomplete onPlaceSelect={handlePlaceSelect} disabled={saving} />
+          <PlacesAutocomplete
+            onPlaceSelect={handlePlaceSelect}
+            disabled={saving}
+          />
 
           {/* Map */}
           <div className="relative h-[350px] w-full overflow-hidden rounded-lg border border-edge">
@@ -180,7 +206,9 @@ export function LocationFormModal({
             loading={detecting}
             disabled={saving}
           >
-            {detecting ? t('day_form.detecting_location') : t('day_form.use_current_location')}
+            {detecting
+              ? t('day_form.detecting_location')
+              : t('day_form.use_current_location')}
           </Button>
 
           {error && <p className="text-xs text-danger">{error}</p>}
@@ -210,7 +238,11 @@ export function LocationFormModal({
             <Button variant="ghost" onClick={onClose} disabled={saving}>
               {t('common.cancel')}
             </Button>
-            <Button onClick={handleSubmit} loading={saving} disabled={!name.trim()}>
+            <Button
+              onClick={handleSubmit}
+              loading={saving}
+              disabled={!name.trim()}
+            >
               {t('common.save')}
             </Button>
           </div>

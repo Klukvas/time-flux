@@ -8,7 +8,7 @@ interface SidebarState {
   hydrate: () => void;
 }
 
-const STORAGE_KEY = 'lifespan_sidebar_collapsed';
+const STORAGE_KEY = 'timeflux_sidebar_collapsed';
 
 export const useSidebarStore = create<SidebarState>((set) => ({
   collapsed: false,

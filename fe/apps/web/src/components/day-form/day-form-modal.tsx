@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { extractApiError } from '@lifespan/api';
-import type { CreateDayMediaRequest, DayMedia } from '@lifespan/api';
-import { getPeriodsForDate, getUserMessage } from '@lifespan/domain';
+import { extractApiError } from '@timeflux/api';
+import type { CreateDayMediaRequest, DayMedia } from '@timeflux/api';
+import { getPeriodsForDate, getUserMessage } from '@timeflux/domain';
 import {
   useCreateDayMedia,
   useCreateDayStateFromRecommendation,
@@ -17,10 +17,10 @@ import {
   useRecommendations,
   useTranslation,
   useUpsertDay,
-} from '@lifespan/hooks';
-import { formatDate, hexToRgba, isImageType, isToday } from '@lifespan/utils';
-import type { MediaItem } from '@lifespan/utils';
-import { MAX_COMMENT_LENGTH } from '@lifespan/constants';
+} from '@timeflux/hooks';
+import { formatDate, hexToRgba, isImageType, isToday } from '@timeflux/utils';
+import type { MediaItem } from '@timeflux/utils';
+import { MAX_COMMENT_LENGTH } from '@timeflux/constants';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { MediaUploader } from '@/components/ui/media-uploader';

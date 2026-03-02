@@ -1,26 +1,34 @@
-import type { ApiErrorResponse, ErrorCode } from '@lifespan/api';
-import { ERROR_MESSAGES, ERROR_TRANSLATION_KEYS } from '@lifespan/constants';
+import type { ApiErrorResponse, ErrorCode } from '@timeflux/api';
+import { ERROR_MESSAGES, ERROR_TRANSLATION_KEYS } from '@timeflux/constants';
 
 /** Get a user-friendly error message from an API error response (English fallback). */
 export function getUserMessage(apiError: ApiErrorResponse): string {
   const code = apiError.error_code as ErrorCode;
-  return ERROR_MESSAGES[code] ?? apiError.message ?? ERROR_MESSAGES.INTERNAL_ERROR;
+  return (
+    ERROR_MESSAGES[code] ?? apiError.message ?? ERROR_MESSAGES.INTERNAL_ERROR
+  );
 }
 
-/** Get the i18n translation key for an API error. Use with `t(key)` from @lifespan/i18n. */
+/** Get the i18n translation key for an API error. Use with `t(key)` from @timeflux/i18n. */
 export function getErrorTranslationKey(apiError: ApiErrorResponse): string {
   const code = apiError.error_code as ErrorCode;
   return ERROR_TRANSLATION_KEYS[code] ?? 'errors.internal_error';
 }
 
 /** Check if an API error matches a specific error code. */
-export function isErrorCode(apiError: ApiErrorResponse, code: ErrorCode): boolean {
+export function isErrorCode(
+  apiError: ApiErrorResponse,
+  code: ErrorCode,
+): boolean {
   return apiError.error_code === code;
 }
 
 /** Check if an error is an authentication error. */
 export function isAuthError(apiError: ApiErrorResponse): boolean {
-  return apiError.error_code === 'UNAUTHORIZED' || apiError.error_code === 'FORBIDDEN';
+  return (
+    apiError.error_code === 'UNAUTHORIZED' ||
+    apiError.error_code === 'FORBIDDEN'
+  );
 }
 
 /** Check if an error is a conflict (in-use) error. */

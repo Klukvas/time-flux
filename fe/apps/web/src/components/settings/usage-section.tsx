@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslation, useSubscription } from '@lifespan/hooks';
+import { useTranslation, useSubscription } from '@timeflux/hooks';
 
 interface UsageRowProps {
   label: string;
@@ -10,7 +10,13 @@ interface UsageRowProps {
   ofText: string;
 }
 
-function UsageRow({ label, used, limit, unlimitedText, ofText }: UsageRowProps) {
+function UsageRow({
+  label,
+  used,
+  limit,
+  unlimitedText,
+  ofText,
+}: UsageRowProps) {
   const isUnlimited = limit === -1;
   const percentage = isUnlimited ? 0 : limit > 0 ? (used / limit) * 100 : 0;
 
@@ -52,10 +58,26 @@ export function UsageSection() {
   const { limits, usage } = subscription;
 
   const rows = [
-    { label: t('subscription.usage_media'), used: usage.media, limit: limits.media },
-    { label: t('subscription.usage_chapters'), used: usage.chapters, limit: limits.chapters },
-    { label: t('subscription.usage_categories'), used: usage.categories, limit: limits.categories },
-    { label: t('subscription.usage_moods'), used: usage.dayStates, limit: limits.dayStates },
+    {
+      label: t('subscription.usage_media'),
+      used: usage.media,
+      limit: limits.media,
+    },
+    {
+      label: t('subscription.usage_chapters'),
+      used: usage.chapters,
+      limit: limits.chapters,
+    },
+    {
+      label: t('subscription.usage_categories'),
+      used: usage.categories,
+      limit: limits.categories,
+    },
+    {
+      label: t('subscription.usage_moods'),
+      used: usage.dayStates,
+      limit: limits.dayStates,
+    },
   ];
 
   return (

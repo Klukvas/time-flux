@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import type { EventPeriod } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage } from '@lifespan/domain';
-import { useClosePeriod, useTranslation } from '@lifespan/hooks';
-import { todayISO } from '@lifespan/utils';
+import type { EventPeriod } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage } from '@timeflux/domain';
+import { useClosePeriod, useTranslation } from '@timeflux/hooks';
+import { todayISO } from '@timeflux/utils';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,11 @@ interface ClosePeriodModalProps {
   period: EventPeriod | null;
 }
 
-export function ClosePeriodModal({ open, onClose, period }: ClosePeriodModalProps) {
+export function ClosePeriodModal({
+  open,
+  onClose,
+  period,
+}: ClosePeriodModalProps) {
   const { t } = useTranslation();
   const closePeriod = useClosePeriod();
   const [endDate, setEndDate] = useState(todayISO());
@@ -54,7 +58,12 @@ export function ClosePeriodModal({ open, onClose, period }: ClosePeriodModalProp
           min={period?.startDate}
         />
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="secondary" type="button" onClick={onClose} disabled={closePeriod.isPending}>
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={onClose}
+            disabled={closePeriod.isPending}
+          >
             {t('common.cancel')}
           </Button>
           <Button type="submit" loading={closePeriod.isPending}>

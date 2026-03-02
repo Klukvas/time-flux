@@ -9,7 +9,7 @@ interface ViewState {
   hydrate: () => Promise<void>;
 }
 
-const TIMELINE_MODE_KEY = 'lifespan_timeline_mode';
+const TIMELINE_MODE_KEY = 'timeflux_timeline_mode';
 const VALID_MODES: TimelineMode[] = ['horizontal', 'week'];
 
 export const useViewStore = create<ViewState>((set) => ({

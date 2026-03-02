@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import type { TimelineQueryParams, WeekQueryParams } from '@lifespan/api';
-import { QUERY_KEYS, STALE_TIMES } from '@lifespan/constants';
+import type { TimelineQueryParams, WeekQueryParams } from '@timeflux/api';
+import { QUERY_KEYS, STALE_TIMES } from '@timeflux/constants';
 import { useApi } from './api-context';
 
 export function useTimeline(params?: TimelineQueryParams) {

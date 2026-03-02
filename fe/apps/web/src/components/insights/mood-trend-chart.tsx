@@ -9,7 +9,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
-import type { TrendPoint } from '@lifespan/api';
+import type { TrendPoint } from '@timeflux/api';
 
 interface MoodTrendChartProps {
   data: TrendPoint[];

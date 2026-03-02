@@ -1,9 +1,9 @@
 'use client';
 
-import { useTranslation } from '@lifespan/hooks';
+import { useTranslation } from '@timeflux/hooks';
 import { useThemeStore } from '@/stores/theme-store';
 import { useLanguageStore } from '@/stores/language-store';
-import type { ThemePreference } from '@lifespan/theme';
+import type { ThemePreference } from '@timeflux/theme';
 
 const THEME_OPTIONS: { value: ThemePreference; icon: string }[] = [
   { value: 'light', icon: '☀️' },
@@ -34,7 +34,7 @@ export function LandingHeader({
         {/* Logo + nav */}
         <div className="flex items-center gap-4">
           <a href="/" className="text-xl font-bold text-accent">
-            LifeSpan
+            TimeFlux
           </a>
           <a
             href="/blog"

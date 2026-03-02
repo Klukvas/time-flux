@@ -1,9 +1,9 @@
 'use client';
 
-import { useTranslation, useTheme } from '@lifespan/hooks';
-import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@lifespan/i18n';
-import type { Language } from '@lifespan/i18n';
-import type { ThemePreference } from '@lifespan/theme';
+import { useTranslation, useTheme } from '@timeflux/hooks';
+import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@timeflux/i18n';
+import type { Language } from '@timeflux/i18n';
+import type { ThemePreference } from '@timeflux/theme';
 import { useAuthStore } from '@/stores/auth-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { SubscriptionSection } from '@/components/settings/subscription-section';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useTranslation } from '@lifespan/hooks';
+import { useTranslation } from '@timeflux/hooks';
 
 const STATS: { key: string; value: number; suffix?: string }[] = [
   { key: 'days_recorded', value: 12482 },
@@ -57,14 +57,23 @@ function formatNumber(n: number): string {
   return n.toLocaleString('en-US');
 }
 
-function StatItem({ statKey, target, suffix }: { statKey: string; target: number; suffix?: string }) {
+function StatItem({
+  statKey,
+  target,
+  suffix,
+}: {
+  statKey: string;
+  target: number;
+  suffix?: string;
+}) {
   const { t } = useTranslation();
   const { value, ref } = useCountUp(target);
 
   return (
     <div ref={ref} className="text-center">
       <p className="text-4xl font-extrabold tracking-tight text-content sm:text-5xl">
-        {formatNumber(value)}{suffix ?? ''}+
+        {formatNumber(value)}
+        {suffix ?? ''}+
       </p>
       <p className="mt-2 text-sm font-medium text-content-secondary">
         {t(`landing.social.${statKey}`)}
@@ -98,7 +107,12 @@ export function SocialProofSection() {
         {/* Stats */}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
           {STATS.map((stat) => (
-            <StatItem key={stat.key} statKey={stat.key} target={stat.value} suffix={stat.suffix} />
+            <StatItem
+              key={stat.key}
+              statKey={stat.key}
+              target={stat.value}
+              suffix={stat.suffix}
+            />
           ))}
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { QUERY_KEYS, STALE_TIMES } from '@lifespan/constants';
+import { QUERY_KEYS, STALE_TIMES } from '@timeflux/constants';
 import { useApi } from './api-context';
 
 export function useSubscription() {

@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   CreateDayStateRequest,
   UpdateDayStateRequest,
-} from '@lifespan/api';
-import { QUERY_KEYS, STALE_TIMES } from '@lifespan/constants';
+} from '@timeflux/api';
+import { QUERY_KEYS, STALE_TIMES } from '@timeflux/constants';
 import { useApi } from './api-context';
 
 export function useDayStates() {

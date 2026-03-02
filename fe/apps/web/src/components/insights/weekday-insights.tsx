@@ -1,7 +1,7 @@
 'use client';
 
-import type { WeekdayInsights } from '@lifespan/api';
-import { useTranslation } from '@lifespan/hooks';
+import type { WeekdayInsights } from '@timeflux/api';
+import { useTranslation } from '@timeflux/hooks';
 
 const WEEKDAY_KEYS = [
   'insights.weekday_monday',

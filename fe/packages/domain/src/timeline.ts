@@ -4,7 +4,7 @@ import type {
   TimelinePeriod,
   TimelineResponse,
   WeekTimelineResponse,
-} from '@lifespan/api';
+} from '@timeflux/api';
 
 /** A single month grouping for vertical timeline display. */
 export interface TimelineMonth {

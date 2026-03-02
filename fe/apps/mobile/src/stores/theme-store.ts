@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { Appearance } from 'react-native';
 import type { NativeEventSubscription } from 'react-native';
-import type { ThemePreference, ResolvedTheme } from '@lifespan/theme';
+import type { ThemePreference, ResolvedTheme } from '@timeflux/theme';
 
 interface ThemeState {
   theme: ThemePreference;
@@ -12,7 +12,7 @@ interface ThemeState {
   hydrate: () => Promise<void>;
 }
 
-const STORAGE_KEY = 'lifespan_theme';
+const STORAGE_KEY = 'timeflux_theme';
 
 let appearanceSubscription: NativeEventSubscription | null = null;
 
@@ -46,12 +46,14 @@ export const useThemeStore = create<ThemeState>((set) => ({
       }
 
       // Listen for system theme changes
-      appearanceSubscription = Appearance.addChangeListener(({ colorScheme }) => {
-        const current = useThemeStore.getState();
-        if (current.theme === 'system') {
-          set({ resolvedTheme: colorScheme === 'dark' ? 'dark' : 'light' });
-        }
-      });
+      appearanceSubscription = Appearance.addChangeListener(
+        ({ colorScheme }) => {
+          const current = useThemeStore.getState();
+          if (current.theme === 'system') {
+            set({ resolvedTheme: colorScheme === 'dark' ? 'dark' : 'light' });
+          }
+        },
+      );
     } catch {
       set({ ready: true });
     }

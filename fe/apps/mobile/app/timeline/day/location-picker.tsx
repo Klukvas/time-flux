@@ -15,10 +15,10 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import type { MapPressEvent, Region } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import * as Location from 'expo-location';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage } from '@lifespan/domain';
-import { useTranslation, useUpdateDayLocation } from '@lifespan/hooks';
-import { MAX_LOCATION_NAME_LENGTH } from '@lifespan/constants';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage } from '@timeflux/domain';
+import { useTranslation, useUpdateDayLocation } from '@timeflux/hooks';
+import { MAX_LOCATION_NAME_LENGTH } from '@timeflux/constants';
 import Constants from 'expo-constants';
 import { colors, fontSize, spacing, borderRadius } from '@/lib/theme';
 

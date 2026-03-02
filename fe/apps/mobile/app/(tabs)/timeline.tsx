@@ -13,8 +13,8 @@ import {
   groupTimelineByMonth,
   isActivePeriod,
   sortPeriods,
-} from '@lifespan/domain';
-import { useOnboarding, useTimeline, useWeekTimeline } from '@lifespan/hooks';
+} from '@timeflux/domain';
+import { useOnboarding, useTimeline, useWeekTimeline } from '@timeflux/hooks';
 import {
   addDays,
   formatDate,
@@ -24,7 +24,7 @@ import {
   hexToRgba,
   isToday,
   todayISO,
-} from '@lifespan/utils';
+} from '@timeflux/utils';
 import { Loading } from '@/components/ui/loading';
 import { OnboardingOverlay } from '@/components/onboarding/onboarding-overlay';
 import { OnThisDaySection } from '@/components/timeline/on-this-day';

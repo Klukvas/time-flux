@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useTheme } from '@lifespan/hooks';
+import { useTheme } from '@timeflux/hooks';
 import { fontSize, spacing } from '@/lib/theme';
 
 interface EmptyStateProps {
@@ -16,7 +16,9 @@ export function EmptyState({ title, description, action }: EmptyStateProps) {
     <View style={styles.container}>
       <Text style={[styles.title, { color: tokens.colors.text }]}>{title}</Text>
       {description && (
-        <Text style={[styles.description, { color: tokens.colors.textSecondary }]}>
+        <Text
+          style={[styles.description, { color: tokens.colors.textSecondary }]}
+        >
           {description}
         </Text>
       )}

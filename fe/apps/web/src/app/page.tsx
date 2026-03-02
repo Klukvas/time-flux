@@ -54,7 +54,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-edge px-4 py-8 text-center text-xs text-content-tertiary">
-        LifeSpan &copy; {new Date().getFullYear()}
+        TimeFlux &copy; {new Date().getFullYear()}
         {' · '}
         <a href="/blog" className="underline hover:text-content-secondary">
           Blog

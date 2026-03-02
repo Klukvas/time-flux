@@ -8,11 +8,18 @@ import {
   Text,
   View,
 } from 'react-native';
-import type { Category } from '@lifespan/api';
-import { extractApiError } from '@lifespan/api';
-import { getUserMessage } from '@lifespan/domain';
-import { useCategories, useCreateCategoryFromRecommendation, useDeleteCategory, useRecommendations, useTranslation, useTheme } from '@lifespan/hooks';
-import { contrastTextColor } from '@lifespan/utils';
+import type { Category } from '@timeflux/api';
+import { extractApiError } from '@timeflux/api';
+import { getUserMessage } from '@timeflux/domain';
+import {
+  useCategories,
+  useCreateCategoryFromRecommendation,
+  useDeleteCategory,
+  useRecommendations,
+  useTranslation,
+  useTheme,
+} from '@timeflux/hooks';
+import { contrastTextColor } from '@timeflux/utils';
 import { Loading } from '@/components/ui/loading';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -30,7 +37,9 @@ export default function CategoriesScreen() {
   const [formVisible, setFormVisible] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formInitialName, setFormInitialName] = useState<string | undefined>();
-  const [formInitialColor, setFormInitialColor] = useState<string | undefined>();
+  const [formInitialColor, setFormInitialColor] = useState<
+    string | undefined
+  >();
 
   // Recommendations state
   const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set());
@@ -53,17 +62,22 @@ export default function CategoriesScreen() {
   };
 
   const handleDelete = (category: Category) => {
-    Alert.alert(t('categories.delete'), t('categories.confirm_delete_message', { name: category.name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () =>
-          deleteCategory.mutate(category.id, {
-            onError: (err) => Alert.alert('Error', getUserMessage(extractApiError(err))),
-          }),
-      },
-    ]);
+    Alert.alert(
+      t('categories.delete'),
+      t('categories.confirm_delete_message', { name: category.name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () =>
+            deleteCategory.mutate(category.id, {
+              onError: (err) =>
+                Alert.alert('Error', getUserMessage(extractApiError(err))),
+            }),
+        },
+      ],
+    );
   };
 
   const handleAcceptRecommendation = async (key: string) => {
@@ -86,7 +100,9 @@ export default function CategoriesScreen() {
   const handleAddAll = async () => {
     setAddingAll(true);
     try {
-      const colors = new Set((categories ?? []).map((c) => c.color.toLowerCase()));
+      const colors = new Set(
+        (categories ?? []).map((c) => c.color.toLowerCase()),
+      );
       const remaining = (recommendations?.categories ?? []).filter(
         (s) => !dismissedKeys.has(s.key) && !colors.has(s.color.toLowerCase()),
       );
@@ -102,11 +118,15 @@ export default function CategoriesScreen() {
     }
   };
 
-  const existingColors = new Set((categories ?? []).map((c) => c.color.toLowerCase()));
-  const visibleRecommendations = (recommendations?.categories ?? []).filter(
-    (s) => !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  const existingColors = new Set(
+    (categories ?? []).map((c) => c.color.toLowerCase()),
   );
-  const showRecommendations = !suggestionsDismissed && visibleRecommendations.length > 0;
+  const visibleRecommendations = (recommendations?.categories ?? []).filter(
+    (s) =>
+      !dismissedKeys.has(s.key) && !existingColors.has(s.color.toLowerCase()),
+  );
+  const showRecommendations =
+    !suggestionsDismissed && visibleRecommendations.length > 0;
 
   if (isLoading) return <Loading />;
 
@@ -118,7 +138,11 @@ export default function CategoriesScreen() {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <View>
-            <Button title={`+ ${t('categories.create')}`} onPress={openCreate} style={{ marginBottom: spacing.lg }} />
+            <Button
+              title={`+ ${t('categories.create')}`}
+              onPress={openCreate}
+              style={{ marginBottom: spacing.lg }}
+            />
 
             {/* Recommendations panel */}
             {showRecommendations && !categories?.length && (
@@ -128,11 +152,29 @@ export default function CategoriesScreen() {
                   description={t('categories.empty.description')}
                 />
 
-                <View style={[styles.suggestionsCard, { backgroundColor: tokens.colors.bgCard, borderColor: tokens.colors.border }]}>
-                  <Text style={[styles.suggestionsTitle, { color: tokens.colors.text }]}>
+                <View
+                  style={[
+                    styles.suggestionsCard,
+                    {
+                      backgroundColor: tokens.colors.bgCard,
+                      borderColor: tokens.colors.border,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.suggestionsTitle,
+                      { color: tokens.colors.text },
+                    ]}
+                  >
                     {t('categories.recommendations.title')}
                   </Text>
-                  <Text style={[styles.suggestionsDesc, { color: tokens.colors.textSecondary }]}>
+                  <Text
+                    style={[
+                      styles.suggestionsDesc,
+                      { color: tokens.colors.textSecondary },
+                    ]}
+                  >
                     {t('categories.recommendations.description')}
                   </Text>
 
@@ -147,18 +189,46 @@ export default function CategoriesScreen() {
                             disabled={addingAll || isCreating}
                             style={({ pressed }) => [
                               styles.suggestionChip,
-                              { borderColor: tokens.colors.border, opacity: pressed || addingAll || isCreating ? 0.6 : 1 },
+                              {
+                                borderColor: tokens.colors.border,
+                                opacity:
+                                  pressed || addingAll || isCreating ? 0.6 : 1,
+                              },
                             ]}
                           >
-                            <View style={[styles.suggestionDot, { backgroundColor: s.color }]} />
-                            <Text style={[styles.suggestionText, { color: tokens.colors.text }]}>{name}</Text>
-                            {isCreating && <ActivityIndicator size="small" style={{ marginLeft: 4 }} />}
+                            <View
+                              style={[
+                                styles.suggestionDot,
+                                { backgroundColor: s.color },
+                              ]}
+                            />
+                            <Text
+                              style={[
+                                styles.suggestionText,
+                                { color: tokens.colors.text },
+                              ]}
+                            >
+                              {name}
+                            </Text>
+                            {isCreating && (
+                              <ActivityIndicator
+                                size="small"
+                                style={{ marginLeft: 4 }}
+                              />
+                            )}
                           </Pressable>
                           <Pressable
                             onPress={() => handleDismissRecommendation(s.key)}
                             style={styles.dismissBtn}
                           >
-                            <Text style={{ color: tokens.colors.textTertiary, fontSize: fontSize.sm }}>✕</Text>
+                            <Text
+                              style={{
+                                color: tokens.colors.textTertiary,
+                                fontSize: fontSize.sm,
+                              }}
+                            >
+                              ✕
+                            </Text>
                           </Pressable>
                         </View>
                       );
@@ -173,7 +243,12 @@ export default function CategoriesScreen() {
                       loading={addingAll}
                     />
                     <Pressable onPress={() => setSuggestionsDismissed(true)}>
-                      <Text style={{ color: tokens.colors.textTertiary, fontSize: fontSize.xs }}>
+                      <Text
+                        style={{
+                          color: tokens.colors.textTertiary,
+                          fontSize: fontSize.xs,
+                        }}
+                      >
                         {t('categories.recommendations.dismiss')}
                       </Text>
                     </Pressable>
@@ -188,7 +263,10 @@ export default function CategoriesScreen() {
                 title={t('categories.empty.title')}
                 description={t('categories.empty.description')}
                 action={
-                  <Button title={`+ ${t('categories.create')}`} onPress={openCreate} />
+                  <Button
+                    title={`+ ${t('categories.create')}`}
+                    onPress={openCreate}
+                  />
                 }
               />
             )}
@@ -201,14 +279,32 @@ export default function CategoriesScreen() {
             onLongPress={() => handleDelete(cat)}
           >
             <View style={[styles.cardBadge, { backgroundColor: cat.color }]}>
-              <Text style={{ fontSize: fontSize.sm, fontWeight: '700', color: contrastTextColor(cat.color) }}>
+              <Text
+                style={{
+                  fontSize: fontSize.sm,
+                  fontWeight: '700',
+                  color: contrastTextColor(cat.color),
+                }}
+              >
                 {cat.name[0]}
               </Text>
             </View>
             <View style={styles.cardInfo}>
-              <Text style={[styles.cardName, { color: tokens.colors.text }]} numberOfLines={1}>{cat.name}</Text>
-              <Text style={[styles.cardLabel, { color: tokens.colors.textSecondary }]}>
-                {cat.isSystem ? t('categories.system_label') : t('categories.custom_label')}
+              <Text
+                style={[styles.cardName, { color: tokens.colors.text }]}
+                numberOfLines={1}
+              >
+                {cat.name}
+              </Text>
+              <Text
+                style={[
+                  styles.cardLabel,
+                  { color: tokens.colors.textSecondary },
+                ]}
+              >
+                {cat.isSystem
+                  ? t('categories.system_label')
+                  : t('categories.custom_label')}
               </Text>
             </View>
           </Pressable>
@@ -217,7 +313,10 @@ export default function CategoriesScreen() {
 
       <CategoryFormModal
         visible={formVisible}
-        onClose={() => { setFormVisible(false); setEditingCategory(null); }}
+        onClose={() => {
+          setFormVisible(false);
+          setEditingCategory(null);
+        }}
         category={editingCategory}
         initialName={formInitialName}
         initialColor={formInitialColor}
@@ -258,7 +357,11 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     marginTop: spacing.lg,
   },
-  suggestionsTitle: { fontSize: fontSize.sm, fontWeight: '600', marginBottom: spacing.xs },
+  suggestionsTitle: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
   suggestionsDesc: { fontSize: fontSize.xs, marginBottom: spacing.lg },
   suggestionsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   suggestionRow: { flexDirection: 'row', alignItems: 'center' },
