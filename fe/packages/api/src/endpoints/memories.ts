@@ -1,9 +1,6 @@
 import type { AxiosInstance } from 'axios';
-import type {
-  MemoriesContextParams,
-  MemoriesContextResponse,
-  OnThisDayResponse,
-} from '../types';
+import type { MemoriesContextResponse, OnThisDayResponse } from '../types';
+import type { MemoriesContextParams } from '../types-local';
 
 export function createMemoriesApi(client: AxiosInstance) {
   return {

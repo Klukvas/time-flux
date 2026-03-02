@@ -6,7 +6,7 @@ export class DaysRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private readonly dayInclude = {
-    dayState: { select: { id: true, name: true, color: true } },
+    dayState: { select: { id: true, name: true, color: true, score: true } },
     media: {
       select: {
         id: true,

@@ -18,8 +18,8 @@ class TimelineMediaDto {
   @ApiProperty()
   s3Key: string;
 
-  @ApiProperty()
-  url: string;
+  @ApiProperty({ nullable: true, type: String })
+  url: string | null;
 
   @ApiProperty()
   fileName: string;
@@ -41,7 +41,12 @@ class TimelineDayDto {
   @ApiProperty({ nullable: true, type: () => TimelineDayStateDto })
   dayState: TimelineDayStateDto | null;
 
-  @ApiProperty({ nullable: true, example: 'media-uuid', description: 'Cover media ID' })
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    example: 'media-uuid',
+    description: 'Cover media ID',
+  })
   mainMediaId: string | null;
 
   @ApiProperty({ type: [TimelineMediaDto] })
@@ -74,10 +79,10 @@ class TimelinePeriodDto {
   @ApiProperty()
   startDate: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   endDate: string | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ type: String, nullable: true })
   comment: string | null;
 
   @ApiProperty()
@@ -111,6 +116,9 @@ export class WeekTimelineResponseDto {
   @ApiProperty({ type: [TimelinePeriodDto] })
   periods: TimelinePeriodDto[];
 
-  @ApiProperty({ type: [TimelineDayDto], description: 'Exactly 7 days (Mon-Sun), with or without state' })
+  @ApiProperty({
+    type: [TimelineDayDto],
+    description: 'Exactly 7 days (Mon-Sun), with or without state',
+  })
   days: TimelineDayDto[];
 }

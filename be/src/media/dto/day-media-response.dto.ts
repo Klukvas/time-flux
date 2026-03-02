@@ -8,6 +8,7 @@ export class DayMediaResponseDto {
   s3Key: string;
 
   @ApiProperty({
+    type: String,
     description:
       'Presigned URL for reading the media file (null if generation failed)',
     nullable: true,

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { extractApiError } from '@lifespan/api';
-import type { DayMedia } from '@lifespan/api';
+import type { CreateDayMediaRequest, DayMedia } from '@lifespan/api';
 import { getPeriodsForDate, getUserMessage } from '@lifespan/domain';
 import {
   useCreateDayMedia,
@@ -39,7 +39,7 @@ interface DayFormModalProps {
 function toMediaItem(m: DayMedia): MediaItem {
   return {
     id: m.id,
-    previewUrl: m.url,
+    previewUrl: m.url ?? '',
     mimeType: m.contentType,
     key: m.s3Key,
     uploading: false,
@@ -68,8 +68,12 @@ export function DayFormModal({
   const deleteDayMedia = useDeleteDayMedia();
   const { upload } = usePresignedUpload();
 
-  const [selectedDayStateId, setSelectedDayStateId] = useState<string | null>(null);
-  const [selectedMainMediaId, setSelectedMainMediaId] = useState<string | null>(null);
+  const [selectedDayStateId, setSelectedDayStateId] = useState<string | null>(
+    null,
+  );
+  const [selectedMainMediaId, setSelectedMainMediaId] = useState<string | null>(
+    null,
+  );
   const [comment, setComment] = useState('');
   const [localMediaItems, setLocalMediaItems] = useState<MediaItem[]>([]);
 
@@ -79,6 +83,8 @@ export function DayFormModal({
     const allPeriods = allGroups.flatMap((g) =>
       g.periods.map((p) => ({
         ...p,
+        endDate: p.endDate ?? null,
+        comment: p.comment ?? null,
         eventGroup: { id: g.id, title: g.title },
         category: g.category,
       })),
@@ -139,7 +145,8 @@ export function DayFormModal({
             data: {
               s3Key: result.key,
               fileName: item.file!.name,
-              contentType: item.file!.type,
+              contentType: item.file!
+                .type as CreateDayMediaRequest['contentType'],
               size: item.file!.size,
             },
           });
@@ -155,7 +162,9 @@ export function DayFormModal({
         } catch {
           setLocalMediaItems((prev) =>
             prev.map((m) =>
-              m.id === item.id ? { ...m, uploading: false, error: 'Upload failed' } : m,
+              m.id === item.id
+                ? { ...m, uploading: false, error: 'Upload failed' }
+                : m,
             ),
           );
         }
@@ -190,7 +199,13 @@ export function DayFormModal({
 
   const handleSave = () => {
     upsertDay.mutate(
-      { date, data: { dayStateId: selectedDayStateId, mainMediaId: selectedMainMediaId } },
+      {
+        date,
+        data: {
+          dayStateId: selectedDayStateId,
+          mainMediaId: selectedMainMediaId,
+        },
+      },
       {
         onSuccess: () => {
           toast.success(t('day_form.day_updated'));
@@ -219,7 +234,11 @@ export function DayFormModal({
   const isPending = upsertDay.isPending;
 
   return (
-    <Modal open={open} onClose={onClose} title={formatDate(date, 'cccc, MMMM d, yyyy')}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={formatDate(date, 'cccc, MMMM d, yyyy')}
+    >
       <div className="space-y-5">
         {/* Today indicator */}
         {today && (
@@ -231,7 +250,9 @@ export function DayFormModal({
 
         {/* Mood Picker */}
         <div>
-          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('day_form.mood')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-content-secondary">
+            {t('day_form.mood')}
+          </h3>
           <div className="flex flex-wrap gap-2">
             {dayStates?.map((ds) => (
               <button
@@ -269,45 +290,69 @@ export function DayFormModal({
             )}
           </div>
           {(() => {
-            const dsColors = new Set((dayStates ?? []).map((ds) => ds.color.toLowerCase()));
+            const dsColors = new Set(
+              (dayStates ?? []).map((ds) => ds.color.toLowerCase()),
+            );
             const visibleRecs = (recommendations?.moods ?? []).filter(
               (r) => !dsColors.has(r.color.toLowerCase()),
             );
             return !dayStates?.length && visibleRecs.length > 0 ? (
-            <div className="mt-2">
-              <p className="mb-1.5 text-xs text-content-tertiary">{t('day_states.recommendations.title')}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {visibleRecs.map((rec) => {
-                  const name = t(`day_states.recommendations.${rec.key}`);
-                  const isCreating = creatingMoodKey === rec.key;
-                  return (
-                    <button
-                      key={rec.key}
-                      type="button"
-                      onClick={() => handleCreateMoodFromRec(rec.key)}
-                      disabled={!!creatingMoodKey || isPending}
-                      className="flex items-center gap-1.5 rounded-full border border-edge px-2.5 py-1 text-xs text-content transition-colors hover:bg-surface-secondary disabled:opacity-50"
-                    >
-                      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: rec.color }} />
-                      {name}
-                      {isCreating && (
-                        <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                      )}
-                    </button>
-                  );
-                })}
+              <div className="mt-2">
+                <p className="mb-1.5 text-xs text-content-tertiary">
+                  {t('day_states.recommendations.title')}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {visibleRecs.map((rec) => {
+                    const name = t(`day_states.recommendations.${rec.key}`);
+                    const isCreating = creatingMoodKey === rec.key;
+                    return (
+                      <button
+                        key={rec.key}
+                        type="button"
+                        onClick={() => handleCreateMoodFromRec(rec.key)}
+                        disabled={!!creatingMoodKey || isPending}
+                        className="flex items-center gap-1.5 rounded-full border border-edge px-2.5 py-1 text-xs text-content transition-colors hover:bg-surface-secondary disabled:opacity-50"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{ backgroundColor: rec.color }}
+                        />
+                        {name}
+                        {isCreating && (
+                          <svg
+                            className="h-3 w-3 animate-spin"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
             ) : null;
           })()}
         </div>
 
         {/* Media Upload */}
         <div>
-          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('day_form.photos_videos')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-content-secondary">
+            {t('day_form.photos_videos')}
+          </h3>
           <MediaUploader
             items={allMediaItems}
             onAdd={handleAddMedia}
@@ -320,7 +365,9 @@ export function DayFormModal({
 
         {/* Comment */}
         <div>
-          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('day_form.comment')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-content-secondary">
+            {t('day_form.comment')}
+          </h3>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
@@ -337,7 +384,9 @@ export function DayFormModal({
 
         {/* Periods for this day */}
         <div>
-          <h3 className="mb-2 text-sm font-medium text-content-secondary">{t('chapters.title')}</h3>
+          <h3 className="mb-2 text-sm font-medium text-content-secondary">
+            {t('chapters.title')}
+          </h3>
           {overlappingPeriods.length > 0 ? (
             <div className="space-y-1.5">
               {overlappingPeriods.map((period) => (
@@ -360,7 +409,9 @@ export function DayFormModal({
                     {period.eventGroup.title}
                   </span>
                   {period.comment && (
-                    <span className="truncate text-content-secondary">{period.comment}</span>
+                    <span className="truncate text-content-secondary">
+                      {period.comment}
+                    </span>
                   )}
                   {period.endDate === null && (
                     <span className="ml-auto flex items-center gap-1 text-xs text-success">
@@ -372,15 +423,27 @@ export function DayFormModal({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-content-tertiary">{t('chapters.empty.description')}</p>
+            <p className="text-sm text-content-tertiary">
+              {t('chapters.empty.description')}
+            </p>
           )}
 
           <Link
             href="/chapters"
             className="mt-2 inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent-hover"
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             {t('chapters.create')}
           </Link>

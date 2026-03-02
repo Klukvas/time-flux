@@ -14,7 +14,10 @@ describe('DayStatesService', () => {
   let service: DayStatesService;
   let repo: jest.Mocked<DayStatesRepository>;
   let subscriptionsService: { assertResourceLimit: jest.Mock };
-  let mockTx: { day: { count: jest.Mock }; dayState: { delete: jest.Mock } };
+  let mockTx: {
+    day: { count: jest.Mock };
+    dayState: { count: jest.Mock; create: jest.Mock; delete: jest.Mock };
+  };
 
   const userId = 'user-1';
 
@@ -37,7 +40,11 @@ describe('DayStatesService', () => {
 
     mockTx = {
       day: { count: jest.fn().mockResolvedValue(0) },
-      dayState: { delete: jest.fn().mockResolvedValue(undefined) },
+      dayState: {
+        count: jest.fn().mockResolvedValue(0),
+        create: jest.fn().mockResolvedValue(mockDayState),
+        delete: jest.fn().mockResolvedValue(undefined),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -110,8 +117,8 @@ describe('DayStatesService', () => {
 
   describe('create', () => {
     it('should store score value from DTO', async () => {
-      repo.countByUserId.mockResolvedValue(0);
-      repo.create.mockResolvedValue(mockDayState);
+      mockTx.dayState.count.mockResolvedValue(0);
+      mockTx.dayState.create.mockResolvedValue(mockDayState);
 
       await service.create(userId, {
         name: 'Custom',
@@ -119,14 +126,16 @@ describe('DayStatesService', () => {
         score: 7,
       });
 
-      expect(repo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ score: 7 }),
+      expect(mockTx.dayState.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ score: 7 }),
+        }),
       );
     });
 
     it('should auto-assign order when not provided', async () => {
-      repo.countByUserId.mockResolvedValue(5);
-      repo.create.mockResolvedValue({ ...mockDayState, order: 5 });
+      mockTx.dayState.count.mockResolvedValue(5);
+      mockTx.dayState.create.mockResolvedValue({ ...mockDayState, order: 5 });
 
       await service.create(userId, {
         name: 'New Mood',
@@ -134,14 +143,16 @@ describe('DayStatesService', () => {
         score: 5,
       });
 
-      expect(repo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ order: 5 }),
+      expect(mockTx.dayState.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ order: 5 }),
+        }),
       );
     });
 
     it('should use provided order when specified', async () => {
-      repo.countByUserId.mockResolvedValue(5);
-      repo.create.mockResolvedValue({ ...mockDayState, order: 0 });
+      mockTx.dayState.count.mockResolvedValue(5);
+      mockTx.dayState.create.mockResolvedValue({ ...mockDayState, order: 0 });
 
       await service.create(userId, {
         name: 'New Mood',
@@ -150,8 +161,10 @@ describe('DayStatesService', () => {
         order: 0,
       });
 
-      expect(repo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ order: 0 }),
+      expect(mockTx.dayState.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ order: 0 }),
+        }),
       );
     });
   });
@@ -160,25 +173,27 @@ describe('DayStatesService', () => {
 
   describe('createFromRecommendation', () => {
     it('should create mood with recommendation color and score', async () => {
-      repo.countByUserId.mockResolvedValue(0);
-      repo.create.mockResolvedValue(mockDayState);
+      mockTx.dayState.count.mockResolvedValue(0);
+      mockTx.dayState.create.mockResolvedValue(mockDayState);
 
       await service.createFromRecommendation(userId, {
         key: 'great' as any,
         name: 'Great',
       });
 
-      expect(repo.create).toHaveBeenCalledWith(
+      expect(mockTx.dayState.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          color: '#22C55E', // Great recommendation color
-          score: 9, // Great recommendation score
+          data: expect.objectContaining({
+            color: '#22C55E', // Great recommendation color
+            score: 9, // Great recommendation score
+          }),
         }),
       );
     });
 
     it('should set correct scores for each recommendation', async () => {
-      repo.countByUserId.mockResolvedValue(0);
-      repo.create.mockResolvedValue(mockDayState);
+      mockTx.dayState.count.mockResolvedValue(0);
+      mockTx.dayState.create.mockResolvedValue(mockDayState);
 
       const expectedScores: Record<string, number> = {
         great: 9,
@@ -189,14 +204,16 @@ describe('DayStatesService', () => {
       };
 
       for (const [key, expectedScore] of Object.entries(expectedScores)) {
-        repo.create.mockClear();
+        mockTx.dayState.create.mockClear();
         await service.createFromRecommendation(userId, {
           key: key as any,
           name: key,
         });
 
-        expect(repo.create).toHaveBeenCalledWith(
-          expect.objectContaining({ score: expectedScore }),
+        expect(mockTx.dayState.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ score: expectedScore }),
+          }),
         );
       }
     });
@@ -215,7 +232,7 @@ describe('DayStatesService', () => {
 
   describe('quota enforcement', () => {
     it('should throw QuotaExceededError when at limit on create', async () => {
-      repo.countByUserId.mockResolvedValue(5);
+      mockTx.dayState.count.mockResolvedValue(5);
       subscriptionsService.assertResourceLimit.mockRejectedValue(
         new QuotaExceededError({
           resource: 'dayStates',
@@ -235,7 +252,7 @@ describe('DayStatesService', () => {
     });
 
     it('should throw QuotaExceededError when at limit on createFromRecommendation', async () => {
-      repo.countByUserId.mockResolvedValue(5);
+      mockTx.dayState.count.mockResolvedValue(5);
       subscriptionsService.assertResourceLimit.mockRejectedValue(
         new QuotaExceededError({
           resource: 'dayStates',
@@ -254,8 +271,8 @@ describe('DayStatesService', () => {
     });
 
     it('should allow create when under limit', async () => {
-      repo.countByUserId.mockResolvedValue(3);
-      repo.create.mockResolvedValue(mockDayState);
+      mockTx.dayState.count.mockResolvedValue(3);
+      mockTx.dayState.create.mockResolvedValue(mockDayState);
       subscriptionsService.assertResourceLimit.mockResolvedValue(undefined);
 
       await expect(

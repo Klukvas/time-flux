@@ -3,14 +3,13 @@ import { BadRequestException } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { MemoriesService } from './memories.service.js';
 import { MemoriesRepository } from './memories.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 
 describe('MemoriesService', () => {
   let service: MemoriesService;
   let memoriesRepo: jest.Mocked<MemoriesRepository>;
-  let authRepo: jest.Mocked<AuthRepository>;
 
   const userId = 'user-1';
+  const timezone = 'UTC';
 
   function makeDay(
     dateStr: string,
@@ -48,18 +47,11 @@ describe('MemoriesService', () => {
             findDaysInRange: jest.fn(),
           },
         },
-        {
-          provide: AuthRepository,
-          useValue: {
-            findUserById: jest.fn().mockResolvedValue({ timezone: 'UTC' }),
-          },
-        },
       ],
     }).compile();
 
     service = module.get(MemoriesService);
     memoriesRepo = module.get(MemoriesRepository);
-    authRepo = module.get(AuthRepository);
   });
 
   // ─── INTERVAL CALCULATION ──────────────────────────────────
@@ -89,7 +81,7 @@ describe('MemoriesService', () => {
         }), // 1 year ago
       ]);
 
-      const result = await service.getOnThisDay(userId, '2024-07-15');
+      const result = await service.getOnThisDay(userId, timezone, '2024-07-15');
 
       expect(result.baseDate).toBe('2024-07-15');
       expect(result.memories).toHaveLength(3);
@@ -108,7 +100,7 @@ describe('MemoriesService', () => {
         makeDay('2023-07-01', { dayStateId: 'ds-1', dayState: mood }),
       ]);
 
-      const result = await service.getOnThisDay(userId, '2024-07-01');
+      const result = await service.getOnThisDay(userId, timezone, '2024-07-01');
 
       expect(result.memories[0].interval).toEqual({ type: 'months', value: 1 });
       expect(result.memories[1].interval).toEqual({ type: 'months', value: 6 });
@@ -129,14 +121,14 @@ describe('MemoriesService', () => {
         makeDay('2023-07-15', { dayStateId: 'ds-1', dayState: mood }),
       ]);
 
-      const result = await service.getOnThisDay(userId, '2024-07-15');
+      const result = await service.getOnThisDay(userId, timezone, '2024-07-15');
       expect(result.memories.length).toBeLessThanOrEqual(3);
     });
 
     it('should return 0 memories when selected day has no content', async () => {
       memoriesRepo.findDayWithContent.mockResolvedValue(null);
 
-      const result = await service.getOnThisDay(userId, '2024-07-15');
+      const result = await service.getOnThisDay(userId, timezone, '2024-07-15');
       expect(result.memories).toHaveLength(0);
     });
 
@@ -153,7 +145,7 @@ describe('MemoriesService', () => {
         }),
       ]);
 
-      const result = await service.getOnThisDay(userId, '2024-07-15');
+      const result = await service.getOnThisDay(userId, timezone, '2024-07-15');
       expect(result.memories).toHaveLength(1);
       expect(result.memories[0].date).toBe('2024-06-15');
     });
@@ -174,7 +166,7 @@ describe('MemoriesService', () => {
         }),
       ]);
 
-      const result = await service.getOnThisDay(userId, '2024-07-15');
+      const result = await service.getOnThisDay(userId, timezone, '2024-07-15');
       expect(result.memories).toHaveLength(1);
       expect(result.memories[0].mood).toEqual(mood);
       expect(result.memories[0].mediaCount).toBe(0);
@@ -187,7 +179,7 @@ describe('MemoriesService', () => {
         makeDay('2024-06-15', { dayState: null, mediaCount: 3 }),
       ]);
 
-      const result = await service.getOnThisDay(userId, '2024-07-15');
+      const result = await service.getOnThisDay(userId, timezone, '2024-07-15');
       expect(result.memories).toHaveLength(1);
       expect(result.memories[0].mood).toBeNull();
       expect(result.memories[0].mediaCount).toBe(3);
@@ -200,7 +192,7 @@ describe('MemoriesService', () => {
         makeDay('2024-06-15', { dayState: null, mediaCount: 0 }),
       ]);
 
-      const result = await service.getOnThisDay(userId, '2024-07-15');
+      const result = await service.getOnThisDay(userId, timezone, '2024-07-15');
       expect(result.memories).toHaveLength(0);
     });
   });
@@ -230,7 +222,7 @@ describe('MemoriesService', () => {
         },
       );
 
-      const result = await service.getOnThisDay(userId, '2024-02-29');
+      const result = await service.getOnThisDay(userId, timezone, '2024-02-29');
       expect(result.baseDate).toBe('2024-02-29');
     });
 
@@ -252,7 +244,7 @@ describe('MemoriesService', () => {
         },
       );
 
-      await service.getOnThisDay(userId, '2024-03-31');
+      await service.getOnThisDay(userId, timezone, '2024-03-31');
     });
 
     it('should handle Jan 31 → 1 month ago = Dec 31 (previous year)', async () => {
@@ -271,31 +263,27 @@ describe('MemoriesService', () => {
         },
       );
 
-      await service.getOnThisDay(userId, '2024-01-31');
+      await service.getOnThisDay(userId, timezone, '2024-01-31');
     });
   });
 
   // ─── TIMEZONE HANDLING ─────────────────────────────────────
 
   describe('getOnThisDay — timezone', () => {
-    it('should use user timezone for date interpretation', async () => {
-      authRepo.findUserById.mockResolvedValue({
-        timezone: 'America/New_York',
-      } as any);
+    it('should use provided timezone for date interpretation', async () => {
       memoriesRepo.findDayWithContent.mockResolvedValue({ id: 'day-1' });
       memoriesRepo.findDaysByDates.mockResolvedValue([]);
 
-      const result = await service.getOnThisDay(userId, '2024-07-15');
+      const result = await service.getOnThisDay(userId, 'America/New_York', '2024-07-15');
 
-      // The date should be interpreted in the user's timezone
+      // The date should be interpreted in the provided timezone
       expect(result.baseDate).toBe('2024-07-15');
     });
 
-    it('should default to UTC when user has no timezone', async () => {
-      authRepo.findUserById.mockResolvedValue(null);
+    it('should work with UTC timezone', async () => {
       memoriesRepo.findDayWithContent.mockResolvedValue(null);
 
-      const result = await service.getOnThisDay(userId, '2024-07-15');
+      const result = await service.getOnThisDay(userId, 'UTC', '2024-07-15');
       expect(result.baseDate).toBe('2024-07-15');
     });
   });
@@ -304,7 +292,7 @@ describe('MemoriesService', () => {
 
   describe('getOnThisDay — invalid date', () => {
     it('should throw BadRequestException for invalid date', async () => {
-      await expect(service.getOnThisDay(userId, 'not-a-date')).rejects.toThrow(
+      await expect(service.getOnThisDay(userId, timezone, 'not-a-date')).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -320,6 +308,7 @@ describe('MemoriesService', () => {
         userId,
         'week' as any,
         '2024-07-17',
+        timezone,
       );
 
       expect(result).toHaveProperty('type', 'week');
@@ -348,6 +337,7 @@ describe('MemoriesService', () => {
         userId,
         'week' as any,
         '2024-07-17',
+        timezone,
       );
 
       const weekResult = result as any;
@@ -369,6 +359,7 @@ describe('MemoriesService', () => {
         userId,
         'week' as any,
         '2024-07-17',
+        timezone,
       );
       const weekResult = result as any;
       expect(weekResult.memories).toHaveLength(0);

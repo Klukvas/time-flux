@@ -17,28 +17,58 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service.js'
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 const OAUTH_CODE_TTL_MS = 60_000;
+const OAUTH_CODES_MAX_SIZE = 1_000;
+const OAUTH_CLEANUP_INTERVAL_MS = 30_000;
 
 // Pre-computed bcrypt hash for constant-time comparison when user doesn't exist
 const DUMMY_HASH =
   '$2b$12$LJ3m4ys3Lk0TSwHlvPkSxOSZSGwcF5s8F1YMwXBPjKzLy4qXzKe7W';
+
+interface OAuthTokenData {
+  access_token: string;
+  refresh_token: string;
+  user: AuthUserData;
+}
+
+interface AuthUserData {
+  id: string;
+  email: string;
+  avatarUrl?: string;
+  timezone: string;
+  onboardingCompleted: boolean;
+  tier: string;
+  createdAt: string;
+}
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly oauthCodes = new Map<
     string,
-    {
-      data: { access_token: string; refresh_token: string; user: any };
-      expiresAt: number;
-    }
+    { data: OAuthTokenData; expiresAt: number }
   >();
+  private readonly cleanupInterval: ReturnType<typeof setInterval>;
 
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly subscriptionsService: SubscriptionsService,
-  ) {}
+  ) {
+    // Periodically clean up expired OAuth codes
+    this.cleanupInterval = setInterval(() => {
+      const now = Date.now();
+      for (const [key, entry] of this.oauthCodes) {
+        if (entry.expiresAt < now) {
+          this.oauthCodes.delete(key);
+        }
+      }
+    }, OAUTH_CLEANUP_INTERVAL_MS);
+  }
+
+  onModuleDestroy() {
+    clearInterval(this.cleanupInterval);
+  }
 
   private async buildUserResponse(user: {
     id: string;
@@ -47,15 +77,15 @@ export class AuthService {
     timezone: string;
     onboardingCompleted: boolean;
     createdAt: Date;
-  }) {
-    const sub = await this.subscriptionsService.getSubscription(user.id);
+  }): Promise<AuthUserData> {
+    const tier = await this.subscriptionsService.getTier(user.id);
     return {
       id: user.id,
       email: user.email,
       avatarUrl: user.avatarUrl ?? undefined,
       timezone: user.timezone,
       onboardingCompleted: user.onboardingCompleted,
-      tier: sub.tier,
+      tier,
       createdAt: user.createdAt.toISOString(),
     };
   }
@@ -70,15 +100,28 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        timezone: dto.timezone ?? 'UTC',
-      },
+    // Atomic: create user + provision FREE subscription in a single transaction
+    const user = await this.prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: {
+          email,
+          passwordHash,
+          timezone: dto.timezone ?? 'UTC',
+        },
+      });
+      await tx.subscription.upsert({
+        where: { userId: newUser.id },
+        create: { userId: newUser.id, tier: 'FREE', status: 'ACTIVE' },
+        update: {},
+      });
+      return newUser;
     });
 
-    const accessToken = this.generateAccessToken(user.id, user.email);
+    const accessToken = this.generateAccessToken(
+      user.id,
+      user.email,
+      user.timezone,
+    );
     const refreshToken = await this.createRefreshToken(user.id);
 
     return {
@@ -102,7 +145,11 @@ export class AuthService {
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    const accessToken = this.generateAccessToken(user.id, user.email);
+    const accessToken = this.generateAccessToken(
+      user.id,
+      user.email,
+      user.timezone,
+    );
     const refreshToken = await this.createRefreshToken(user.id);
 
     return {
@@ -166,6 +213,7 @@ export class AuthService {
       const accessToken = this.generateAccessToken(
         result.user.id,
         result.user.email,
+        result.user.timezone,
       );
       const refreshToken = await this.createRefreshToken(result.user.id);
 
@@ -208,6 +256,7 @@ export class AuthService {
     const accessToken = this.generateAccessToken(
       stored.user.id,
       stored.user.email,
+      stored.user.timezone,
     );
     const newRefreshToken = await this.createRefreshToken(stored.user.id);
 
@@ -223,11 +272,18 @@ export class AuthService {
     await this.prisma.refreshToken.deleteMany({ where: { tokenHash } });
   }
 
-  storeOAuthCode(data: {
-    access_token: string;
-    refresh_token: string;
-    user: any;
-  }): string {
+  storeOAuthCode(data: OAuthTokenData): string {
+    // Enforce max size to prevent memory exhaustion
+    if (this.oauthCodes.size >= OAUTH_CODES_MAX_SIZE) {
+      // Evict oldest entries (first 20%)
+      const evictCount = Math.ceil(OAUTH_CODES_MAX_SIZE * 0.2);
+      const iterator = this.oauthCodes.keys();
+      for (let i = 0; i < evictCount; i++) {
+        const key = iterator.next().value;
+        if (key) this.oauthCodes.delete(key);
+      }
+    }
+
     const code = randomBytes(32).toString('hex');
     this.oauthCodes.set(code, {
       data,
@@ -236,11 +292,7 @@ export class AuthService {
     return code;
   }
 
-  exchangeOAuthCode(code: string): {
-    access_token: string;
-    refresh_token: string;
-    user: any;
-  } {
+  exchangeOAuthCode(code: string): OAuthTokenData {
     const entry = this.oauthCodes.get(code);
     this.oauthCodes.delete(code);
 
@@ -256,8 +308,15 @@ export class AuthService {
     return this.buildUserResponse(user);
   }
 
-  private generateAccessToken(userId: string, email: string): string {
-    return this.jwtService.sign({ sub: userId, email }, { expiresIn: '15m' });
+  private generateAccessToken(
+    userId: string,
+    email: string,
+    timezone: string,
+  ): string {
+    return this.jwtService.sign(
+      { sub: userId, email, timezone },
+      { expiresIn: '15m' },
+    );
   }
 
   private async createRefreshToken(userId: string): Promise<string> {

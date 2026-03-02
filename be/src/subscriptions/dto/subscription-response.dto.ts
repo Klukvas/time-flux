@@ -38,6 +38,9 @@ export class SubscriptionResponseDto {
   @ApiProperty({ example: 'uuid-123' })
   id!: string;
 
+  @ApiProperty({ example: 'uuid-456' })
+  userId!: string;
+
   @ApiProperty({ enum: ['FREE', 'PRO', 'PREMIUM'], example: 'FREE' })
   tier!: string;
 
@@ -47,14 +50,35 @@ export class SubscriptionResponseDto {
   })
   status!: string;
 
-  @ApiPropertyOptional({ example: 'sub_01abc123', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    example: 'cus_01abc123',
+    nullable: true,
+  })
+  paddleCustomerId!: string | null;
+
+  @ApiPropertyOptional({
+    type: String,
+    example: 'sub_01abc123',
+    nullable: true,
+  })
   paddleSubscriptionId!: string | null;
 
-  @ApiPropertyOptional({ example: '2026-03-26T00:00:00.000Z', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    example: '2026-03-26T00:00:00.000Z',
+    nullable: true,
+  })
   currentPeriodEnd!: string | null;
 
-  @ApiPropertyOptional({ example: null, nullable: true })
+  @ApiPropertyOptional({ type: String, example: null, nullable: true })
   canceledAt!: string | null;
+
+  @ApiProperty({ example: '2026-03-01T00:00:00.000Z' })
+  createdAt!: string;
+
+  @ApiProperty({ example: '2026-03-01T00:00:00.000Z' })
+  updatedAt!: string;
 
   @ApiProperty({ type: SubscriptionLimitsDto })
   limits!: SubscriptionLimitsDto;
@@ -69,6 +93,10 @@ export class CancelResponseDto {
   })
   message!: string;
 
-  @ApiPropertyOptional({ example: '2026-03-26T00:00:00.000Z', nullable: true })
+  @ApiPropertyOptional({
+    type: String,
+    example: '2026-03-26T00:00:00.000Z',
+    nullable: true,
+  })
   canceledAt!: string | null;
 }

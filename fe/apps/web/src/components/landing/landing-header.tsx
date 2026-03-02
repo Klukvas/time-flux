@@ -12,11 +12,16 @@ const THEME_OPTIONS: { value: ThemePreference; icon: string }[] = [
 ];
 
 interface LandingHeaderProps {
+  isAuthenticated: boolean;
   onLogin: () => void;
   onRegister: () => void;
 }
 
-export function LandingHeader({ onLogin, onRegister }: LandingHeaderProps) {
+export function LandingHeader({
+  isAuthenticated,
+  onLogin,
+  onRegister,
+}: LandingHeaderProps) {
   const { t } = useTranslation();
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
@@ -26,10 +31,18 @@ export function LandingHeader({ onLogin, onRegister }: LandingHeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-edge/50 bg-surface/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        {/* Logo */}
-        <a href="/" className="text-xl font-bold text-accent">
-          LifeSpan
-        </a>
+        {/* Logo + nav */}
+        <div className="flex items-center gap-4">
+          <a href="/" className="text-xl font-bold text-accent">
+            LifeSpan
+          </a>
+          <a
+            href="/blog"
+            className="text-sm font-medium text-content-secondary hover:text-content transition-colors"
+          >
+            Blog
+          </a>
+        </div>
 
         {/* Right controls */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -69,18 +82,29 @@ export function LandingHeader({ onLogin, onRegister }: LandingHeaderProps) {
           </div>
 
           {/* Auth buttons */}
-          <button
-            onClick={onLogin}
-            className="rounded-lg px-3 py-1.5 text-sm font-medium text-content-secondary transition-colors hover:text-content"
-          >
-            {t('landing.header.login')}
-          </button>
-          <button
-            onClick={onRegister}
-            className="rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-accent-text transition-colors hover:bg-accent-hover"
-          >
-            {t('landing.header.register')}
-          </button>
+          {isAuthenticated ? (
+            <a
+              href="/timeline"
+              className="rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-accent-text transition-colors hover:bg-accent-hover"
+            >
+              {t('landing.header.go_to_platform')}
+            </a>
+          ) : (
+            <>
+              <button
+                onClick={onLogin}
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-content-secondary transition-colors hover:text-content"
+              >
+                {t('landing.header.login')}
+              </button>
+              <button
+                onClick={onRegister}
+                className="rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-accent-text transition-colors hover:bg-accent-hover"
+              >
+                {t('landing.header.register')}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

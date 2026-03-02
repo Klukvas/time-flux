@@ -7,7 +7,7 @@ export class AuthUserDto {
   @ApiProperty()
   email: string;
 
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   avatarUrl?: string | null;
 
   @ApiProperty()
@@ -15,6 +15,9 @@ export class AuthUserDto {
 
   @ApiProperty()
   onboardingCompleted: boolean;
+
+  @ApiProperty({ enum: ['FREE', 'PRO', 'PREMIUM'], example: 'FREE' })
+  tier: string;
 
   @ApiProperty()
   createdAt: string;

@@ -15,15 +15,27 @@ import {
 } from '../common/errors/app.error.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
+const TIER_CACHE_TTL_MS = 60_000;
+
+interface TierCacheEntry {
+  readonly tier: string;
+  readonly expiresAt: number;
+}
+
 @Injectable()
 export class SubscriptionsService {
   private readonly logger = new Logger(SubscriptionsService.name);
+  private readonly tierCache = new Map<string, TierCacheEntry>();
 
   constructor(
     private readonly repo: SubscriptionsRepository,
     private readonly paddleService: PaddleService,
     private readonly prisma: PrismaService,
   ) {}
+
+  invalidateTierCache(userId: string): void {
+    this.tierCache.delete(userId);
+  }
 
   async getSubscription(userId: string) {
     const sub = await this.repo.upsertFree(userId);
@@ -44,8 +56,20 @@ export class SubscriptionsService {
   }
 
   async getTier(userId: string): Promise<string> {
+    const cached = this.tierCache.get(userId);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.tier;
+    }
+
     const sub = await this.repo.findByUserId(userId);
-    return sub?.tier ?? 'FREE';
+    const tier = sub?.tier ?? 'FREE';
+
+    this.tierCache.set(userId, {
+      tier,
+      expiresAt: Date.now() + TIER_CACHE_TTL_MS,
+    });
+
+    return tier;
   }
 
   async getLimits(userId: string): Promise<TierLimits> {
@@ -66,10 +90,10 @@ export class SubscriptionsService {
     resource: TierLimitResource,
     currentCount: number,
   ) {
-    const limits = await this.getLimits(userId);
+    const tier = await this.getTier(userId);
+    const limits = TIER_LIMITS[tier] ?? TIER_LIMITS.FREE;
     const max = limits[resource];
     if (max !== -1 && currentCount >= max) {
-      const tier = await this.getTier(userId);
       throw new QuotaExceededError({
         resource,
         current: currentCount,

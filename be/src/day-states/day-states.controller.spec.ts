@@ -3,7 +3,7 @@ import { DayStatesController } from './day-states.controller.js';
 import { DayStatesService } from './day-states.service.js';
 import { CreateDayStateDto } from './dto/create-day-state.dto.js';
 import { UpdateDayStateDto } from './dto/update-day-state.dto.js';
-import { CreateFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
+import { CreateDayStateFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
 import { JwtPayload } from '../common/decorators/current-user.decorator.js';
 
 describe('DayStatesController', () => {
@@ -16,7 +16,11 @@ describe('DayStatesController', () => {
     delete: jest.Mock;
   };
 
-  const mockUser: JwtPayload = { sub: 'user-1', email: 'test@example.com' };
+  const mockUser: JwtPayload = {
+    sub: 'user-1',
+    email: 'test@example.com',
+    timezone: 'UTC',
+  };
 
   beforeEach(async () => {
     service = {
@@ -101,9 +105,9 @@ describe('DayStatesController', () => {
 
   describe('createFromRecommendation', () => {
     it('should delegate to dayStatesService.createFromRecommendation with user.sub and dto', async () => {
-      const dto: CreateFromRecommendationDto = {
+      const dto: CreateDayStateFromRecommendationDto = {
         key: 'great',
-      } as CreateFromRecommendationDto;
+      } as CreateDayStateFromRecommendationDto;
       const expected = { id: 'state-1', label: 'Great', score: 9 };
       service.createFromRecommendation.mockResolvedValue(expected);
 
@@ -117,7 +121,7 @@ describe('DayStatesController', () => {
     });
 
     it('should propagate service errors for unknown recommendation key', async () => {
-      const dto = { key: 'unknown' } as CreateFromRecommendationDto;
+      const dto = { key: 'unknown' } as CreateDayStateFromRecommendationDto;
       service.createFromRecommendation.mockRejectedValue(
         new Error('Unknown recommendation key'),
       );

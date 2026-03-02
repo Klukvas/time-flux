@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import type { PresignedUrlRequest } from '@lifespan/api';
 import { useApi } from './api-context';
 import { generateFileName } from '@lifespan/utils';
 
@@ -15,7 +16,7 @@ export function usePresignedUpload() {
       const fileName = generateFileName(file.name);
       const { uploadUrl, key } = await api.uploads.getPresignedUrl({
         fileName,
-        contentType: file.type,
+        contentType: file.type as PresignedUrlRequest['contentType'],
         size: file.size,
       });
 

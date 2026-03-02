@@ -11,7 +11,11 @@ describe('TimelineController', () => {
     getWeekTimeline: jest.Mock;
   };
 
-  const mockUser: JwtPayload = { sub: 'user-1', email: 'test@example.com' };
+  const mockUser: JwtPayload = {
+    sub: 'user-1',
+    email: 'test@example.com',
+    timezone: 'UTC',
+  };
 
   beforeEach(async () => {
     service = {
@@ -35,7 +39,7 @@ describe('TimelineController', () => {
 
       const result = await controller.getTimeline(mockUser, query);
 
-      expect(service.getTimeline).toHaveBeenCalledWith('user-1', query);
+      expect(service.getTimeline).toHaveBeenCalledWith('user-1', query, 'UTC');
       expect(result).toEqual(expected);
     });
 
@@ -67,7 +71,11 @@ describe('TimelineController', () => {
 
       const result = await controller.getWeekTimeline(mockUser, query);
 
-      expect(service.getWeekTimeline).toHaveBeenCalledWith('user-1', query);
+      expect(service.getWeekTimeline).toHaveBeenCalledWith(
+        'user-1',
+        query,
+        'UTC',
+      );
       expect(result).toEqual(expected);
     });
 

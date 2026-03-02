@@ -3,10 +3,11 @@
 import { useTranslation } from '@lifespan/hooks';
 
 interface FinalCTAProps {
+  isAuthenticated: boolean;
   onStart: () => void;
 }
 
-export function FinalCTA({ onStart }: FinalCTAProps) {
+export function FinalCTA({ isAuthenticated, onStart }: FinalCTAProps) {
   const { t } = useTranslation();
 
   return (
@@ -23,12 +24,21 @@ export function FinalCTA({ onStart }: FinalCTAProps) {
           {t('landing.cta.subtext')}
         </p>
         <div className="mt-10">
-          <button
-            onClick={onStart}
-            className="rounded-xl bg-accent px-8 py-4 text-lg font-semibold text-accent-text shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover hover:shadow-xl hover:shadow-accent/30"
-          >
-            {t('landing.cta.button')}
-          </button>
+          {isAuthenticated ? (
+            <a
+              href="/timeline"
+              className="inline-block rounded-xl bg-accent px-8 py-4 text-lg font-semibold text-accent-text shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover hover:shadow-xl hover:shadow-accent/30"
+            >
+              {t('landing.header.go_to_platform')}
+            </a>
+          ) : (
+            <button
+              onClick={onStart}
+              className="rounded-xl bg-accent px-8 py-4 text-lg font-semibold text-accent-text shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover hover:shadow-xl hover:shadow-accent/30"
+            >
+              {t('landing.cta.button')}
+            </button>
+          )}
         </div>
       </div>
     </section>

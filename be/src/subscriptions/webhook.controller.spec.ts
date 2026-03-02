@@ -11,7 +11,10 @@ describe('WebhookController', () => {
 
   const WEBHOOK_SECRET = 'test-webhook-secret';
 
-  function makeSignature(body: string, ts = '1234567890') {
+  function makeSignature(
+    body: string,
+    ts = String(Math.floor(Date.now() / 1000)),
+  ) {
     const signedPayload = `${ts}:${body}`;
     const h1 = createHmac('sha256', WEBHOOK_SECRET)
       .update(signedPayload)
@@ -41,7 +44,11 @@ describe('WebhookController', () => {
   });
 
   it('should return { received: true } with valid signature', async () => {
-    const body = JSON.stringify({ event_id: 'evt_1', event_type: 'subscription.created', data: {} });
+    const body = JSON.stringify({
+      event_id: 'evt_1',
+      event_type: 'subscription.created',
+      data: {},
+    });
     const rawBody = Buffer.from(body);
     const signature = makeSignature(body);
 
@@ -64,7 +71,8 @@ describe('WebhookController', () => {
   it('should throw UnauthorizedError when signature is invalid', async () => {
     const body = JSON.stringify({ event_id: 'evt_1' });
     const rawBody = Buffer.from(body);
-    const invalidSig = 'ts=123;h1=0000000000000000000000000000000000000000000000000000000000000000';
+    const invalidSig =
+      'ts=123;h1=0000000000000000000000000000000000000000000000000000000000000000';
 
     await expect(
       controller.handlePaddleWebhook(invalidSig, rawBody),

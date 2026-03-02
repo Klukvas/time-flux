@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CategoriesRepository } from './categories.repository.js';
 import { CreateCategoryDto } from './dto/create-category.dto.js';
 import { UpdateCategoryDto } from './dto/update-category.dto.js';
-import { CreateFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
+import { CreateCategoryFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
 import {
   CategoryNotFoundError,
   CategoryInUseError,
@@ -25,23 +25,30 @@ export class CategoriesService {
   }
 
   async create(userId: string, dto: CreateCategoryDto) {
-    const count = await this.categoriesRepository.countByUserId(userId);
-    await this.subscriptionsService.assertResourceLimit(
-      userId,
-      'categories',
-      count,
+    return this.prisma.$transaction(
+      async (tx) => {
+        const count = await tx.category.count({ where: { userId } });
+        await this.subscriptionsService.assertResourceLimit(
+          userId,
+          'categories',
+          count,
+        );
+        return tx.category.create({
+          data: {
+            userId,
+            name: dto.name,
+            color: dto.color,
+            order: dto.order ?? count,
+          },
+        });
+      },
+      { isolationLevel: 'Serializable' },
     );
-    return this.categoriesRepository.create({
-      userId,
-      name: dto.name,
-      color: dto.color,
-      order: dto.order ?? count,
-    });
   }
 
   async createFromRecommendation(
     userId: string,
-    dto: CreateFromRecommendationDto,
+    dto: CreateCategoryFromRecommendationDto,
   ) {
     const recommendation = CATEGORY_RECOMMENDATIONS.find(
       (r) => r.key === dto.key,
@@ -50,18 +57,25 @@ export class CategoriesService {
       throw new RecommendationNotFoundError({ key: dto.key });
     }
 
-    const count = await this.categoriesRepository.countByUserId(userId);
-    await this.subscriptionsService.assertResourceLimit(
-      userId,
-      'categories',
-      count,
+    return this.prisma.$transaction(
+      async (tx) => {
+        const count = await tx.category.count({ where: { userId } });
+        await this.subscriptionsService.assertResourceLimit(
+          userId,
+          'categories',
+          count,
+        );
+        return tx.category.create({
+          data: {
+            userId,
+            name: dto.name,
+            color: recommendation.color,
+            order: count,
+          },
+        });
+      },
+      { isolationLevel: 'Serializable' },
     );
-    return this.categoriesRepository.create({
-      userId,
-      name: dto.name,
-      color: recommendation.color,
-      order: count,
-    });
   }
 
   async update(userId: string, id: string, dto: UpdateCategoryDto) {

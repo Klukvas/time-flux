@@ -13,7 +13,9 @@ import { InsightsSkeleton } from '@/components/ui/skeleton';
 export function InsightsDashboard() {
   const { t } = useTranslation();
   const { data: subscription } = useSubscription();
-  const analyticsLocked = subscription?.limits.analytics === false;
+  const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
+  const analyticsLocked =
+    paymentsEnabled && subscription?.limits.analytics === false;
   const { data, isLoading, error } = useMoodOverview({
     enabled: !analyticsLocked,
   });

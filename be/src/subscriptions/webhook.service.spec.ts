@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { WebhookService } from './webhook.service.js';
 import { WebhookRepository } from './webhook.repository.js';
 import { SubscriptionsRepository } from './subscriptions.repository.js';
+import { SubscriptionsService } from './subscriptions.service.js';
 
 const makePayload = (
   eventType: string,
@@ -11,7 +12,7 @@ const makePayload = (
   event_id: 'evt_123',
   event_type: eventType,
   data: {
-    subscription_id: 'sub_abc',
+    id: 'sub_abc',
     customer_id: 'ctm_xyz',
     custom_data: { userId: 'user-1' },
     items: [{ price: { id: 'pri_pro' } }],
@@ -24,6 +25,7 @@ describe('WebhookService', () => {
   let service: WebhookService;
   let webhookRepo: Record<string, jest.Mock>;
   let subRepo: Record<string, jest.Mock>;
+  let subscriptionsService: Record<string, jest.Mock>;
 
   beforeEach(async () => {
     webhookRepo = {
@@ -34,7 +36,13 @@ describe('WebhookService', () => {
 
     subRepo = {
       updateByUserId: jest.fn().mockResolvedValue(undefined),
-      updateByPaddleSubscriptionId: jest.fn().mockResolvedValue(undefined),
+      updateByPaddleSubscriptionId: jest
+        .fn()
+        .mockResolvedValue({ userId: 'user-1' }),
+    };
+
+    subscriptionsService = {
+      invalidateTierCache: jest.fn(),
     };
 
     const config = {
@@ -52,6 +60,7 @@ describe('WebhookService', () => {
         WebhookService,
         { provide: WebhookRepository, useValue: webhookRepo },
         { provide: SubscriptionsRepository, useValue: subRepo },
+        { provide: SubscriptionsService, useValue: subscriptionsService },
         { provide: ConfigService, useValue: config },
       ],
     }).compile();
@@ -61,7 +70,10 @@ describe('WebhookService', () => {
 
   // ─── Idempotency ──────────────────────────────────────────
 
-  it('should skip already processed events', async () => {
+  it('should skip already processed events (P2002 + findById processed=true)', async () => {
+    // Simulate: create throws P2002 (already stored), findById returns processed=true
+    const p2002 = Object.assign(new Error('Unique constraint'), { code: 'P2002' });
+    webhookRepo.create.mockRejectedValue(p2002);
     webhookRepo.findById.mockResolvedValue({ id: 'evt_123', processed: true });
 
     await service.handleEvent(makePayload('subscription.created'));
@@ -70,7 +82,10 @@ describe('WebhookService', () => {
     expect(webhookRepo.markProcessed).not.toHaveBeenCalled();
   });
 
-  it('should not re-create event if it already exists but unprocessed', async () => {
+  it('should not re-create event if it already exists but unprocessed (P2002)', async () => {
+    // Simulate: create throws P2002 (already stored), findById returns processed=false
+    const p2002 = Object.assign(new Error('Unique constraint'), { code: 'P2002' });
+    webhookRepo.create.mockRejectedValue(p2002);
     webhookRepo.findById.mockResolvedValue({
       id: 'evt_123',
       processed: false,
@@ -78,7 +93,7 @@ describe('WebhookService', () => {
 
     await service.handleEvent(makePayload('subscription.created'));
 
-    expect(webhookRepo.create).not.toHaveBeenCalled();
+    expect(webhookRepo.create).toHaveBeenCalledTimes(1);
     expect(subRepo.updateByUserId).toHaveBeenCalled();
     expect(webhookRepo.markProcessed).toHaveBeenCalledWith('evt_123');
   });
@@ -190,6 +205,86 @@ describe('WebhookService', () => {
     );
   });
 
+  // ─── subscription.resumed ────────────────────────────────
+
+  it('should handle subscription.resumed', async () => {
+    await service.handleEvent(makePayload('subscription.resumed'));
+
+    expect(subRepo.updateByPaddleSubscriptionId).toHaveBeenCalledWith(
+      'sub_abc',
+      {
+        status: 'ACTIVE',
+        currentPeriodEnd: new Date('2026-04-01T00:00:00Z'),
+        canceledAt: null,
+      },
+    );
+  });
+
+  it('should handle subscription.resumed without billing period', async () => {
+    await service.handleEvent(
+      makePayload('subscription.resumed', {
+        current_billing_period: {},
+      }),
+    );
+
+    expect(subRepo.updateByPaddleSubscriptionId).toHaveBeenCalledWith(
+      'sub_abc',
+      {
+        status: 'ACTIVE',
+        currentPeriodEnd: null,
+        canceledAt: null,
+      },
+    );
+  });
+
+  // ─── subscription.trialing ──────────────────────────────
+
+  it('should handle subscription.trialing', async () => {
+    await service.handleEvent(makePayload('subscription.trialing'));
+
+    expect(subRepo.updateByUserId).toHaveBeenCalledWith('user-1', {
+      tier: 'PRO',
+      status: 'TRIALING',
+      paddleCustomerId: 'ctm_xyz',
+      paddleSubscriptionId: 'sub_abc',
+      currentPeriodEnd: new Date('2026-04-01T00:00:00Z'),
+      canceledAt: null,
+    });
+  });
+
+  it('should skip subscription.trialing without userId', async () => {
+    await service.handleEvent(
+      makePayload('subscription.trialing', { custom_data: {} }),
+    );
+
+    expect(subRepo.updateByUserId).not.toHaveBeenCalled();
+  });
+
+  it('should throw for subscription.trialing with unknown price ID', async () => {
+    await expect(
+      service.handleEvent(
+        makePayload('subscription.trialing', {
+          items: [{ price: { id: 'pri_unknown' } }],
+        }),
+      ),
+    ).rejects.toThrow('Unknown price ID: pri_unknown');
+  });
+
+  // ─── subscription.imported ──────────────────────────────
+
+  it('should handle subscription.imported same as created', async () => {
+    await service.handleEvent(makePayload('subscription.imported'));
+
+    expect(subRepo.updateByUserId).toHaveBeenCalledWith('user-1', {
+      tier: 'PRO',
+      status: 'ACTIVE',
+      paddleCustomerId: 'ctm_xyz',
+      paddleSubscriptionId: 'sub_abc',
+      currentPeriodEnd: new Date('2026-04-01T00:00:00Z'),
+      canceledAt: null,
+    });
+  });
+
   // ─── Edge cases ───────────────────────────────────────────
 
   it('should skip subscription.created without userId', async () => {
@@ -200,14 +295,14 @@ describe('WebhookService', () => {
     expect(subRepo.updateByUserId).not.toHaveBeenCalled();
   });
 
-  it('should skip subscription.created with unknown price ID', async () => {
-    await service.handleEvent(
-      makePayload('subscription.created', {
-        items: [{ price: { id: 'pri_unknown' } }],
-      }),
-    );
-
-    expect(subRepo.updateByUserId).not.toHaveBeenCalled();
+  it('should throw for subscription.created with unknown price ID', async () => {
+    await expect(
+      service.handleEvent(
+        makePayload('subscription.created', {
+          items: [{ price: { id: 'pri_unknown' } }],
+        }),
+      ),
+    ).rejects.toThrow('Unknown price ID: pri_unknown');
   });
 
   it('should handle unknown event type gracefully', async () => {

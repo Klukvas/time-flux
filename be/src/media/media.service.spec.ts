@@ -3,7 +3,6 @@ jest.mock('uuid', () => ({ v4: () => 'mock-uuid' }));
 import { Test, TestingModule } from '@nestjs/testing';
 import { MediaService } from './media.service.js';
 import { MediaRepository } from './media.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 import { S3Service } from '../s3/s3.service.js';
 import {
   FutureDateError,
@@ -11,15 +10,21 @@ import {
   QuotaExceededError,
 } from '../common/errors/app.error.js';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 describe('MediaService', () => {
   let service: MediaService;
   let mediaRepo: jest.Mocked<MediaRepository>;
-  let authRepo: jest.Mocked<AuthRepository>;
   let s3Service: jest.Mocked<S3Service>;
   let subscriptionsService: { assertResourceLimit: jest.Mock };
+  let prismaMock: {
+    $transaction: jest.Mock;
+    dayMedia: { count: jest.Mock };
+    day: { upsert: jest.Mock };
+  };
 
   const userId = 'user-1';
+  const timezone = 'UTC';
 
   const mockMedia = {
     id: 'media-1',
@@ -44,6 +49,28 @@ describe('MediaService', () => {
       assertResourceLimit: jest.fn(),
     };
 
+    prismaMock = {
+      $transaction: jest.fn(),
+      dayMedia: { count: jest.fn().mockResolvedValue(0) },
+      day: {
+        upsert: jest.fn().mockResolvedValue(mockDay),
+      },
+    };
+
+    // Default transaction: runs the callback with a tx that mimics prisma
+    prismaMock.$transaction.mockImplementation(async (cb: any) => {
+      const tx = {
+        dayMedia: {
+          count: jest.fn().mockResolvedValue(0),
+          create: jest.fn().mockResolvedValue(mockMedia),
+        },
+        day: {
+          upsert: jest.fn().mockResolvedValue(mockDay),
+        },
+      };
+      return cb(tx);
+    });
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MediaService,
@@ -63,12 +90,6 @@ describe('MediaService', () => {
           },
         },
         {
-          provide: AuthRepository,
-          useValue: {
-            findUserById: jest.fn().mockResolvedValue({ timezone: 'UTC' }),
-          },
-        },
-        {
           provide: S3Service,
           useValue: {
             getPresignedReadUrl: jest
@@ -81,12 +102,15 @@ describe('MediaService', () => {
           provide: SubscriptionsService,
           useValue: subscriptionsService,
         },
+        {
+          provide: PrismaService,
+          useValue: prismaMock,
+        },
       ],
     }).compile();
 
     service = module.get(MediaService);
     mediaRepo = module.get(MediaRepository);
-    authRepo = module.get(AuthRepository);
     s3Service = module.get(S3Service);
   });
 
@@ -101,7 +125,7 @@ describe('MediaService', () => {
           fileName: 'file.jpg',
           contentType: 'image/jpeg',
           size: 1024,
-        }),
+        }, timezone),
       ).rejects.toThrow(FutureDateError);
     });
 
@@ -109,11 +133,11 @@ describe('MediaService', () => {
       const today = new Date().toISOString().split('T')[0];
 
       const result = await service.addMedia(userId, today, {
-        s3Key: 'uploads/user-1/file.jpg',
+        s3Key: `uploads/${userId}/file.jpg`,
         fileName: 'file.jpg',
         contentType: 'image/jpeg',
         size: 1024,
-      });
+      }, timezone);
 
       expect(result).toHaveProperty('id');
     });
@@ -123,49 +147,73 @@ describe('MediaService', () => {
 
   describe('addMedia — auto cover photo', () => {
     it('should auto-set first image as cover when no cover exists', async () => {
-      mediaRepo.upsertDay.mockResolvedValue({
-        ...mockDay,
-        mainMediaId: null,
-      } as any);
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          dayMedia: {
+            count: jest.fn().mockResolvedValue(0),
+            create: jest.fn().mockResolvedValue(mockMedia),
+          },
+          day: {
+            upsert: jest.fn().mockResolvedValue({ ...mockDay, mainMediaId: null }),
+          },
+        };
+        return cb(tx);
+      });
 
       await service.addMedia(userId, '2024-01-15', {
-        s3Key: 'uploads/user-1/photo.jpg',
+        s3Key: `uploads/${userId}/photo.jpg`,
         fileName: 'photo.jpg',
         contentType: 'image/jpeg',
         size: 1024,
-      });
+      }, timezone);
 
       expect(mediaRepo.setMainMedia).toHaveBeenCalledWith('day-1', 'media-1');
     });
 
     it('should NOT override existing cover photo', async () => {
-      mediaRepo.upsertDay.mockResolvedValue({
-        ...mockDay,
-        mainMediaId: 'existing-cover',
-      } as any);
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          dayMedia: {
+            count: jest.fn().mockResolvedValue(0),
+            create: jest.fn().mockResolvedValue(mockMedia),
+          },
+          day: {
+            upsert: jest.fn().mockResolvedValue({ ...mockDay, mainMediaId: 'existing-cover' }),
+          },
+        };
+        return cb(tx);
+      });
 
       await service.addMedia(userId, '2024-01-15', {
-        s3Key: 'uploads/user-1/photo.jpg',
+        s3Key: `uploads/${userId}/photo.jpg`,
         fileName: 'photo.jpg',
         contentType: 'image/jpeg',
         size: 1024,
-      });
+      }, timezone);
 
       expect(mediaRepo.setMainMedia).not.toHaveBeenCalled();
     });
 
     it('should NOT auto-set cover for video uploads', async () => {
-      mediaRepo.upsertDay.mockResolvedValue({
-        ...mockDay,
-        mainMediaId: null,
-      } as any);
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          dayMedia: {
+            count: jest.fn().mockResolvedValue(0),
+            create: jest.fn().mockResolvedValue({ ...mockMedia, contentType: 'video/mp4' }),
+          },
+          day: {
+            upsert: jest.fn().mockResolvedValue({ ...mockDay, mainMediaId: null }),
+          },
+        };
+        return cb(tx);
+      });
 
       await service.addMedia(userId, '2024-01-15', {
-        s3Key: 'uploads/user-1/video.mp4',
+        s3Key: `uploads/${userId}/video.mp4`,
         fileName: 'video.mp4',
         contentType: 'video/mp4',
         size: 10000000,
-      });
+      }, timezone);
 
       expect(mediaRepo.setMainMedia).not.toHaveBeenCalled();
     });
@@ -175,19 +223,35 @@ describe('MediaService', () => {
 
   describe('addMedia — day upsert', () => {
     it('should upsert day record before creating media', async () => {
+      let capturedTx: any;
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          dayMedia: {
+            count: jest.fn().mockResolvedValue(0),
+            create: jest.fn().mockResolvedValue(mockMedia),
+          },
+          day: {
+            upsert: jest.fn().mockResolvedValue(mockDay),
+          },
+        };
+        capturedTx = tx;
+        return cb(tx);
+      });
+
       await service.addMedia(userId, '2024-01-15', {
-        s3Key: 'uploads/user-1/file.jpg',
+        s3Key: `uploads/${userId}/file.jpg`,
         fileName: 'file.jpg',
         contentType: 'image/jpeg',
         size: 1024,
-      });
+      }, timezone);
 
-      expect(mediaRepo.upsertDay).toHaveBeenCalledWith(
-        userId,
-        new Date('2024-01-15T00:00:00Z'),
+      expect(capturedTx.day.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId_date: { userId, date: new Date('2024-01-15T00:00:00Z') } },
+        }),
       );
-      expect(mediaRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ dayId: 'day-1' }),
+      expect(capturedTx.dayMedia.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ dayId: 'day-1' }) }),
       );
     });
   });
@@ -270,23 +334,32 @@ describe('MediaService', () => {
 
   describe('addMedia — quota enforcement', () => {
     it('should throw QuotaExceededError when media at limit', async () => {
-      mediaRepo.countByUserId.mockResolvedValue(50);
-      subscriptionsService.assertResourceLimit.mockRejectedValue(
-        new QuotaExceededError({
-          resource: 'media',
-          current: 50,
-          limit: 50,
-          tier: 'FREE',
-        }),
-      );
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          dayMedia: {
+            count: jest.fn().mockResolvedValue(50),
+            create: jest.fn(),
+          },
+          day: { upsert: jest.fn() },
+        };
+        subscriptionsService.assertResourceLimit.mockRejectedValue(
+          new QuotaExceededError({
+            resource: 'media',
+            current: 50,
+            limit: 50,
+            tier: 'FREE',
+          }),
+        );
+        return cb(tx);
+      });
 
       await expect(
         service.addMedia(userId, '2024-01-15', {
-          s3Key: 'uploads/user-1/file.jpg',
+          s3Key: `uploads/${userId}/file.jpg`,
           fileName: 'file.jpg',
           contentType: 'image/jpeg',
           size: 1024,
-        }),
+        }, timezone),
       ).rejects.toThrow(QuotaExceededError);
     });
   });
@@ -294,20 +367,15 @@ describe('MediaService', () => {
   // ─── TIMEZONE-AWARE FUTURE DATE CHECK ──────────────────────
 
   describe('addMedia — timezone-aware validation', () => {
-    it('should use user timezone for future date check', async () => {
-      authRepo.findUserById.mockResolvedValue({
-        timezone: 'Pacific/Auckland',
-      } as any);
-
-      // A date that might be "tomorrow" in UTC but "today" in NZ timezone won't matter
-      // for 2099, it's always future regardless
+    it('should use provided timezone for future date check', async () => {
+      // A date that is always in the future regardless of timezone
       await expect(
         service.addMedia(userId, '2099-01-01', {
-          s3Key: 'uploads/user-1/file.jpg',
+          s3Key: `uploads/${userId}/file.jpg`,
           fileName: 'file.jpg',
           contentType: 'image/jpeg',
           size: 1024,
-        }),
+        }, 'Pacific/Auckland'),
       ).rejects.toThrow(FutureDateError);
     });
   });

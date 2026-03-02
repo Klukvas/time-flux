@@ -12,7 +12,11 @@ describe('EventPeriodsController', () => {
     closePeriod: jest.Mock;
   };
 
-  const mockUser = { sub: 'user-1' };
+  const mockUser = {
+    sub: 'user-1',
+    email: 'test@example.com',
+    timezone: 'UTC',
+  };
 
   beforeEach(async () => {
     service = {
@@ -31,13 +35,20 @@ describe('EventPeriodsController', () => {
 
   describe('update', () => {
     it('should delegate to service.updatePeriod with user.sub, id and dto', async () => {
-      const dto: UpdateEventPeriodDto = { comment: 'Updated comment' } as UpdateEventPeriodDto;
+      const dto: UpdateEventPeriodDto = {
+        comment: 'Updated comment',
+      } as UpdateEventPeriodDto;
       const expected = { id: 'period-1', comment: 'Updated comment' };
       service.updatePeriod.mockResolvedValue(expected);
 
       const result = await controller.update(mockUser, 'period-1', dto);
 
-      expect(service.updatePeriod).toHaveBeenCalledWith('user-1', 'period-1', dto);
+      expect(service.updatePeriod).toHaveBeenCalledWith(
+        'user-1',
+        'period-1',
+        dto,
+        'UTC',
+      );
       expect(result).toEqual(expected);
     });
 
@@ -55,7 +66,9 @@ describe('EventPeriodsController', () => {
       const dto = {} as UpdateEventPeriodDto;
       service.updatePeriod.mockRejectedValue(new Error('Update failed'));
 
-      await expect(controller.update(mockUser, 'period-1', dto)).rejects.toThrow('Update failed');
+      await expect(
+        controller.update(mockUser, 'period-1', dto),
+      ).rejects.toThrow('Update failed');
     });
   });
 
@@ -72,19 +85,28 @@ describe('EventPeriodsController', () => {
     it('should propagate service errors', async () => {
       service.deletePeriod.mockRejectedValue(new Error('Delete failed'));
 
-      await expect(controller.remove(mockUser, 'period-1')).rejects.toThrow('Delete failed');
+      await expect(controller.remove(mockUser, 'period-1')).rejects.toThrow(
+        'Delete failed',
+      );
     });
   });
 
   describe('close', () => {
     it('should delegate to service.closePeriod with user.sub, id and dto', async () => {
-      const dto: CloseEventPeriodDto = { endDate: '2024-06-30' } as CloseEventPeriodDto;
+      const dto: CloseEventPeriodDto = {
+        endDate: '2024-06-30',
+      } as CloseEventPeriodDto;
       const expected = { id: 'period-1', endDate: '2024-06-30' };
       service.closePeriod.mockResolvedValue(expected);
 
       const result = await controller.close(mockUser, 'period-1', dto);
 
-      expect(service.closePeriod).toHaveBeenCalledWith('user-1', 'period-1', dto);
+      expect(service.closePeriod).toHaveBeenCalledWith(
+        'user-1',
+        'period-1',
+        dto,
+        'UTC',
+      );
       expect(result).toEqual(expected);
     });
 
@@ -102,7 +124,9 @@ describe('EventPeriodsController', () => {
       const dto = {} as CloseEventPeriodDto;
       service.closePeriod.mockRejectedValue(new Error('Close failed'));
 
-      await expect(controller.close(mockUser, 'period-1', dto)).rejects.toThrow('Close failed');
+      await expect(controller.close(mockUser, 'period-1', dto)).rejects.toThrow(
+        'Close failed',
+      );
     });
   });
 });

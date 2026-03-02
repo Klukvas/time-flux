@@ -3,10 +3,11 @@
 import { useTranslation } from '@lifespan/hooks';
 
 interface HeroSectionProps {
+  isAuthenticated: boolean;
   onStart: () => void;
 }
 
-export function HeroSection({ onStart }: HeroSectionProps) {
+export function HeroSection({ isAuthenticated, onStart }: HeroSectionProps) {
   const { t } = useTranslation();
 
   return (
@@ -25,15 +26,26 @@ export function HeroSection({ onStart }: HeroSectionProps) {
             {t('landing.hero.subtext')}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
-            <button
-              onClick={onStart}
-              className="rounded-xl bg-accent px-6 py-3 text-base font-semibold text-accent-text shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover hover:shadow-xl hover:shadow-accent/30"
-            >
-              {t('landing.hero.cta_start')}
-            </button>
-            <button className="rounded-xl border border-edge px-6 py-3 text-base font-semibold text-content transition-colors hover:bg-surface-secondary">
-              {t('landing.hero.cta_demo')}
-            </button>
+            {isAuthenticated ? (
+              <a
+                href="/timeline"
+                className="rounded-xl bg-accent px-6 py-3 text-base font-semibold text-accent-text shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover hover:shadow-xl hover:shadow-accent/30"
+              >
+                {t('landing.header.go_to_platform')}
+              </a>
+            ) : (
+              <>
+                <button
+                  onClick={onStart}
+                  className="rounded-xl bg-accent px-6 py-3 text-base font-semibold text-accent-text shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover hover:shadow-xl hover:shadow-accent/30"
+                >
+                  {t('landing.hero.cta_start')}
+                </button>
+                <button className="rounded-xl border border-edge px-6 py-3 text-base font-semibold text-content transition-colors hover:bg-surface-secondary">
+                  {t('landing.hero.cta_demo')}
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -56,9 +68,20 @@ function TimelineMock({ badge }: { badge: string }) {
   ];
 
   const moodDots = [
-    '#22C55E', '#84CC16', '#22C55E', '#FACC15', '#F97316',
-    '#EF4444', '#FACC15', '#84CC16', '#22C55E', '#22C55E',
-    '#84CC16', '#FACC15', '#22C55E', '#84CC16',
+    '#22C55E',
+    '#84CC16',
+    '#22C55E',
+    '#FACC15',
+    '#F97316',
+    '#EF4444',
+    '#FACC15',
+    '#84CC16',
+    '#22C55E',
+    '#22C55E',
+    '#84CC16',
+    '#FACC15',
+    '#22C55E',
+    '#84CC16',
   ];
 
   return (
@@ -67,11 +90,17 @@ function TimelineMock({ badge }: { badge: string }) {
       <div className="space-y-2.5">
         {chapters.map((ch) => (
           <div key={ch.label} className="flex items-center gap-3">
-            <span className="w-24 text-right text-xs font-medium text-content-secondary">{ch.label}</span>
+            <span className="w-24 text-right text-xs font-medium text-content-secondary">
+              {ch.label}
+            </span>
             <div className="h-3 flex-1 overflow-hidden rounded-full bg-edge-light">
               <div
                 className="h-full rounded-full transition-all"
-                style={{ width: ch.width, backgroundColor: ch.color, opacity: 0.7 }}
+                style={{
+                  width: ch.width,
+                  backgroundColor: ch.color,
+                  opacity: 0.7,
+                }}
               />
             </div>
           </div>
@@ -91,8 +120,26 @@ function TimelineMock({ badge }: { badge: string }) {
 
       {/* Day labels */}
       <div className="mt-1 flex items-center gap-1.5">
-        {['M', 'T', 'W', 'T', 'F', 'S', 'S', 'M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-          <span key={i} className="w-4 text-center text-[10px] text-content-tertiary">
+        {[
+          'M',
+          'T',
+          'W',
+          'T',
+          'F',
+          'S',
+          'S',
+          'M',
+          'T',
+          'W',
+          'T',
+          'F',
+          'S',
+          'S',
+        ].map((d, i) => (
+          <span
+            key={i}
+            className="w-4 text-center text-[10px] text-content-tertiary"
+          >
             {d}
           </span>
         ))}

@@ -15,7 +15,11 @@ describe('DaysController', () => {
     findAll: jest.Mock;
   };
 
-  const mockUser: JwtPayload = { sub: 'user-1', email: 'test@example.com' };
+  const mockUser: JwtPayload = {
+    sub: 'user-1',
+    email: 'test@example.com',
+    timezone: 'UTC',
+  };
 
   beforeEach(async () => {
     service = {
@@ -40,7 +44,12 @@ describe('DaysController', () => {
 
       const result = await controller.upsert(mockUser, '2024-01-15', dto);
 
-      expect(service.upsert).toHaveBeenCalledWith('user-1', '2024-01-15', dto);
+      expect(service.upsert).toHaveBeenCalledWith(
+        'user-1',
+        '2024-01-15',
+        dto,
+        'UTC',
+      );
       expect(result).toEqual(expected);
     });
 
@@ -84,6 +93,7 @@ describe('DaysController', () => {
         'user-1',
         '2024-01-15',
         dto,
+        'UTC',
       );
       expect(result).toEqual(expected);
     });
@@ -107,6 +117,7 @@ describe('DaysController', () => {
         'user-1',
         '2024-01-15',
         dto,
+        'UTC',
       );
       expect(result).toEqual(expected);
     });

@@ -37,6 +37,6 @@ export class AnalyticsController {
   })
   async getMoodOverview(@CurrentUser() user: JwtPayload) {
     await this.subscriptionsService.assertFeatureAccess(user.sub, 'analytics');
-    return this.analyticsService.getMoodOverview(user.sub);
+    return this.analyticsService.getMoodOverview(user.sub, user.timezone);
   }
 }

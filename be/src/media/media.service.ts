@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { MediaRepository } from './media.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 import { S3Service } from '../s3/s3.service.js';
 import { CreateDayMediaDto } from './dto/create-day-media.dto.js';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../common/errors/app.error.js';
 import { parseISODateToUTC } from '../common/utils/parse-date.js';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class MediaService {
@@ -18,9 +18,9 @@ export class MediaService {
 
   constructor(
     private readonly mediaRepository: MediaRepository,
-    private readonly authRepository: AuthRepository,
     private readonly s3Service: S3Service,
     private readonly subscriptionsService: SubscriptionsService,
+    private readonly prisma: PrismaService,
   ) {}
 
   private async formatMedia(media: any) {
@@ -43,12 +43,10 @@ export class MediaService {
     };
   }
 
-  private async assertNotTooFarInFuture(dateStr: string, userId: string) {
-    const user = await this.authRepository.findUserById(userId);
-    const tz = user?.timezone ?? 'UTC';
-    const target = DateTime.fromISO(dateStr, { zone: tz }).startOf('day');
+  private assertNotTooFarInFuture(dateStr: string, timezone: string) {
+    const target = DateTime.fromISO(dateStr, { zone: timezone }).startOf('day');
     const tomorrow = DateTime.now()
-      .setZone(tz)
+      .setZone(timezone)
       .startOf('day')
       .plus({ days: 1 });
     if (target > tomorrow) {
@@ -59,15 +57,13 @@ export class MediaService {
     }
   }
 
-  async addMedia(userId: string, dateStr: string, dto: CreateDayMediaDto) {
-    const mediaCount = await this.mediaRepository.countByUserId(userId);
-    await this.subscriptionsService.assertResourceLimit(
-      userId,
-      'media',
-      mediaCount,
-    );
-
-    await this.assertNotTooFarInFuture(dateStr, userId);
+  async addMedia(
+    userId: string,
+    dateStr: string,
+    dto: CreateDayMediaDto,
+    timezone: string,
+  ) {
+    this.assertNotTooFarInFuture(dateStr, timezone);
 
     // Verify S3 key belongs to this user (prevent IDOR via s3Key spoofing)
     const expectedPrefix = `uploads/${userId}/`;
@@ -77,33 +73,38 @@ export class MediaService {
 
     const date = parseISODateToUTC(dateStr);
 
-    // Ensure the Day record exists (upsert)
-    const day = await this.mediaRepository.upsertDay(userId, date);
-
-    let media;
-    try {
-      media = await this.mediaRepository.create({
-        dayId: day.id,
-        userId,
-        s3Key: dto.s3Key,
-        fileName: dto.fileName,
-        contentType: dto.contentType,
-        size: dto.size,
-      });
-    } catch (error) {
-      // DB write failed — clean up the S3 file to prevent orphans
-      this.logger.warn(
-        `DB write failed for s3Key=${dto.s3Key}, cleaning up S3 object`,
-      );
-      try {
-        await this.s3Service.deleteObject(dto.s3Key);
-      } catch (s3Err) {
-        this.logger.error(
-          `Failed to clean up orphan S3 object s3Key=${dto.s3Key}: ${s3Err}`,
+    // Wrap count + create in a serializable transaction to prevent TOCTOU
+    const { media, day } = await this.prisma.$transaction(
+      async (tx) => {
+        const mediaCount = await tx.dayMedia.count({ where: { userId } });
+        await this.subscriptionsService.assertResourceLimit(
+          userId,
+          'media',
+          mediaCount,
         );
-      }
-      throw error;
-    }
+
+        // Ensure the Day record exists (upsert)
+        const txDay = await tx.day.upsert({
+          where: { userId_date: { userId, date } },
+          create: { userId, date },
+          update: {},
+        });
+
+        const txMedia = await tx.dayMedia.create({
+          data: {
+            dayId: txDay.id,
+            userId,
+            s3Key: dto.s3Key,
+            fileName: dto.fileName,
+            contentType: dto.contentType,
+            size: dto.size,
+          },
+        });
+
+        return { media: txMedia, day: txDay };
+      },
+      { isolationLevel: 'Serializable' },
+    );
 
     // Auto-select as cover if it's the first image and no cover is set
     if (!day.mainMediaId && dto.contentType.startsWith('image/')) {

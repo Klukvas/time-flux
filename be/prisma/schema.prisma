@@ -116,6 +116,7 @@ model EventPeriod {
   @@index([eventGroupId])
   @@index([eventGroupId, startDate])
   @@index([eventGroupId, endDate])
+  @@index([startDate])
   @@map("event_periods")
 }
 
@@ -137,6 +138,7 @@ model Day {
   media      DayMedia[] @relation("DayMedia")
 
   @@unique([userId, date])
+  @@index([userId])
   @@index([userId, dayStateId])
   @@map("days")
 }

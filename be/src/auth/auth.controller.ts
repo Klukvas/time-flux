@@ -24,6 +24,7 @@ import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { AuthResponseDto, AuthUserDto } from './dto/auth-response.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
+import { GoogleExchangeDto } from './dto/google-exchange.dto.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { GoogleAuthGuard } from '../common/guards/google-auth.guard.js';
 import {
@@ -129,9 +130,9 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Invalid or expired code' })
   async googleExchange(
-    @Body() body: { code: string },
+    @Body() dto: GoogleExchangeDto,
   ): Promise<AuthResponseDto> {
-    return this.authService.exchangeOAuthCode(body.code);
+    return this.authService.exchangeOAuthCode(dto.code);
   }
 
   @Post('refresh')

@@ -1,9 +1,11 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiExtraModels,
   ApiOperation,
   ApiResponse,
   ApiTags,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { MemoriesService } from './memories.service.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
@@ -47,7 +49,11 @@ export class MemoriesController {
     @Query() query: OnThisDayQueryDto,
   ): Promise<OnThisDayResponseDto> {
     await this.subscriptionsService.assertFeatureAccess(user.sub, 'memories');
-    return this.memoriesService.getOnThisDay(user.sub, query.date);
+    return this.memoriesService.getOnThisDay(
+      user.sub,
+      user.timezone,
+      query.date,
+    );
   }
 
   @Get('context')
@@ -58,15 +64,20 @@ export class MemoriesController {
       'Day mode returns memories from 1 month, 6 months, and 1 year ago. ' +
       'Week mode returns weekly summaries for the same intervals.',
   })
+  @ApiExtraModels(DayContextResponseDto, WeekContextResponseDto)
   @ApiResponse({
     status: 200,
-    description: 'Day mode response',
-    type: DayContextResponseDto,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Week mode response',
-    type: WeekContextResponseDto,
+    description: 'Context-based memories (day or week mode)',
+    content: {
+      'application/json': {
+        schema: {
+          oneOf: [
+            { $ref: getSchemaPath(DayContextResponseDto) },
+            { $ref: getSchemaPath(WeekContextResponseDto) },
+          ],
+        },
+      },
+    },
   })
   @ApiResponse({ status: 400, description: 'Invalid date or mode' })
   async getContext(
@@ -74,6 +85,11 @@ export class MemoriesController {
     @Query() query: ContextQueryDto,
   ): Promise<ContextResponseDto> {
     await this.subscriptionsService.assertFeatureAccess(user.sub, 'memories');
-    return this.memoriesService.getContext(user.sub, query.mode, query.date);
+    return this.memoriesService.getContext(
+      user.sub,
+      query.mode,
+      query.date,
+      user.timezone,
+    );
   }
 }

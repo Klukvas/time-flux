@@ -6,7 +6,7 @@ describe('SubscriptionsController', () => {
   let controller: SubscriptionsController;
   let service: Record<string, jest.Mock>;
 
-  const user = { sub: 'user-1', email: 'test@example.com' };
+  const user = { sub: 'user-1', email: 'test@example.com', timezone: 'UTC' };
 
   beforeEach(async () => {
     service = {
@@ -16,9 +16,7 @@ describe('SubscriptionsController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [SubscriptionsController],
-      providers: [
-        { provide: SubscriptionsService, useValue: service },
-      ],
+      providers: [{ provide: SubscriptionsService, useValue: service }],
     }).compile();
 
     controller = module.get(SubscriptionsController);
@@ -29,7 +27,14 @@ describe('SubscriptionsController', () => {
       id: 'sub-1',
       tier: 'FREE',
       status: 'ACTIVE',
-      limits: { media: 50, chapters: 5, categories: 5, dayStates: 5, analytics: false, memories: false },
+      limits: {
+        media: 50,
+        chapters: 5,
+        categories: 5,
+        dayStates: 5,
+        analytics: false,
+        memories: false,
+      },
     };
     service.getSubscription.mockResolvedValue(mockSub);
 

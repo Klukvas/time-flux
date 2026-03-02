@@ -15,13 +15,17 @@ interface Suggestion {
   placePrediction: google.maps.places.PlacePrediction;
 }
 
-export function PlacesAutocomplete({ onPlaceSelect, disabled }: PlacesAutocompleteProps) {
+export function PlacesAutocomplete({
+  onPlaceSelect,
+  disabled,
+}: PlacesAutocompleteProps) {
   const { t } = useTranslation();
   const places = useMapsLibrary('places');
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
-  const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
+  const sessionTokenRef =
+    useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -34,7 +38,10 @@ export function PlacesAutocomplete({ onPlaceSelect, disabled }: PlacesAutocomple
   // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -63,10 +70,12 @@ export function PlacesAutocomplete({ onPlaceSelect, disabled }: PlacesAutocomple
       debounceRef.current = setTimeout(async () => {
         try {
           const { suggestions: results } =
-            await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
-              input: value,
-              sessionToken: sessionTokenRef.current ?? undefined,
-            });
+            await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(
+              {
+                input: value,
+                sessionToken: sessionTokenRef.current ?? undefined,
+              },
+            );
 
           const mapped: Suggestion[] = results
             .filter((s) => s.placePrediction)
@@ -78,7 +87,8 @@ export function PlacesAutocomplete({ onPlaceSelect, disabled }: PlacesAutocomple
 
           setSuggestions(mapped);
           setOpen(mapped.length > 0);
-        } catch {
+        } catch (err) {
+          console.error('Places autocomplete fetch failed:', err);
           setSuggestions([]);
           setOpen(false);
         }
@@ -107,9 +117,10 @@ export function PlacesAutocomplete({ onPlaceSelect, disabled }: PlacesAutocomple
         setOpen(false);
 
         // Start a new session for the next search
-        sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken();
-      } catch {
-        // ignore errors
+        sessionTokenRef.current =
+          new google.maps.places.AutocompleteSessionToken();
+      } catch (err) {
+        console.error('Place details fetch failed:', err);
       }
     },
     [onPlaceSelect],

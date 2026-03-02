@@ -20,6 +20,7 @@ export type {
   TokenSetter,
 } from './client';
 export * from './types';
+export * from './types-local';
 
 export interface Api {
   auth: ReturnType<typeof createAuthApi>;

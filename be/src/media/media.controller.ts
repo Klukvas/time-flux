@@ -46,7 +46,7 @@ export class MediaController {
     @Param('date', ParseDatePipe) date: string,
     @Body() dto: CreateDayMediaDto,
   ): Promise<DayMediaResponseDto> {
-    return this.mediaService.addMedia(user.sub, date, dto);
+    return this.mediaService.addMedia(user.sub, date, dto, user.timezone);
   }
 
   @Get('days/:date/media')

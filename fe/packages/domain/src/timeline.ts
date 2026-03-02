@@ -1,11 +1,17 @@
-import type { Day, TimelinePeriod, TimelineResponse, WeekTimelineResponse } from '@lifespan/api';
+import type {
+  Day,
+  TimelineDay,
+  TimelinePeriod,
+  TimelineResponse,
+  WeekTimelineResponse,
+} from '@lifespan/api';
 
 /** A single month grouping for vertical timeline display. */
 export interface TimelineMonth {
   key: string; // "2024-06"
   label: string; // "June 2024"
   periods: TimelinePeriod[];
-  days: Day[];
+  days: TimelineDay[];
 }
 
 /** A week row for the horizontal timeline. */
@@ -19,9 +25,9 @@ export interface HorizontalTimelineWeek {
 export interface HorizontalTimelineDay {
   date: string;
   dayNumber: number;
-  dayState: Day['dayState'];
-  mainMediaId: Day['mainMediaId'];
-  media: Day['media'];
+  dayState: TimelineDay['dayState'];
+  mainMediaId: TimelineDay['mainMediaId'];
+  media: TimelineDay['media'];
   hasData: boolean;
 }
 
@@ -71,11 +77,13 @@ export function groupTimelineByMonth(data: TimelineResponse): TimelineMonth[] {
   }
 
   // Sort by month key descending (newest first)
-  return Array.from(monthMap.values()).sort((a, b) => b.key.localeCompare(a.key));
+  return Array.from(monthMap.values()).sort((a, b) =>
+    b.key.localeCompare(a.key),
+  );
 }
 
 /** Build a day-state color map from days: { "2024-06-15": "#4CAF50" } */
-export function buildDayColorMap(days: Day[]): Map<string, string> {
+export function buildDayColorMap(days: TimelineDay[]): Map<string, string> {
   const map = new Map<string, string>();
   for (const day of days) {
     if (day.dayState) {
@@ -100,7 +108,10 @@ export function sortPeriods(periods: TimelinePeriod[]): TimelinePeriod[] {
 }
 
 /** Get periods that overlap with a specific date in the week view. */
-export function getPeriodsForDate(periods: TimelinePeriod[], date: string): TimelinePeriod[] {
+export function getPeriodsForDate(
+  periods: TimelinePeriod[],
+  date: string,
+): TimelinePeriod[] {
   return periods.filter((p) => {
     const starts = p.startDate <= date;
     const ends = p.endDate === null || p.endDate >= date;
@@ -111,9 +122,9 @@ export function getPeriodsForDate(periods: TimelinePeriod[], date: string): Time
 /** Build the week grid with day data and overlapping periods. */
 export interface WeekDay {
   date: string;
-  dayState: Day['dayState'];
-  mainMediaId: Day['mainMediaId'];
-  media: Day['media'];
+  dayState: TimelineDay['dayState'];
+  mainMediaId: TimelineDay['mainMediaId'];
+  media: TimelineDay['media'];
   periods: TimelinePeriod[];
 }
 
@@ -128,7 +139,10 @@ export function buildWeekGrid(data: WeekTimelineResponse): WeekDay[] {
 }
 
 /** Map periods to days: returns a Map<date, TimelinePeriod[]> for quick lookup. */
-export function mapPeriodsToDays(periods: TimelinePeriod[], dates: string[]): Map<string, TimelinePeriod[]> {
+export function mapPeriodsToDays(
+  periods: TimelinePeriod[],
+  dates: string[],
+): Map<string, TimelinePeriod[]> {
   const map = new Map<string, TimelinePeriod[]>();
   for (const date of dates) {
     map.set(date, getPeriodsForDate(periods, date));
@@ -143,7 +157,7 @@ export function groupTimelineHorizontal(
   data: TimelineResponse,
   registrationDate?: string,
 ): HorizontalTimelineWeek[] {
-  const dayMap = new Map<string, Day>();
+  const dayMap = new Map<string, TimelineDay>();
   for (const d of data.days) dayMap.set(d.date, d);
 
   // Determine the effective start of the range
@@ -155,7 +169,7 @@ export function groupTimelineHorizontal(
   // Expand end to Sunday of its week
   const end = new Date(rangeEnd);
   const endSun = new Date(end);
-  endSun.setDate(end.getDate() + (7 - ((end.getDay() || 7))));
+  endSun.setDate(end.getDate() + (7 - (end.getDay() || 7)));
 
   // For the start: if we have a registration date, start there (partial week);
   // otherwise align to Monday
@@ -270,8 +284,18 @@ export function getDayDetail(
 function formatMonthLabel(yearMonth: string): string {
   const [year, month] = yearMonth.split('-');
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   return `${months[parseInt(month, 10) - 1]} ${year}`;
 }

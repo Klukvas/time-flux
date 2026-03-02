@@ -16,7 +16,7 @@ describe('CategoriesService', () => {
   let subscriptionsService: { assertResourceLimit: jest.Mock };
   let mockTx: {
     eventGroup: { count: jest.Mock };
-    category: { delete: jest.Mock };
+    category: { count: jest.Mock; create: jest.Mock; delete: jest.Mock };
   };
 
   const userId = 'user-1';
@@ -39,7 +39,11 @@ describe('CategoriesService', () => {
 
     mockTx = {
       eventGroup: { count: jest.fn().mockResolvedValue(0) },
-      category: { delete: jest.fn().mockResolvedValue(undefined) },
+      category: {
+        count: jest.fn().mockResolvedValue(0),
+        create: jest.fn().mockResolvedValue(mockCategory),
+        delete: jest.fn().mockResolvedValue(undefined),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -112,24 +116,28 @@ describe('CategoriesService', () => {
 
   describe('create', () => {
     it('should auto-assign order when not provided', async () => {
-      repo.countByUserId.mockResolvedValue(3);
-      repo.create.mockResolvedValue({ ...mockCategory, order: 3 });
+      mockTx.category.count.mockResolvedValue(3);
+      mockTx.category.create.mockResolvedValue({ ...mockCategory, order: 3 });
 
       await service.create(userId, { name: 'New', color: '#FF0000' });
 
-      expect(repo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ order: 3 }),
+      expect(mockTx.category.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ order: 3 }),
+        }),
       );
     });
 
     it('should use provided order when specified', async () => {
-      repo.countByUserId.mockResolvedValue(3);
-      repo.create.mockResolvedValue({ ...mockCategory, order: 0 });
+      mockTx.category.count.mockResolvedValue(3);
+      mockTx.category.create.mockResolvedValue({ ...mockCategory, order: 0 });
 
       await service.create(userId, { name: 'New', color: '#FF0000', order: 0 });
 
-      expect(repo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ order: 0 }),
+      expect(mockTx.category.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ order: 0 }),
+        }),
       );
     });
   });
@@ -138,17 +146,19 @@ describe('CategoriesService', () => {
 
   describe('createFromRecommendation', () => {
     it('should create category with recommendation color', async () => {
-      repo.countByUserId.mockResolvedValue(0);
-      repo.create.mockResolvedValue(mockCategory);
+      mockTx.category.count.mockResolvedValue(0);
+      mockTx.category.create.mockResolvedValue(mockCategory);
 
       await service.createFromRecommendation(userId, {
         key: 'work' as any,
         name: 'Work',
       });
 
-      expect(repo.create).toHaveBeenCalledWith(
+      expect(mockTx.category.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          color: '#3B82F6', // Work recommendation color
+          data: expect.objectContaining({
+            color: '#3B82F6', // Work recommendation color
+          }),
         }),
       );
     });
@@ -167,7 +177,7 @@ describe('CategoriesService', () => {
 
   describe('quota enforcement', () => {
     it('should throw QuotaExceededError when at limit on create', async () => {
-      repo.countByUserId.mockResolvedValue(5);
+      mockTx.category.count.mockResolvedValue(5);
       subscriptionsService.assertResourceLimit.mockRejectedValue(
         new QuotaExceededError({
           resource: 'categories',
@@ -183,7 +193,7 @@ describe('CategoriesService', () => {
     });
 
     it('should throw QuotaExceededError when at limit on createFromRecommendation', async () => {
-      repo.countByUserId.mockResolvedValue(5);
+      mockTx.category.count.mockResolvedValue(5);
       subscriptionsService.assertResourceLimit.mockRejectedValue(
         new QuotaExceededError({
           resource: 'categories',
@@ -202,8 +212,8 @@ describe('CategoriesService', () => {
     });
 
     it('should allow create when under limit', async () => {
-      repo.countByUserId.mockResolvedValue(3);
-      repo.create.mockResolvedValue(mockCategory);
+      mockTx.category.count.mockResolvedValue(3);
+      mockTx.category.create.mockResolvedValue(mockCategory);
       subscriptionsService.assertResourceLimit.mockResolvedValue(undefined);
 
       await expect(

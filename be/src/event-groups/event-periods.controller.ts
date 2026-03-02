@@ -17,10 +17,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
-import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import {
+  CurrentUser,
+  type JwtPayload,
+} from '../common/decorators/current-user.decorator.js';
 import { EventGroupsService } from './event-groups.service.js';
 import { UpdateEventPeriodDto } from './dto/update-event-period.dto.js';
 import { CloseEventPeriodDto } from './dto/close-event-period.dto.js';
+import { EventGroupResponseDto } from './dto/event-group-response.dto.js';
 
 @ApiTags('Event Periods')
 @ApiBearerAuth()
@@ -32,14 +36,18 @@ export class EventPeriodsController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update event period' })
   @ApiParam({ name: 'id', description: 'Event period UUID' })
-  @ApiResponse({ status: 200, description: 'Period updated' })
+  @ApiResponse({
+    status: 200,
+    description: 'Period updated',
+    type: EventGroupResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Period not found' })
   update(
-    @CurrentUser() user: { sub: string },
+    @CurrentUser() user: JwtPayload,
     @Param('id') id: string,
     @Body() dto: UpdateEventPeriodDto,
   ) {
-    return this.service.updatePeriod(user.sub, id, dto);
+    return this.service.updatePeriod(user.sub, id, dto, user.timezone);
   }
 
   @Delete(':id')
@@ -48,20 +56,24 @@ export class EventPeriodsController {
   @ApiParam({ name: 'id', description: 'Event period UUID' })
   @ApiResponse({ status: 204, description: 'Period deleted' })
   @ApiResponse({ status: 404, description: 'Period not found' })
-  remove(@CurrentUser() user: { sub: string }, @Param('id') id: string) {
+  remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.service.deletePeriod(user.sub, id);
   }
 
   @Post(':id/close')
   @ApiOperation({ summary: 'Close an active event period' })
   @ApiParam({ name: 'id', description: 'Event period UUID' })
-  @ApiResponse({ status: 200, description: 'Period closed' })
+  @ApiResponse({
+    status: 200,
+    description: 'Period closed',
+    type: EventGroupResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Period not found' })
   close(
-    @CurrentUser() user: { sub: string },
+    @CurrentUser() user: JwtPayload,
     @Param('id') id: string,
     @Body() dto: CloseEventPeriodDto,
   ) {
-    return this.service.closePeriod(user.sub, id, dto);
+    return this.service.closePeriod(user.sub, id, dto, user.timezone);
   }
 }

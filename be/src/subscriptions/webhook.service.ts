@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { WebhookRepository } from './webhook.repository.js';
 import { SubscriptionsRepository } from './subscriptions.repository.js';
+import { SubscriptionsService } from './subscriptions.service.js';
 import { buildPriceToTierMap, tierFromPriceId } from './paddle-price-map.js';
 import { ConfigService } from '@nestjs/config';
 
@@ -27,6 +28,7 @@ export class WebhookService {
   constructor(
     private readonly webhookRepo: WebhookRepository,
     private readonly subscriptionRepo: SubscriptionsRepository,
+    private readonly subscriptionsService: SubscriptionsService,
     config: ConfigService,
   ) {
     this.priceToTier = buildPriceToTierMap(config);
@@ -35,16 +37,21 @@ export class WebhookService {
   async handleEvent(payload: PaddleWebhookPayload): Promise<void> {
     const { event_id, event_type, data } = payload;
 
-    // Idempotency: skip if already processed
-    const existing = await this.webhookRepo.findById(event_id);
-    if (existing?.processed) {
-      this.logger.log(`Skipping already processed event ${event_id}`);
-      return;
-    }
-
-    // Store event for audit trail
-    if (!existing) {
+    // Atomic idempotency: attempt insert, treat unique violation as "already exists"
+    try {
       await this.webhookRepo.create(event_id, event_type, payload);
+    } catch (error: any) {
+      // P2002 = Prisma unique constraint violation → event already stored
+      if (error?.code === 'P2002') {
+        const existing = await this.webhookRepo.findById(event_id);
+        if (existing?.processed) {
+          this.logger.log(`Skipping already processed event ${event_id}`);
+          return;
+        }
+        // Not yet processed — continue to processEvent below
+      } else {
+        throw error;
+      }
     }
 
     try {
@@ -104,8 +111,7 @@ export class WebhookService {
       : undefined;
 
     if (!tier) {
-      this.logger.error(`Unknown price ID: ${priceId}`);
-      return;
+      throw new Error(`Unknown price ID: ${priceId}`);
     }
 
     const periodEnd = data.current_billing_period?.ends_at
@@ -120,6 +126,7 @@ export class WebhookService {
       currentPeriodEnd: periodEnd,
       canceledAt: null,
     });
+    this.subscriptionsService.invalidateTierCache(userId);
 
     this.logger.log(`Subscription activated for user ${userId}: ${tier}`);
   }
@@ -146,12 +153,13 @@ export class WebhookService {
     if (tier) updateData.tier = tier;
     if (canceledAt) updateData.canceledAt = canceledAt;
 
-    await this.subscriptionRepo.updateByPaddleSubscriptionId(
+    const updated = await this.subscriptionRepo.updateByPaddleSubscriptionId(
       data.id,
       updateData as Parameters<
         typeof this.subscriptionRepo.updateByPaddleSubscriptionId
       >[1],
     );
+    this.subscriptionsService.invalidateTierCache(updated.userId);
 
     this.logger.log(
       `Subscription updated: ${data.id}${tier ? ` → ${tier}` : ''}`,
@@ -159,25 +167,37 @@ export class WebhookService {
   }
 
   private async handleCanceled(data: PaddleSubscriptionEvent): Promise<void> {
-    await this.subscriptionRepo.updateByPaddleSubscriptionId(data.id, {
-      tier: 'FREE',
-      status: 'CANCELED',
-      canceledAt: new Date(),
-    });
+    const updated = await this.subscriptionRepo.updateByPaddleSubscriptionId(
+      data.id,
+      {
+        tier: 'FREE',
+        status: 'CANCELED',
+        canceledAt: new Date(),
+      },
+    );
+    this.subscriptionsService.invalidateTierCache(updated.userId);
     this.logger.log(`Subscription canceled: ${data.id}`);
   }
 
   private async handlePastDue(data: PaddleSubscriptionEvent): Promise<void> {
-    await this.subscriptionRepo.updateByPaddleSubscriptionId(data.id, {
-      status: 'PAST_DUE',
-    });
+    const updated = await this.subscriptionRepo.updateByPaddleSubscriptionId(
+      data.id,
+      {
+        status: 'PAST_DUE',
+      },
+    );
+    this.subscriptionsService.invalidateTierCache(updated.userId);
     this.logger.log(`Subscription past due: ${data.id}`);
   }
 
   private async handlePaused(data: PaddleSubscriptionEvent): Promise<void> {
-    await this.subscriptionRepo.updateByPaddleSubscriptionId(data.id, {
-      status: 'PAUSED',
-    });
+    const updated = await this.subscriptionRepo.updateByPaddleSubscriptionId(
+      data.id,
+      {
+        status: 'PAUSED',
+      },
+    );
+    this.subscriptionsService.invalidateTierCache(updated.userId);
     this.logger.log(`Subscription paused: ${data.id}`);
   }
 
@@ -186,11 +206,15 @@ export class WebhookService {
       ? new Date(data.current_billing_period.ends_at)
       : null;
 
-    await this.subscriptionRepo.updateByPaddleSubscriptionId(data.id, {
-      status: 'ACTIVE',
-      currentPeriodEnd: periodEnd,
-      canceledAt: null,
-    });
+    const updated = await this.subscriptionRepo.updateByPaddleSubscriptionId(
+      data.id,
+      {
+        status: 'ACTIVE',
+        currentPeriodEnd: periodEnd,
+        canceledAt: null,
+      },
+    );
+    this.subscriptionsService.invalidateTierCache(updated.userId);
     this.logger.log(`Subscription resumed: ${data.id}`);
   }
 
@@ -207,8 +231,7 @@ export class WebhookService {
       : undefined;
 
     if (!tier) {
-      this.logger.error(`Unknown price ID: ${priceId}`);
-      return;
+      throw new Error(`Unknown price ID: ${priceId}`);
     }
 
     const periodEnd = data.current_billing_period?.ends_at
@@ -223,6 +246,7 @@ export class WebhookService {
       currentPeriodEnd: periodEnd,
       canceledAt: null,
     });
+    this.subscriptionsService.invalidateTierCache(userId);
 
     this.logger.log(`Subscription trialing for user ${userId}: ${tier}`);
   }

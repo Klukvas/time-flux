@@ -1,7 +1,20 @@
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiProperty,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PrismaService } from '../prisma/prisma.service.js';
+
+class HealthResponseDto {
+  @ApiProperty({ example: 'ok' })
+  status: string;
+
+  @ApiProperty({ example: 'connected' })
+  database: string;
+}
 
 @ApiTags('Health')
 @Controller('api/v1/health')
@@ -11,7 +24,11 @@ export class HealthController {
 
   @Get()
   @ApiOperation({ summary: 'Health check' })
-  @ApiResponse({ status: 200, description: 'Service is healthy' })
+  @ApiResponse({
+    status: 200,
+    description: 'Service is healthy',
+    type: HealthResponseDto,
+  })
   @ApiResponse({ status: 503, description: 'Service is degraded' })
   async check() {
     try {

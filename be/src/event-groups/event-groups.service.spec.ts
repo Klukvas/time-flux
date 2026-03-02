@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EventGroupsService } from './event-groups.service.js';
 import { EventGroupsRepository } from './event-groups.repository.js';
 import { CategoriesRepository } from '../categories/categories.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 import { DaysRepository } from '../days/days.repository.js';
 import { S3Service } from '../s3/s3.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -25,7 +24,6 @@ describe('EventGroupsService — Period Business Logic', () => {
   let service: EventGroupsService;
   let repo: jest.Mocked<EventGroupsRepository>;
   let categoriesRepo: jest.Mocked<CategoriesRepository>;
-  let authRepo: jest.Mocked<AuthRepository>;
   let subscriptionsService: { assertResourceLimit: jest.Mock };
   let prisma: any;
 
@@ -98,12 +96,6 @@ describe('EventGroupsService — Period Business Logic', () => {
           },
         },
         {
-          provide: AuthRepository,
-          useValue: {
-            findUserById: jest.fn().mockResolvedValue({ timezone: 'UTC' }),
-          },
-        },
-        {
           provide: DaysRepository,
           useValue: {
             findByUserIdAndDateRange: jest.fn().mockResolvedValue([]),
@@ -131,7 +123,6 @@ describe('EventGroupsService — Period Business Logic', () => {
     service = module.get(EventGroupsService);
     repo = module.get(EventGroupsRepository);
     categoriesRepo = module.get(CategoriesRepository);
-    authRepo = module.get(AuthRepository);
   });
 
   // ─── ACTIVE PERIOD CONSTRAINT ──────────────────────────────
@@ -148,7 +139,12 @@ describe('EventGroupsService — Period Business Logic', () => {
       );
 
       await expect(
-        service.createPeriod(userId, groupId, { startDate: '2024-06-01' }),
+        service.createPeriod(
+          userId,
+          groupId,
+          { startDate: '2024-06-01' },
+          'UTC',
+        ),
       ).rejects.toThrow(ActivePeriodExistsError);
     });
 
@@ -164,9 +160,14 @@ describe('EventGroupsService — Period Business Logic', () => {
           periods: [makePeriod('p-new', '2024-06-01', null)],
         } as any);
 
-      const result = await service.createPeriod(userId, groupId, {
-        startDate: '2024-06-01',
-      });
+      const result = await service.createPeriod(
+        userId,
+        groupId,
+        {
+          startDate: '2024-06-01',
+        },
+        'UTC',
+      );
       expect(result.periods).toHaveLength(1);
     });
 
@@ -189,10 +190,15 @@ describe('EventGroupsService — Period Business Logic', () => {
         } as any);
 
       // Providing endDate should skip active period check
-      const result = await service.createPeriod(userId, groupId, {
-        startDate: '2024-03-01',
-        endDate: '2024-05-01',
-      });
+      const result = await service.createPeriod(
+        userId,
+        groupId,
+        {
+          startDate: '2024-03-01',
+          endDate: '2024-05-01',
+        },
+        'UTC',
+      );
       expect(result.periods).toHaveLength(2);
     });
   });
@@ -217,10 +223,15 @@ describe('EventGroupsService — Period Business Logic', () => {
 
       // New: Feb 1 – Apr 30 (overlaps with existing)
       await expect(
-        service.createPeriod(userId, groupId, {
-          startDate: '2024-02-01',
-          endDate: '2024-04-30',
-        }),
+        service.createPeriod(
+          userId,
+          groupId,
+          {
+            startDate: '2024-02-01',
+            endDate: '2024-04-30',
+          },
+          'UTC',
+        ),
       ).rejects.toThrow(PeriodOverlapError);
     });
 
@@ -248,10 +259,15 @@ describe('EventGroupsService — Period Business Logic', () => {
           periods: [makePeriod('p-new', '2024-01-31', '2024-02-28')],
         } as any);
 
-      const result = await service.createPeriod(userId, groupId, {
-        startDate: '2024-01-31',
-        endDate: '2024-02-28',
-      });
+      const result = await service.createPeriod(
+        userId,
+        groupId,
+        {
+          startDate: '2024-01-31',
+          endDate: '2024-02-28',
+        },
+        'UTC',
+      );
       expect(result.periods).toHaveLength(1);
     });
 
@@ -267,10 +283,15 @@ describe('EventGroupsService — Period Business Logic', () => {
 
       // New: Feb 1 – Mar 31 (fully inside existing)
       await expect(
-        service.createPeriod(userId, groupId, {
-          startDate: '2024-02-01',
-          endDate: '2024-03-31',
-        }),
+        service.createPeriod(
+          userId,
+          groupId,
+          {
+            startDate: '2024-02-01',
+            endDate: '2024-03-31',
+          },
+          'UTC',
+        ),
       ).rejects.toThrow(PeriodOverlapError);
     });
 
@@ -286,10 +307,15 @@ describe('EventGroupsService — Period Business Logic', () => {
 
       // New: Jan 1 – Jun 30 (wraps existing)
       await expect(
-        service.createPeriod(userId, groupId, {
-          startDate: '2024-01-01',
-          endDate: '2024-06-30',
-        }),
+        service.createPeriod(
+          userId,
+          groupId,
+          {
+            startDate: '2024-01-01',
+            endDate: '2024-06-30',
+          },
+          'UTC',
+        ),
       ).rejects.toThrow(PeriodOverlapError);
     });
 
@@ -314,9 +340,14 @@ describe('EventGroupsService — Period Business Logic', () => {
           periods: [makePeriod('p-active', '2024-04-01', null)],
         } as any);
 
-      const result = await service.createPeriod(userId, groupId, {
-        startDate: '2024-04-01',
-      });
+      const result = await service.createPeriod(
+        userId,
+        groupId,
+        {
+          startDate: '2024-04-01',
+        },
+        'UTC',
+      );
       expect(result.periods).toHaveLength(1);
     });
 
@@ -342,10 +373,15 @@ describe('EventGroupsService — Period Business Logic', () => {
           periods: [makePeriod('p-new', '2024-01-10', '2024-01-20')],
         } as any);
 
-      const result = await service.createPeriod(userId, groupId, {
-        startDate: '2024-01-10',
-        endDate: '2024-01-20',
-      });
+      const result = await service.createPeriod(
+        userId,
+        groupId,
+        {
+          startDate: '2024-01-10',
+          endDate: '2024-01-20',
+        },
+        'UTC',
+      );
       expect(result.periods).toHaveLength(1);
     });
 
@@ -361,10 +397,15 @@ describe('EventGroupsService — Period Business Logic', () => {
 
       // New: Jan 1 – Jan 31 (exact same range)
       await expect(
-        service.createPeriod(userId, groupId, {
-          startDate: '2024-01-01',
-          endDate: '2024-01-31',
-        }),
+        service.createPeriod(
+          userId,
+          groupId,
+          {
+            startDate: '2024-01-01',
+            endDate: '2024-01-31',
+          },
+          'UTC',
+        ),
       ).rejects.toThrow(PeriodOverlapError);
     });
 
@@ -389,10 +430,15 @@ describe('EventGroupsService — Period Business Logic', () => {
           periods: [makePeriod('p-new', '2024-03-01', '2024-04-30')],
         } as any);
 
-      const result = await service.createPeriod(userId, groupId, {
-        startDate: '2024-03-01',
-        endDate: '2024-04-30',
-      });
+      const result = await service.createPeriod(
+        userId,
+        groupId,
+        {
+          startDate: '2024-03-01',
+          endDate: '2024-04-30',
+        },
+        'UTC',
+      );
       expect(result.periods).toHaveLength(1);
     });
   });
@@ -406,10 +452,15 @@ describe('EventGroupsService — Period Business Logic', () => {
 
     it('should reject start date after end date', async () => {
       await expect(
-        service.createPeriod(userId, groupId, {
-          startDate: '2024-06-01',
-          endDate: '2024-01-01',
-        }),
+        service.createPeriod(
+          userId,
+          groupId,
+          {
+            startDate: '2024-06-01',
+            endDate: '2024-01-01',
+          },
+          'UTC',
+        ),
       ).rejects.toThrow(InvalidDateRangeError);
     });
 
@@ -425,10 +476,15 @@ describe('EventGroupsService — Period Business Logic', () => {
           periods: [makePeriod('p-new', '2024-03-15', '2024-03-15')],
         } as any);
 
-      const result = await service.createPeriod(userId, groupId, {
-        startDate: '2024-03-15',
-        endDate: '2024-03-15',
-      });
+      const result = await service.createPeriod(
+        userId,
+        groupId,
+        {
+          startDate: '2024-03-15',
+          endDate: '2024-03-15',
+        },
+        'UTC',
+      );
       expect(result.periods).toHaveLength(1);
     });
   });
@@ -442,7 +498,7 @@ describe('EventGroupsService — Period Business Logic', () => {
       );
 
       await expect(
-        service.closePeriod(userId, 'p-1', { endDate: '2024-06-30' }),
+        service.closePeriod(userId, 'p-1', { endDate: '2024-06-30' }, 'UTC'),
       ).rejects.toThrow(EventAlreadyClosedError);
     });
 
@@ -452,7 +508,7 @@ describe('EventGroupsService — Period Business Logic', () => {
       );
 
       await expect(
-        service.closePeriod(userId, 'p-1', { endDate: '2024-01-01' }),
+        service.closePeriod(userId, 'p-1', { endDate: '2024-01-01' }, 'UTC'),
       ).rejects.toThrow(InvalidDateRangeError);
     });
 
@@ -469,9 +525,14 @@ describe('EventGroupsService — Period Business Logic', () => {
         periods: [makePeriod('p-active', '2024-06-01', '2024-06-01')],
       } as any);
 
-      const result = await service.closePeriod(userId, 'p-active', {
-        endDate: '2024-06-01',
-      });
+      const result = await service.closePeriod(
+        userId,
+        'p-active',
+        {
+          endDate: '2024-06-01',
+        },
+        'UTC',
+      );
       expect(result.periods[0].endDate).toBe('2024-06-01');
     });
 
@@ -488,7 +549,12 @@ describe('EventGroupsService — Period Business Logic', () => {
 
       // Closing p-active from Mar 1 to May 31 overlaps with existing Apr 1 – Jun 30
       await expect(
-        service.closePeriod(userId, 'p-active', { endDate: '2024-05-31' }),
+        service.closePeriod(
+          userId,
+          'p-active',
+          { endDate: '2024-05-31' },
+          'UTC',
+        ),
       ).rejects.toThrow(PeriodOverlapError);
     });
 
@@ -505,9 +571,14 @@ describe('EventGroupsService — Period Business Logic', () => {
         periods: [makePeriod('p-active', '2024-01-01', '2024-02-28')],
       } as any);
 
-      const result = await service.closePeriod(userId, 'p-active', {
-        endDate: '2024-02-28',
-      });
+      const result = await service.closePeriod(
+        userId,
+        'p-active',
+        {
+          endDate: '2024-02-28',
+        },
+        'UTC',
+      );
       expect(result.periods[0].endDate).toBe('2024-02-28');
     });
   });
@@ -528,7 +599,7 @@ describe('EventGroupsService — Period Business Logic', () => {
 
       // Extending end date to overlap with existing
       await expect(
-        service.updatePeriod(userId, 'p-1', { endDate: '2024-05-15' }),
+        service.updatePeriod(userId, 'p-1', { endDate: '2024-05-15' }, 'UTC'),
       ).rejects.toThrow(PeriodOverlapError);
     });
 
@@ -537,7 +608,7 @@ describe('EventGroupsService — Period Business Logic', () => {
       repo.findPeriodByIdAndUserId.mockResolvedValue(period as any);
 
       await expect(
-        service.updatePeriod(userId, 'p-1', { endDate: '2024-01-01' }),
+        service.updatePeriod(userId, 'p-1', { endDate: '2024-01-01' }, 'UTC'),
       ).rejects.toThrow(InvalidDateRangeError);
     });
 
@@ -550,7 +621,7 @@ describe('EventGroupsService — Period Business Logic', () => {
 
       // Removing endDate → making it active, but another active exists
       await expect(
-        service.updatePeriod(userId, 'p-1', { endDate: '' as any }),
+        service.updatePeriod(userId, 'p-1', { endDate: '' as any }, 'UTC'),
       ).rejects.toThrow(ActivePeriodExistsError);
     });
 
@@ -567,9 +638,14 @@ describe('EventGroupsService — Period Business Logic', () => {
       } as any);
 
       // Updating comment on an active period should not trigger active period error
-      const result = await service.updatePeriod(userId, 'p-1', {
-        comment: 'updated',
-      });
+      const result = await service.updatePeriod(
+        userId,
+        'p-1',
+        {
+          comment: 'updated',
+        },
+        'UTC',
+      );
       expect(result).toBeDefined();
     });
   });
@@ -613,7 +689,11 @@ describe('EventGroupsService — Period Business Logic', () => {
       categoriesRepo.findByIdAndUserId.mockResolvedValue(null);
 
       await expect(
-        service.createGroup(userId, { categoryId: 'bad-cat', title: 'Test' }),
+        service.createGroup(
+          userId,
+          { categoryId: 'bad-cat', title: 'Test' },
+          'UTC',
+        ),
       ).rejects.toThrow(CategoryNotFoundError);
     });
 
@@ -629,10 +709,14 @@ describe('EventGroupsService — Period Business Logic', () => {
       );
 
       await expect(
-        service.createGroup(userId, {
-          categoryId: 'cat-1',
-          title: 'Over Limit',
-        }),
+        service.createGroup(
+          userId,
+          {
+            categoryId: 'cat-1',
+            title: 'Over Limit',
+          },
+          'UTC',
+        ),
       ).rejects.toThrow(QuotaExceededError);
     });
   });
@@ -644,7 +728,12 @@ describe('EventGroupsService — Period Business Logic', () => {
       repo.findPeriodByIdAndUserId.mockResolvedValue(null);
 
       await expect(
-        service.closePeriod(userId, 'nonexistent', { endDate: '2024-12-31' }),
+        service.closePeriod(
+          userId,
+          'nonexistent',
+          { endDate: '2024-12-31' },
+          'UTC',
+        ),
       ).rejects.toThrow(EventPeriodNotFoundError);
     });
 
@@ -652,9 +741,14 @@ describe('EventGroupsService — Period Business Logic', () => {
       repo.findGroupByIdAndUserId.mockResolvedValue(null);
 
       await expect(
-        service.createPeriod(userId, 'nonexistent', {
-          startDate: '2024-01-01',
-        }),
+        service.createPeriod(
+          userId,
+          'nonexistent',
+          {
+            startDate: '2024-01-01',
+          },
+          'UTC',
+        ),
       ).rejects.toThrow(EventGroupNotFoundError);
     });
 
@@ -670,7 +764,7 @@ describe('EventGroupsService — Period Business Logic', () => {
       repo.findPeriodByIdAndUserId.mockResolvedValue(null);
 
       await expect(
-        service.updatePeriod(userId, 'nonexistent', { comment: 'test' }),
+        service.updatePeriod(userId, 'nonexistent', { comment: 'test' }, 'UTC'),
       ).rejects.toThrow(EventPeriodNotFoundError);
     });
   });
@@ -686,9 +780,14 @@ describe('EventGroupsService — Period Business Logic', () => {
         periods: [],
       } as any);
 
-      const result = await service.updateGroup(userId, groupId, {
-        title: 'Updated Title',
-      });
+      const result = await service.updateGroup(
+        userId,
+        groupId,
+        {
+          title: 'Updated Title',
+        },
+        'UTC',
+      );
 
       expect(result.title).toBe('Updated Title');
       expect(repo.updateGroup).toHaveBeenCalledWith(groupId, {
@@ -702,7 +801,7 @@ describe('EventGroupsService — Period Business Logic', () => {
       repo.findGroupByIdAndUserId.mockResolvedValue(null);
 
       await expect(
-        service.updateGroup(userId, 'bad-id', { title: 'Test' }),
+        service.updateGroup(userId, 'bad-id', { title: 'Test' }, 'UTC'),
       ).rejects.toThrow(EventGroupNotFoundError);
     });
 
@@ -711,7 +810,7 @@ describe('EventGroupsService — Period Business Logic', () => {
       categoriesRepo.findByIdAndUserId.mockResolvedValue(null);
 
       await expect(
-        service.updateGroup(userId, groupId, { categoryId: 'bad-cat' }),
+        service.updateGroup(userId, groupId, { categoryId: 'bad-cat' }, 'UTC'),
       ).rejects.toThrow(CategoryNotFoundError);
     });
 
@@ -719,10 +818,15 @@ describe('EventGroupsService — Period Business Logic', () => {
       repo.findGroupByIdAndUserId.mockResolvedValue(mockGroup as any);
       repo.updateGroup.mockResolvedValue({ ...mockGroup, periods: [] } as any);
 
-      await service.updateGroup(userId, groupId, {
-        categoryId: 'cat-1',
-        title: 'Same',
-      });
+      await service.updateGroup(
+        userId,
+        groupId,
+        {
+          categoryId: 'cat-1',
+          title: 'Same',
+        },
+        'UTC',
+      );
 
       expect(categoriesRepo.findByIdAndUserId).not.toHaveBeenCalled();
     });
@@ -736,7 +840,7 @@ describe('EventGroupsService — Period Business Logic', () => {
         { ...mockGroup, periods: [] },
       ] as any);
 
-      const result = await service.findAllGroups(userId);
+      const result = await service.findAllGroups(userId, 'UTC');
 
       expect(result).toHaveLength(1);
       expect(result[0].title).toBe('Test Chapter');
@@ -745,7 +849,7 @@ describe('EventGroupsService — Period Business Logic', () => {
     it('should return empty array when no groups', async () => {
       repo.findAllGroupsByUserId.mockResolvedValue([]);
 
-      const result = await service.findAllGroups(userId);
+      const result = await service.findAllGroups(userId, 'UTC');
 
       expect(result).toEqual([]);
     });
@@ -760,7 +864,7 @@ describe('EventGroupsService — Period Business Logic', () => {
         periods: [],
       } as any);
 
-      const result = await service.findGroupById(userId, groupId);
+      const result = await service.findGroupById(userId, groupId, 'UTC');
 
       expect(result.id).toBe(groupId);
       expect(result.title).toBe('Test Chapter');
@@ -769,9 +873,9 @@ describe('EventGroupsService — Period Business Logic', () => {
     it('should throw when group not found', async () => {
       repo.findGroupByIdAndUserId.mockResolvedValue(null);
 
-      await expect(service.findGroupById(userId, 'bad-id')).rejects.toThrow(
-        EventGroupNotFoundError,
-      );
+      await expect(
+        service.findGroupById(userId, 'bad-id', 'UTC'),
+      ).rejects.toThrow(EventGroupNotFoundError);
     });
   });
 
@@ -786,10 +890,14 @@ describe('EventGroupsService — Period Business Logic', () => {
       } as any);
       repo.createGroup.mockResolvedValue({ ...mockGroup, periods: [] } as any);
 
-      const result = await service.createGroup(userId, {
-        categoryId: 'cat-1',
-        title: 'New Chapter',
-      });
+      const result = await service.createGroup(
+        userId,
+        {
+          categoryId: 'cat-1',
+          title: 'New Chapter',
+        },
+        'UTC',
+      );
 
       expect(result.id).toBe(groupId);
       expect(repo.createGroup).toHaveBeenCalledWith({
@@ -825,9 +933,9 @@ describe('EventGroupsService — Period Business Logic', () => {
     it('should throw when group not found', async () => {
       repo.findGroupByIdAndUserId.mockResolvedValue(null);
 
-      await expect(service.getGroupDetails(userId, 'bad-id')).rejects.toThrow(
-        EventGroupNotFoundError,
-      );
+      await expect(
+        service.getGroupDetails(userId, 'bad-id', 'UTC'),
+      ).rejects.toThrow(EventGroupNotFoundError);
     });
 
     it('should return details for group with no periods', async () => {
@@ -836,7 +944,7 @@ describe('EventGroupsService — Period Business Logic', () => {
         periods: [],
       } as any);
 
-      const result = await service.getGroupDetails(userId, groupId);
+      const result = await service.getGroupDetails(userId, groupId, 'UTC');
 
       expect(result.totalDays).toBe(0);
       expect(result.moodStats).toEqual([]);
@@ -864,7 +972,7 @@ describe('EventGroupsService — Period Business Logic', () => {
       // The mock was set up in beforeEach with findByUserIdAndDateRange returning []
       // which means allDays will be empty
 
-      const result = await service.getGroupDetails(userId, groupId);
+      const result = await service.getGroupDetails(userId, groupId, 'UTC');
 
       expect(result.analytics.totalPeriods).toBe(1);
       expect(result.totalDays).toBe(0);
@@ -888,35 +996,11 @@ describe('EventGroupsService — Period Business Logic', () => {
 
       // We can't easily override daysRepository in this test because it's set up in beforeEach.
       // The mock returns [] so we verify the structure.
-      const result = await service.getGroupDetails(userId, groupId);
+      const result = await service.getGroupDetails(userId, groupId, 'UTC');
 
       expect(result.analytics).toBeDefined();
       expect(result.analytics.moodDistribution).toEqual([]);
       expect(result.analytics.density).toHaveLength(1);
-    });
-  });
-
-  // ─── TIMEZONE HANDLING ─────────────────────────────────────
-
-  describe('timezone handling', () => {
-    it('should default to UTC when user has no timezone', async () => {
-      authRepo.findUserById.mockResolvedValue({ timezone: undefined } as any);
-      repo.findAllGroupsByUserId.mockResolvedValue([
-        { ...mockGroup, periods: [] },
-      ] as any);
-
-      const result = await service.findAllGroups(userId);
-
-      expect(result).toHaveLength(1);
-    });
-
-    it('should default to UTC when user not found', async () => {
-      authRepo.findUserById.mockResolvedValue(null);
-      repo.findAllGroupsByUserId.mockResolvedValue([]);
-
-      const result = await service.findAllGroups(userId);
-
-      expect(result).toEqual([]);
     });
   });
 });

@@ -1,13 +1,24 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
+import compression from 'compression';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
+import { buildSwaggerConfig } from './common/swagger/swagger.config.js';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 
 const REQUIRED_ENV_VARS = ['DATABASE_URL', 'JWT_SECRET'];
-const PRODUCTION_REQUIRED_ENV_VARS = ['FRONTEND_URL'];
+const PRODUCTION_REQUIRED_ENV_VARS = [
+  'FRONTEND_URL',
+  'S3_ENDPOINT',
+  'S3_REGION',
+  'S3_BUCKET',
+  'S3_ACCESS_KEY_ID',
+  'S3_SECRET_ACCESS_KEY',
+  'PADDLE_WEBHOOK_SECRET',
+];
 
 function validateEnv() {
   const required =
@@ -27,13 +38,28 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
+    bufferLogs: true,
   });
-  const logger = new Logger('Bootstrap');
+  app.useLogger(app.get(Logger));
+  const logger = app.get(Logger);
 
   // ── Graceful shutdown ──────────────────────────────────────
   app.enableShutdownHooks();
 
+  // ── Compression (before all other middleware) ─────────────────
+  app.use(compression());
+
+  // ── Security: CORS whitelist ───────────────────────────────────
+  const frontendUrl = process.env.FRONTEND_URL;
+  const allowedOrigins = frontendUrl
+    ? [frontendUrl]
+    : ['http://localhost:3001', 'http://localhost:8081'];
+
   // ── Security: Helmet (must come before CORS) ──────────────────
+  const connectSrc: string[] = ["'self'", ...allowedOrigins];
+  const s3Endpoint = process.env.S3_ENDPOINT;
+  if (s3Endpoint) connectSrc.push(s3Endpoint);
+
   app.use(
     helmet({
       frameguard: { action: 'deny' },
@@ -43,18 +69,12 @@ async function bootstrap() {
           scriptSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", 'data:', 'https:'],
-          connectSrc: ["'self'"],
+          connectSrc,
         },
       },
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     }),
   );
-
-  // ── Security: CORS whitelist ───────────────────────────────────
-  const frontendUrl = process.env.FRONTEND_URL;
-  const allowedOrigins = frontendUrl
-    ? [frontendUrl]
-    : ['http://localhost:3001', 'http://localhost:8081'];
 
   app.enableCors({
     origin: allowedOrigins,
@@ -81,27 +101,7 @@ async function bootstrap() {
 
   // ── Swagger (disabled in production) ───────────────────────────
   if (process.env.NODE_ENV !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('LifeSpan API')
-      .setDescription(
-        'Backend API for Life Timeline — build a visual timeline of your life',
-      )
-      .setVersion('1.0')
-      .addBearerAuth()
-      .addTag('Auth', 'User registration and login')
-      .addTag('Categories', 'User-defined event categories with colors')
-      .addTag('Day States', 'User-defined day states (moods) with colors')
-      .addTag('Event Groups', 'Chapters — reusable event groups')
-      .addTag('Event Periods', 'Dated periods within event groups')
-      .addTag('Days', 'Per-day visual state management')
-      .addTag('Timeline', 'Read-only timeline views (vertical + week)')
-      .addTag('Uploads', 'S3-compatible presigned URL generation')
-      .addTag('Memories', 'Memory resurfacing — "On This Day"')
-      .addTag('Analytics', 'Emotional pattern detection and mood analytics')
-      .addTag('Subscriptions', 'Subscription management and billing')
-      .addTag('Health', 'Health check endpoint')
-      .build();
-
+    const config = buildSwaggerConfig();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
     logger.log('Swagger docs available at /api/docs');

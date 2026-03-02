@@ -179,7 +179,8 @@ function DayContent({ date }: { date: string }) {
     updateLocation.mutate(
       { date, data: { locationName: null, latitude: null, longitude: null } },
       {
-        onSuccess: () => Alert.alert('', t('day_form.location_removed')),
+        onSuccess: () =>
+          Alert.alert(t('common.success'), t('day_form.location_removed')),
         onError: (err) =>
           Alert.alert('Error', getUserMessage(extractApiError(err))),
       },

@@ -269,6 +269,8 @@ const en: TranslationDictionary = {
     usage_chapters: 'Chapters',
     usage_categories: 'Categories',
     usage_moods: 'Moods',
+    payments_coming_soon:
+      'Paid plans are coming soon. For now, all features are available for free.',
   },
 
   common: {
@@ -327,6 +329,10 @@ const en: TranslationDictionary = {
     location_unavailable: 'Location unavailable. Please enter manually.',
     search_location: 'Search for a place...',
     tap_to_place_pin: 'Tap on the map to place a pin',
+    today: 'Today',
+    previous_day: 'Previous day',
+    next_day: 'Next day',
+    future_read_only: 'Future date — read only',
   },
 
   confirm_delete: {
@@ -501,13 +507,15 @@ const en: TranslationDictionary = {
     header: {
       login: 'Sign in',
       register: 'Get started',
+      go_to_platform: 'Go to platform',
     },
   },
 
   legal: {
     terms_title: 'Terms of Service',
     privacy_title: 'Privacy Policy',
-    last_updated: 'Last updated: February 26, 2026',
+    refund_title: 'Refund Policy',
+    last_updated: 'Last updated: February 27, 2026',
     agree_prefix: 'By creating an account, you agree to our',
     terms_link: 'Terms of Service',
     and_separator: 'and',
@@ -524,7 +532,7 @@ const en: TranslationDictionary = {
         'You must provide accurate information when creating an account. You are responsible for maintaining the confidentiality of your credentials and for all activity under your account. Notify us immediately of any unauthorized use.',
       subscriptions_title: '4. Subscriptions & Billing',
       subscriptions_text:
-        'Some features require a paid subscription. Payments are processed by Paddle.com Market Limited ("Paddle"), our Merchant of Record. Paddle handles all billing, invoicing, tax collection, and refund processing. By subscribing, you also agree to Paddle\'s Terms of Use and Privacy Policy. Subscriptions renew automatically unless canceled before the end of the billing period.',
+        'Some features require a paid subscription. Payments are processed by Paddle.com Market Limited ("Paddle"), our Merchant of Record. Paddle handles all billing, invoicing, tax collection, and refund processing. By subscribing, you also agree to Paddle\'s Terms of Use (https://www.paddle.com/legal/terms) and Privacy Policy (https://www.paddle.com/legal/privacy). Subscriptions renew automatically unless canceled before the end of the billing period. You can cancel your subscription at any time from the Settings page in your account — cancellation takes effect at the end of the current billing period and you will retain access to paid features until then.',
       content_title: '5. User Content',
       content_text:
         'You retain ownership of all content you upload (photos, text, media). By using the Service, you grant us a limited license to store, process, and display your content solely for providing the Service. We do not sell or share your content with third parties for advertising purposes.',
@@ -537,7 +545,10 @@ const en: TranslationDictionary = {
       liability_title: '8. Limitation of Liability',
       liability_text:
         'To the maximum extent permitted by law, LifeSpan shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Service. Our total liability is limited to the amount you paid in the 12 months preceding the claim.',
-      contact_title: '9. Contact',
+      governing_law_title: '9. Governing Law',
+      governing_law_text:
+        'These Terms shall be governed by and construed in accordance with the laws of the European Union. Any disputes arising from or relating to these Terms or the Service shall be resolved through good-faith negotiation first, and if unresolved, through the courts of the applicable jurisdiction.',
+      contact_title: '10. Contact',
       contact_text:
         'If you have questions about these Terms, contact us at support@lifespan.app.',
     },
@@ -566,6 +577,29 @@ const en: TranslationDictionary = {
       contact_title: '8. Contact',
       contact_text:
         'For privacy-related inquiries, contact us at support@lifespan.app.',
+    },
+    refund: {
+      overview_title: '1. Overview',
+      overview_text:
+        'LifeSpan subscriptions are billed through Paddle.com Market Limited ("Paddle"), our Merchant of Record. Paddle processes all refund requests on our behalf. This policy outlines when and how you can request a refund.',
+      eligibility_title: '2. Refund Eligibility',
+      eligibility_text:
+        'You may request a full refund within 14 days of your initial subscription purchase if you are not satisfied with the Service. Refunds are not available after the 14-day window, for renewal charges (since you can cancel anytime before renewal), or if your account was terminated for violating our Terms of Service.',
+      how_to_title: '3. How to Request a Refund',
+      how_to_text:
+        'To request a refund, email us at support@lifespan.app with your account email and the reason for your request. Alternatively, you can contact Paddle directly through the receipt email you received at the time of purchase. We aim to process all refund requests within 5 business days.',
+      processing_title: '4. Refund Processing',
+      processing_text:
+        'Approved refunds are processed by Paddle and returned to the original payment method. Depending on your bank or payment provider, it may take 5–10 business days for the refund to appear on your statement. Once a refund is issued, your subscription will be immediately downgraded to the free plan.',
+      cancellation_title: '5. Cancellation vs. Refund',
+      cancellation_text:
+        'Cancelling your subscription is different from requesting a refund. When you cancel, your subscription remains active until the end of the current billing period — no refund is issued for the remaining time. You can cancel anytime from the Settings page in your account. If you believe you were charged in error or have special circumstances, please contact us.',
+      changes_title: '6. Policy Changes',
+      changes_text:
+        'We may update this Refund Policy from time to time. Any changes will be posted on this page with an updated date. Continued use of the Service after changes constitutes acceptance of the revised policy.',
+      contact_title: '7. Contact',
+      contact_text:
+        'For refund-related questions, contact us at support@lifespan.app.',
     },
   },
 

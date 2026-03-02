@@ -1,0 +1,3524 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (e.g. email already taken)"
+          },
+          "429": {
+            "description": "Too many requests"
+          }
+        },
+        "summary": "Register a new user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "429": {
+            "description": "Too many requests"
+          }
+        },
+        "summary": "Login with email and password",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/google": {
+      "get": {
+        "description": "Redirects the user to Google consent screen. After authorization, Google redirects back to /api/v1/auth/google/callback.",
+        "operationId": "AuthController_googleAuth",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Redirects to Google OAuth consent screen"
+          }
+        },
+        "summary": "Initiate Google OAuth login",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/google/exchange": {
+      "post": {
+        "operationId": "AuthController_googleExchange",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleExchangeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tokens returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired code"
+          }
+        },
+        "summary": "Exchange one-time OAuth code for tokens",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tokens refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired refresh token"
+          }
+        },
+        "summary": "Refresh access token using a refresh token",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logged out successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Logout — revoke refresh token",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/auth/onboarding": {
+      "patch": {
+        "operationId": "AuthController_completeOnboarding",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Onboarding marked as completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark onboarding as completed",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/api/v1/subscriptions": {
+      "get": {
+        "operationId": "SubscriptionsController_getSubscription",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current subscription with tier limits",
+        "tags": [
+          "Subscriptions"
+        ]
+      }
+    },
+    "/api/v1/subscriptions/cancel": {
+      "post": {
+        "operationId": "SubscriptionsController_cancelSubscription",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel current subscription",
+        "tags": [
+          "Subscriptions"
+        ]
+      }
+    },
+    "/api/v1/categories": {
+      "get": {
+        "operationId": "CategoriesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all categories for the current user",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "post": {
+        "operationId": "CategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new category",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/v1/categories/from-recommendation": {
+      "post": {
+        "operationId": "CategoriesController_createFromRecommendation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryFromRecommendationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown recommendation key"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a category from a recommendation",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/v1/categories/{id}": {
+      "patch": {
+        "operationId": "CategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a category",
+        "tags": [
+          "Categories"
+        ]
+      },
+      "delete": {
+        "operationId": "CategoriesController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Category deleted"
+          },
+          "404": {
+            "description": "Category not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a category",
+        "tags": [
+          "Categories"
+        ]
+      }
+    },
+    "/api/v1/day-states": {
+      "get": {
+        "operationId": "DayStatesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayStateResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all day states for the current user",
+        "tags": [
+          "Day States"
+        ]
+      },
+      "post": {
+        "operationId": "DayStatesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDayStateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayStateResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new day state",
+        "tags": [
+          "Day States"
+        ]
+      }
+    },
+    "/api/v1/day-states/from-recommendation": {
+      "post": {
+        "operationId": "DayStatesController_createFromRecommendation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDayStateFromRecommendationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayStateResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown recommendation key"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a day state from a recommendation",
+        "tags": [
+          "Day States"
+        ]
+      }
+    },
+    "/api/v1/day-states/{id}": {
+      "patch": {
+        "operationId": "DayStatesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDayStateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayStateResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Day state not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a day state",
+        "tags": [
+          "Day States"
+        ]
+      },
+      "delete": {
+        "operationId": "DayStatesController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Day state deleted"
+          },
+          "404": {
+            "description": "Day state not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a day state",
+        "tags": [
+          "Day States"
+        ]
+      }
+    },
+    "/api/v1/event-groups": {
+      "post": {
+        "operationId": "EventGroupsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event group created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventGroupResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create event group",
+        "tags": [
+          "Event Groups"
+        ]
+      },
+      "get": {
+        "operationId": "EventGroupsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of event groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventGroupResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List event groups",
+        "tags": [
+          "Event Groups"
+        ]
+      }
+    },
+    "/api/v1/event-groups/{id}": {
+      "get": {
+        "operationId": "EventGroupsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Event group UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event group found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventGroupResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event group not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get event group by ID",
+        "tags": [
+          "Event Groups"
+        ]
+      },
+      "patch": {
+        "operationId": "EventGroupsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Event group UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEventGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event group updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventGroupResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event group not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update event group",
+        "tags": [
+          "Event Groups"
+        ]
+      },
+      "delete": {
+        "operationId": "EventGroupsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Event group UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Event group deleted"
+          },
+          "404": {
+            "description": "Event group not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete event group",
+        "tags": [
+          "Event Groups"
+        ]
+      }
+    },
+    "/api/v1/event-groups/{id}/periods": {
+      "post": {
+        "operationId": "EventGroupsController_createPeriod",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Event group UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventPeriodDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Period created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventGroupResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event group not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create period for event group",
+        "tags": [
+          "Event Groups"
+        ]
+      }
+    },
+    "/api/v1/event-groups/{id}/details": {
+      "get": {
+        "operationId": "EventGroupsController_getDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Event group UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event group details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventGroupDetailsResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Event group not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get event group details with analytics",
+        "tags": [
+          "Event Groups"
+        ]
+      }
+    },
+    "/api/v1/periods/{id}": {
+      "patch": {
+        "operationId": "EventPeriodsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Event period UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEventPeriodDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Period updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventGroupResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Period not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update event period",
+        "tags": [
+          "Event Periods"
+        ]
+      },
+      "delete": {
+        "operationId": "EventPeriodsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Event period UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Period deleted"
+          },
+          "404": {
+            "description": "Period not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete event period",
+        "tags": [
+          "Event Periods"
+        ]
+      }
+    },
+    "/api/v1/periods/{id}/close": {
+      "post": {
+        "operationId": "EventPeriodsController_close",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Event period UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseEventPeriodDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Period closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventGroupResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Period not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Close an active event period",
+        "tags": [
+          "Event Periods"
+        ]
+      }
+    },
+    "/api/v1/days/{date}": {
+      "put": {
+        "operationId": "DaysController_upsert",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "path",
+            "description": "Date in YYYY-MM-DD format",
+            "schema": {
+              "example": "2024-01-15",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertDayDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Day state not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set or update the day state for a specific date",
+        "tags": [
+          "Days"
+        ]
+      }
+    },
+    "/api/v1/days/{date}/location": {
+      "patch": {
+        "operationId": "DaysController_updateLocation",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "path",
+            "description": "Date in YYYY-MM-DD format",
+            "schema": {
+              "example": "2024-01-15",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDayLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Future date or invalid coordinates"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update or clear the location for a specific date",
+        "tags": [
+          "Days"
+        ]
+      }
+    },
+    "/api/v1/days": {
+      "get": {
+        "operationId": "DaysController_findAll",
+        "parameters": [
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "description": "Start of date range (YYYY-MM-DD)",
+            "schema": {
+              "example": "2024-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "description": "End of date range (YYYY-MM-DD)",
+            "schema": {
+              "example": "2024-01-31",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get days with their states for a date range",
+        "tags": [
+          "Days"
+        ]
+      }
+    },
+    "/api/v1/uploads/presigned-url": {
+      "post": {
+        "operationId": "S3Controller_getPresignedUrl",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresignedUrlRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresignedUrlResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generate a presigned URL for direct S3 upload (Hetzner S3-compatible)",
+        "tags": [
+          "Uploads"
+        ]
+      }
+    },
+    "/api/v1/timeline": {
+      "get": {
+        "operationId": "TimelineController_getTimeline",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Start of timeline range (defaults to 1 year ago)",
+            "schema": {
+              "example": "2024-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "End of timeline range (defaults to today)",
+            "schema": {
+              "example": "2024-12-31",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelineResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get vertical timeline (events + days for a date range)",
+        "tags": [
+          "Timeline"
+        ]
+      }
+    },
+    "/api/v1/timeline/week": {
+      "get": {
+        "operationId": "TimelineController_getWeekTimeline",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Any date within the target week (YYYY-MM-DD)",
+            "schema": {
+              "example": "2024-06-15",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeekTimelineResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get week view (7 days with events for a specific week)",
+        "tags": [
+          "Timeline"
+        ]
+      }
+    },
+    "/api/v1/days/{date}/media": {
+      "post": {
+        "operationId": "MediaController_addMedia",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "path",
+            "description": "Date in YYYY-MM-DD format",
+            "schema": {
+              "example": "2024-01-15",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDayMediaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayMediaResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Attach uploaded media to a day",
+        "tags": [
+          "Media"
+        ]
+      },
+      "get": {
+        "operationId": "MediaController_getMediaForDay",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "path",
+            "description": "Date in YYYY-MM-DD format",
+            "schema": {
+              "example": "2024-01-15",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayMediaResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List media for a specific day",
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/media/{id}": {
+      "delete": {
+        "operationId": "MediaController_deleteMedia",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Media item UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Media deleted"
+          },
+          "404": {
+            "description": "Media not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a media item",
+        "tags": [
+          "Media"
+        ]
+      }
+    },
+    "/api/v1/memories/on-this-day": {
+      "get": {
+        "description": "Returns memories from 1 month, 6 months, and 1 year ago for the given date (defaults to today).",
+        "operationId": "MemoriesController_getOnThisDay",
+        "parameters": [
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "description": "Date in YYYY-MM-DD format. Defaults to today if not provided.",
+            "schema": {
+              "example": "2026-02-12",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "On This Day memories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnThisDayResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get \"On This Day\" memories",
+        "tags": [
+          "Memories"
+        ]
+      }
+    },
+    "/api/v1/memories/context": {
+      "get": {
+        "description": "Returns memories relative to the selected date. Day mode returns memories from 1 month, 6 months, and 1 year ago. Week mode returns weekly summaries for the same intervals.",
+        "operationId": "MemoriesController_getContext",
+        "parameters": [
+          {
+            "name": "mode",
+            "required": true,
+            "in": "query",
+            "description": "Memory context mode",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day",
+                "week"
+              ]
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Selected date in YYYY-MM-DD (ISO 8601)",
+            "schema": {
+              "example": "2026-02-12",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Context-based memories (day or week mode)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/DayContextResponseDto"
+                    },
+                    {
+                      "$ref": "#/components/schemas/WeekContextResponseDto"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid date or mode"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get context-based memories for a selected date",
+        "tags": [
+          "Memories"
+        ]
+      }
+    },
+    "/api/v1/recommendations": {
+      "get": {
+        "operationId": "RecommendationsController_getRecommendations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns recommendation lists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get recommended categories and moods",
+        "tags": [
+          "Recommendations"
+        ]
+      }
+    },
+    "/api/v1/analytics/mood-overview": {
+      "get": {
+        "operationId": "AnalyticsController_getMoodOverview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Mood overview with distribution, category stats, 30-day trend, and weekday insights",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MoodOverviewResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get global mood analytics overview with weekday behavioral insights",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is degraded"
+          }
+        },
+        "summary": "Health check",
+        "tags": [
+          "Health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "LifeSpan API",
+    "description": "Backend API for Life Timeline — build a visual timeline of your life",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "User registration and login"
+    },
+    {
+      "name": "Categories",
+      "description": "User-defined event categories with colors"
+    },
+    {
+      "name": "Day States",
+      "description": "User-defined day states (moods) with colors"
+    },
+    {
+      "name": "Event Groups",
+      "description": "Chapters — reusable event groups"
+    },
+    {
+      "name": "Event Periods",
+      "description": "Dated periods within event groups"
+    },
+    {
+      "name": "Days",
+      "description": "Per-day visual state management"
+    },
+    {
+      "name": "Timeline",
+      "description": "Read-only timeline views (vertical + week)"
+    },
+    {
+      "name": "Uploads",
+      "description": "S3-compatible presigned URL generation"
+    },
+    {
+      "name": "Memories",
+      "description": "Memory resurfacing — \"On This Day\""
+    },
+    {
+      "name": "Analytics",
+      "description": "Emotional pattern detection and mood analytics"
+    },
+    {
+      "name": "Subscriptions",
+      "description": "Subscription management and billing"
+    },
+    {
+      "name": "Health",
+      "description": "Health check endpoint"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "SecurePass1",
+            "minLength": 8,
+            "description": "Min 8 chars, 1 uppercase, 1 lowercase, 1 number"
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Europe/Berlin",
+            "default": "UTC"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "AuthUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "onboardingCompleted": {
+            "type": "boolean"
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "PRO",
+              "PREMIUM"
+            ],
+            "example": "FREE"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "timezone",
+          "onboardingCompleted",
+          "tier",
+          "createdAt"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthUserDto"
+          }
+        },
+        "required": [
+          "access_token",
+          "refresh_token",
+          "user"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "securePassword123"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "GoogleExchangeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "One-time OAuth exchange code"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "description": "Refresh token received during login/register"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ]
+      },
+      "SubscriptionLimitsDto": {
+        "type": "object",
+        "properties": {
+          "media": {
+            "type": "number",
+            "example": 50
+          },
+          "chapters": {
+            "type": "number",
+            "example": 5
+          },
+          "categories": {
+            "type": "number",
+            "example": 5
+          },
+          "dayStates": {
+            "type": "number",
+            "example": 5
+          },
+          "analytics": {
+            "type": "boolean",
+            "example": false
+          },
+          "memories": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "media",
+          "chapters",
+          "categories",
+          "dayStates",
+          "analytics",
+          "memories"
+        ]
+      },
+      "SubscriptionUsageDto": {
+        "type": "object",
+        "properties": {
+          "media": {
+            "type": "number",
+            "example": 12
+          },
+          "chapters": {
+            "type": "number",
+            "example": 3
+          },
+          "categories": {
+            "type": "number",
+            "example": 4
+          },
+          "dayStates": {
+            "type": "number",
+            "example": 5
+          }
+        },
+        "required": [
+          "media",
+          "chapters",
+          "categories",
+          "dayStates"
+        ]
+      },
+      "SubscriptionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-123"
+          },
+          "userId": {
+            "type": "string",
+            "example": "uuid-456"
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "PRO",
+              "PREMIUM"
+            ],
+            "example": "FREE"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "TRIALING",
+              "PAST_DUE",
+              "CANCELED",
+              "PAUSED"
+            ],
+            "example": "ACTIVE"
+          },
+          "paddleCustomerId": {
+            "type": "string",
+            "example": "cus_01abc123",
+            "nullable": true
+          },
+          "paddleSubscriptionId": {
+            "type": "string",
+            "example": "sub_01abc123",
+            "nullable": true
+          },
+          "currentPeriodEnd": {
+            "type": "string",
+            "example": "2026-03-26T00:00:00.000Z",
+            "nullable": true
+          },
+          "canceledAt": {
+            "type": "string",
+            "example": null,
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-03-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-03-01T00:00:00.000Z"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/SubscriptionLimitsDto"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/SubscriptionUsageDto"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "tier",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "limits",
+          "usage"
+        ]
+      },
+      "CancelResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Subscription will be canceled at the end of the billing period"
+          },
+          "canceledAt": {
+            "type": "string",
+            "example": "2026-03-26T00:00:00.000Z",
+            "nullable": true
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "CategoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "isSystem": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color",
+          "isSystem",
+          "order"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Work"
+          },
+          "color": {
+            "type": "string",
+            "example": "#FF5733",
+            "description": "Hex color code"
+          },
+          "order": {
+            "type": "number",
+            "example": 0,
+            "description": "Display order"
+          }
+        },
+        "required": [
+          "name",
+          "color"
+        ]
+      },
+      "CreateCategoryFromRecommendationDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "work",
+            "description": "Recommendation key"
+          },
+          "name": {
+            "type": "string",
+            "example": "Work",
+            "description": "Translated display name"
+          }
+        },
+        "required": [
+          "key",
+          "name"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Work"
+          },
+          "color": {
+            "type": "string",
+            "example": "#FF5733"
+          },
+          "order": {
+            "type": "number",
+            "example": 0
+          }
+        }
+      },
+      "DayStateResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "isSystem": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "number"
+          },
+          "score": {
+            "type": "number",
+            "description": "Mood intensity score (0-10)"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color",
+          "isSystem",
+          "order",
+          "score"
+        ]
+      },
+      "CreateDayStateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Great"
+          },
+          "color": {
+            "type": "string",
+            "example": "#4CAF50",
+            "description": "Hex color code"
+          },
+          "order": {
+            "type": "number",
+            "example": 0,
+            "description": "Display order"
+          },
+          "score": {
+            "type": "number",
+            "example": 7,
+            "description": "Mood intensity score (0-10)"
+          }
+        },
+        "required": [
+          "name",
+          "color",
+          "score"
+        ]
+      },
+      "CreateDayStateFromRecommendationDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "great",
+            "description": "Recommendation key"
+          },
+          "name": {
+            "type": "string",
+            "example": "Great",
+            "description": "Translated display name"
+          }
+        },
+        "required": [
+          "key",
+          "name"
+        ]
+      },
+      "UpdateDayStateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Great"
+          },
+          "color": {
+            "type": "string",
+            "example": "#4CAF50"
+          },
+          "order": {
+            "type": "number",
+            "example": 0
+          },
+          "score": {
+            "type": "number",
+            "example": 7,
+            "description": "Mood intensity score (0-10)"
+          }
+        }
+      },
+      "CreateEventGroupDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "categoryId",
+          "title"
+        ]
+      },
+      "EventGroupCategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color"
+        ]
+      },
+      "EventPeriodResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "example": "2024-01-01"
+          },
+          "endDate": {
+            "type": "string",
+            "example": "2024-01-31",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "startDate",
+          "createdAt"
+        ]
+      },
+      "EventGroupResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "$ref": "#/components/schemas/EventGroupCategoryDto"
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventPeriodResponseDto"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "category",
+          "periods",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateEventGroupDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateEventPeriodDto": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "startDate"
+        ]
+      },
+      "MoodStatDto": {
+        "type": "object",
+        "properties": {
+          "dayStateName": {
+            "type": "string"
+          },
+          "dayStateColor": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          },
+          "percentage": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "dayStateName",
+          "dayStateColor",
+          "count",
+          "percentage"
+        ]
+      },
+      "EventGroupDetailsMediaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "s3Key": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "s3Key",
+          "url",
+          "fileName",
+          "contentType",
+          "size",
+          "createdAt"
+        ]
+      },
+      "MoodDistributionItemDto": {
+        "type": "object",
+        "properties": {
+          "moodId": {
+            "type": "string"
+          },
+          "moodName": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          },
+          "percentage": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "moodId",
+          "moodName",
+          "color",
+          "count",
+          "percentage"
+        ]
+      },
+      "PeriodDensityDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "example": "2024-01-01"
+          },
+          "end": {
+            "type": "string",
+            "example": "2024-01-31"
+          },
+          "activeDays": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "activeDays"
+        ]
+      },
+      "ChapterAnalyticsDto": {
+        "type": "object",
+        "properties": {
+          "totalPeriods": {
+            "type": "number"
+          },
+          "totalDays": {
+            "type": "number"
+          },
+          "totalMedia": {
+            "type": "number"
+          },
+          "averageMoodScore": {
+            "type": "number",
+            "nullable": true
+          },
+          "moodDistribution": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MoodDistributionItemDto"
+            }
+          },
+          "density": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PeriodDensityDto"
+            }
+          }
+        },
+        "required": [
+          "totalPeriods",
+          "totalDays",
+          "totalMedia",
+          "moodDistribution",
+          "density"
+        ]
+      },
+      "EventGroupDetailsResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "$ref": "#/components/schemas/EventGroupCategoryDto"
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventPeriodResponseDto"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "moodStats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MoodStatDto"
+            }
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventGroupDetailsMediaDto"
+            }
+          },
+          "totalDays": {
+            "type": "number"
+          },
+          "analytics": {
+            "$ref": "#/components/schemas/ChapterAnalyticsDto"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "category",
+          "periods",
+          "createdAt",
+          "updatedAt",
+          "moodStats",
+          "media",
+          "totalDays",
+          "analytics"
+        ]
+      },
+      "UpdateEventPeriodDto": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          }
+        }
+      },
+      "CloseEventPeriodDto": {
+        "type": "object",
+        "properties": {
+          "endDate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "endDate"
+        ]
+      },
+      "UpsertDayDto": {
+        "type": "object",
+        "properties": {
+          "dayStateId": {
+            "type": "string",
+            "example": "day-state-id",
+            "nullable": true,
+            "description": "Day state ID. Pass null to clear the day state."
+          },
+          "mainMediaId": {
+            "type": "string",
+            "example": "media-uuid",
+            "nullable": true,
+            "description": "ID of the media item to use as the day cover. Pass null to clear."
+          },
+          "comment": {
+            "type": "string",
+            "example": "Had a great day!",
+            "nullable": true,
+            "description": "Day comment (max 500 chars). Pass null to clear."
+          }
+        }
+      },
+      "DayStateSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color"
+        ]
+      },
+      "DayMediaResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "s3Key": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "description": "Presigned URL for reading the media file (null if generation failed)",
+            "nullable": true
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "s3Key",
+          "url",
+          "fileName",
+          "contentType",
+          "size",
+          "createdAt"
+        ]
+      },
+      "DayResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "example": "2024-01-15"
+          },
+          "dayState": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DayStateSummaryDto"
+              }
+            ]
+          },
+          "mainMediaId": {
+            "type": "string",
+            "nullable": true,
+            "example": "media-uuid",
+            "description": "ID of the cover media"
+          },
+          "locationName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Kyiv, Ukraine",
+            "description": "Location name"
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true,
+            "example": 50.4501,
+            "description": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true,
+            "example": 30.5234,
+            "description": "Longitude"
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true,
+            "example": "Had a great day!",
+            "description": "Day comment"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayMediaResponseDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "dayState",
+          "mainMediaId",
+          "locationName",
+          "latitude",
+          "longitude",
+          "comment",
+          "media"
+        ]
+      },
+      "UpdateDayLocationDto": {
+        "type": "object",
+        "properties": {
+          "locationName": {
+            "type": "string",
+            "example": "Kyiv, Ukraine",
+            "nullable": true,
+            "description": "Location name (max 120 chars). Pass null to clear."
+          },
+          "latitude": {
+            "type": "number",
+            "example": 50.4501,
+            "nullable": true,
+            "description": "Latitude (-90 to 90). Pass null to clear."
+          },
+          "longitude": {
+            "type": "number",
+            "example": 30.5234,
+            "nullable": true,
+            "description": "Longitude (-180 to 180). Pass null to clear."
+          }
+        }
+      },
+      "PresignedUrlRequestDto": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "example": "photo.jpg",
+            "description": "File name for the upload"
+          },
+          "contentType": {
+            "type": "string",
+            "example": "image/jpeg",
+            "description": "MIME content type",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "image/gif",
+              "image/heic",
+              "image/heif",
+              "video/mp4",
+              "video/webm",
+              "video/quicktime"
+            ]
+          },
+          "size": {
+            "type": "number",
+            "example": 1024000,
+            "description": "File size in bytes (required, max 50 MB)"
+          }
+        },
+        "required": [
+          "fileName",
+          "contentType",
+          "size"
+        ]
+      },
+      "PresignedUrlResponseDto": {
+        "type": "object",
+        "properties": {
+          "uploadUrl": {
+            "type": "string",
+            "description": "Presigned URL for direct upload to S3"
+          },
+          "key": {
+            "type": "string",
+            "description": "The object key in S3"
+          }
+        },
+        "required": [
+          "uploadUrl",
+          "key"
+        ]
+      },
+      "TimelineEventGroupDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ]
+      },
+      "TimelineCategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color"
+        ]
+      },
+      "TimelinePeriodDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventGroup": {
+            "$ref": "#/components/schemas/TimelineEventGroupDto"
+          },
+          "category": {
+            "$ref": "#/components/schemas/TimelineCategoryDto"
+          }
+        },
+        "required": [
+          "id",
+          "startDate",
+          "endDate",
+          "comment",
+          "eventGroup",
+          "category"
+        ]
+      },
+      "TimelineDayStateDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color"
+        ]
+      },
+      "TimelineMediaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "s3Key": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "s3Key",
+          "url",
+          "fileName",
+          "contentType",
+          "size",
+          "createdAt"
+        ]
+      },
+      "TimelineDayDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "example": "2024-01-15"
+          },
+          "dayState": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TimelineDayStateDto"
+              }
+            ]
+          },
+          "mainMediaId": {
+            "type": "string",
+            "nullable": true,
+            "example": "media-uuid",
+            "description": "Cover media ID"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineMediaDto"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "dayState",
+          "mainMediaId",
+          "media"
+        ]
+      },
+      "TimelineResponseDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "example": "2024-01-01"
+          },
+          "to": {
+            "type": "string",
+            "example": "2024-12-31"
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinePeriodDto"
+            }
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineDayDto"
+            }
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "periods",
+          "days"
+        ]
+      },
+      "WeekTimelineResponseDto": {
+        "type": "object",
+        "properties": {
+          "weekStart": {
+            "type": "string",
+            "example": "2024-06-10",
+            "description": "Monday of the week"
+          },
+          "weekEnd": {
+            "type": "string",
+            "example": "2024-06-16",
+            "description": "Sunday of the week"
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelinePeriodDto"
+            }
+          },
+          "days": {
+            "description": "Exactly 7 days (Mon-Sun), with or without state",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineDayDto"
+            }
+          }
+        },
+        "required": [
+          "weekStart",
+          "weekEnd",
+          "periods",
+          "days"
+        ]
+      },
+      "CreateDayMediaDto": {
+        "type": "object",
+        "properties": {
+          "s3Key": {
+            "type": "string",
+            "example": "uploads/user-id/uuid.jpg",
+            "description": "S3 object key"
+          },
+          "fileName": {
+            "type": "string",
+            "example": "photo.jpg",
+            "description": "Original file name"
+          },
+          "contentType": {
+            "type": "string",
+            "example": "image/jpeg",
+            "description": "MIME type",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+              "image/gif",
+              "image/heic",
+              "image/heif",
+              "video/mp4",
+              "video/webm",
+              "video/quicktime"
+            ]
+          },
+          "size": {
+            "type": "number",
+            "example": 1024000,
+            "description": "File size in bytes"
+          }
+        },
+        "required": [
+          "s3Key",
+          "fileName",
+          "contentType",
+          "size"
+        ]
+      },
+      "IntervalDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "months",
+              "years"
+            ]
+          },
+          "value": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "MoodDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Happy"
+          },
+          "color": {
+            "type": "string",
+            "example": "#4CAF50"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color"
+        ]
+      },
+      "DayMemoryDto": {
+        "type": "object",
+        "properties": {
+          "interval": {
+            "$ref": "#/components/schemas/IntervalDto"
+          },
+          "date": {
+            "type": "string",
+            "example": "2025-02-12"
+          },
+          "mood": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MoodDto"
+              }
+            ]
+          },
+          "mediaCount": {
+            "type": "number",
+            "example": 3
+          }
+        },
+        "required": [
+          "interval",
+          "date",
+          "mediaCount"
+        ]
+      },
+      "OnThisDayResponseDto": {
+        "type": "object",
+        "properties": {
+          "baseDate": {
+            "type": "string",
+            "example": "2026-02-12"
+          },
+          "memories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayMemoryDto"
+            }
+          }
+        },
+        "required": [
+          "baseDate",
+          "memories"
+        ]
+      },
+      "DayContextResponseDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "day"
+          },
+          "baseDate": {
+            "type": "string",
+            "example": "2026-02-12"
+          },
+          "memories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayMemoryDto"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "baseDate",
+          "memories"
+        ]
+      },
+      "BaseWeekDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "example": "2026-02-09"
+          },
+          "end": {
+            "type": "string",
+            "example": "2026-02-15"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ]
+      },
+      "WeekMemoryDto": {
+        "type": "object",
+        "properties": {
+          "interval": {
+            "$ref": "#/components/schemas/IntervalDto"
+          },
+          "weekStart": {
+            "type": "string",
+            "example": "2025-02-10"
+          },
+          "weekEnd": {
+            "type": "string",
+            "example": "2025-02-16"
+          },
+          "activeDays": {
+            "type": "number",
+            "example": 4
+          },
+          "totalMedia": {
+            "type": "number",
+            "example": 7
+          }
+        },
+        "required": [
+          "interval",
+          "weekStart",
+          "weekEnd",
+          "activeDays",
+          "totalMedia"
+        ]
+      },
+      "WeekContextResponseDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "week"
+          },
+          "baseWeek": {
+            "$ref": "#/components/schemas/BaseWeekDto"
+          },
+          "memories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeekMemoryDto"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "baseWeek",
+          "memories"
+        ]
+      },
+      "RecommendationDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "work"
+          },
+          "color": {
+            "type": "string",
+            "example": "#3B82F6"
+          }
+        },
+        "required": [
+          "key",
+          "color"
+        ]
+      },
+      "RecommendationsResponseDto": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationDto"
+            }
+          },
+          "moods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationDto"
+            }
+          }
+        },
+        "required": [
+          "categories",
+          "moods"
+        ]
+      },
+      "CategoryMoodSummaryDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "averageMoodScore": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "categoryId",
+          "name",
+          "averageMoodScore"
+        ]
+      },
+      "TrendPointDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "date",
+          "score"
+        ]
+      },
+      "WeekdayInsightDto": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "number",
+            "description": "Day of week (0=Monday, 6=Sunday)"
+          },
+          "averageScore": {
+            "type": "number",
+            "description": "Average mood score for this weekday (0-10)"
+          },
+          "sampleSize": {
+            "type": "number",
+            "description": "Number of data points for this weekday"
+          }
+        },
+        "required": [
+          "weekday",
+          "averageScore",
+          "sampleSize"
+        ]
+      },
+      "ActivityInsightDto": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "number",
+            "description": "Day of week (0=Monday, 6=Sunday)"
+          },
+          "averageActivityScore": {
+            "type": "number",
+            "description": "Average activity score for this weekday"
+          },
+          "sampleSize": {
+            "type": "number",
+            "description": "Number of data points for this weekday"
+          }
+        },
+        "required": [
+          "weekday",
+          "averageActivityScore",
+          "sampleSize"
+        ]
+      },
+      "VolatilityInsightDto": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "number",
+            "description": "Day of week (0=Monday, 6=Sunday)"
+          },
+          "standardDeviation": {
+            "type": "number",
+            "description": "Standard deviation of mood scores"
+          },
+          "sampleSize": {
+            "type": "number",
+            "description": "Number of data points for this weekday"
+          }
+        },
+        "required": [
+          "weekday",
+          "standardDeviation",
+          "sampleSize"
+        ]
+      },
+      "RecoveryInsightDto": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "number",
+            "description": "Day of week (0=Monday, 6=Sunday)"
+          },
+          "recoveryRate": {
+            "type": "number",
+            "description": "Rate of recovery events (0-1)"
+          },
+          "recoveryEvents": {
+            "type": "number",
+            "description": "Number of recovery events"
+          },
+          "totalOccurrences": {
+            "type": "number",
+            "description": "Total occurrences of this weekday"
+          }
+        },
+        "required": [
+          "weekday",
+          "recoveryRate",
+          "recoveryEvents",
+          "totalOccurrences"
+        ]
+      },
+      "BurnoutInsightDto": {
+        "type": "object",
+        "properties": {
+          "detected": {
+            "type": "boolean",
+            "description": "Whether a burnout pattern was detected"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of pattern detected",
+            "example": "work_stress_pattern"
+          },
+          "confidence": {
+            "type": "number",
+            "description": "Confidence level (0-1)"
+          }
+        },
+        "required": [
+          "detected"
+        ]
+      },
+      "WeekdayInsightsDto": {
+        "type": "object",
+        "properties": {
+          "bestMoodDay": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WeekdayInsightDto"
+              }
+            ]
+          },
+          "worstMoodDay": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WeekdayInsightDto"
+              }
+            ]
+          },
+          "mostActiveDay": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActivityInsightDto"
+              }
+            ]
+          },
+          "leastActiveDay": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActivityInsightDto"
+              }
+            ]
+          },
+          "mostUnstableDay": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VolatilityInsightDto"
+              }
+            ]
+          },
+          "recoveryIndex": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecoveryInsightDto"
+              }
+            ]
+          },
+          "burnoutPattern": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BurnoutInsightDto"
+              }
+            ]
+          }
+        }
+      },
+      "MoodOverviewResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalDaysWithMood": {
+            "type": "number"
+          },
+          "averageMoodScore": {
+            "type": "number"
+          },
+          "moodDistribution": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MoodDistributionItemDto"
+            }
+          },
+          "bestCategory": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoryMoodSummaryDto"
+              }
+            ]
+          },
+          "worstCategory": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoryMoodSummaryDto"
+              }
+            ]
+          },
+          "trendLast30Days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrendPointDto"
+            }
+          },
+          "weekdayInsights": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WeekdayInsightsDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "totalDaysWithMood",
+          "averageMoodScore",
+          "moodDistribution",
+          "trendLast30Days"
+        ]
+      },
+      "HealthResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "database": {
+            "type": "string",
+            "example": "connected"
+          }
+        },
+        "required": [
+          "status",
+          "database"
+        ]
+      }
+    }
+  }
+}

@@ -13,7 +13,11 @@ describe('MediaController', () => {
     deleteMedia: jest.Mock;
   };
 
-  const mockUser: JwtPayload = { sub: 'user-1', email: 'test@example.com' };
+  const mockUser: JwtPayload = {
+    sub: 'user-1',
+    email: 'test@example.com',
+    timezone: 'UTC',
+  };
 
   beforeEach(async () => {
     service = {
@@ -47,6 +51,7 @@ describe('MediaController', () => {
         'user-1',
         '2024-01-15',
         dto,
+        'UTC',
       );
       expect(result).toEqual(expected);
     });

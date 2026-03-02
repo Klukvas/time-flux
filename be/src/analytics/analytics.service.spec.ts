@@ -1,12 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnalyticsService } from './analytics.service.js';
 import { AnalyticsRepository } from './analytics.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;
   let repo: jest.Mocked<AnalyticsRepository>;
-  let authRepo: jest.Mocked<AuthRepository>;
 
   const userId = 'user-1';
 
@@ -52,18 +50,11 @@ describe('AnalyticsService', () => {
             findDaysWithMoodInRange: jest.fn().mockResolvedValue([]),
           },
         },
-        {
-          provide: AuthRepository,
-          useValue: {
-            findUserById: jest.fn().mockResolvedValue({ timezone: 'UTC' }),
-          },
-        },
       ],
     }).compile();
 
     service = module.get(AnalyticsService);
     repo = module.get(AnalyticsRepository);
-    authRepo = module.get(AuthRepository);
   });
 
   // ─── AVERAGE MOOD SCORE ────────────────────────────────────
@@ -79,7 +70,7 @@ describe('AnalyticsService', () => {
         makeDay('2024-01-05', 'ds-bad'),
       ] as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.averageMoodScore).toBe(6.6);
     });
@@ -87,7 +78,7 @@ describe('AnalyticsService', () => {
     it('should return 0 when no days have mood', async () => {
       repo.findAllDaysWithMood.mockResolvedValue([]);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.averageMoodScore).toBe(0);
       expect(result.totalDaysWithMood).toBe(0);
@@ -107,13 +98,19 @@ describe('AnalyticsService', () => {
         makeDay('2024-01-05', 'ds-okay'),
       ] as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.moodDistribution).toHaveLength(3);
       // Sorted by count descending (Great and Good tie at 2, Okay at 1)
-      const great = result.moodDistribution.find((d: any) => d.moodName === 'Great');
-      const good = result.moodDistribution.find((d: any) => d.moodName === 'Good');
-      const okay = result.moodDistribution.find((d: any) => d.moodName === 'Okay');
+      const great = result.moodDistribution.find(
+        (d: any) => d.moodName === 'Great',
+      );
+      const good = result.moodDistribution.find(
+        (d: any) => d.moodName === 'Good',
+      );
+      const okay = result.moodDistribution.find(
+        (d: any) => d.moodName === 'Okay',
+      );
 
       expect(great!.count).toBe(2);
       expect(great!.percentage).toBe(40); // 2/5 = 40%
@@ -143,7 +140,10 @@ describe('AnalyticsService', () => {
           eventGroups: [
             {
               periods: [
-                { startDate: new Date('2024-01-01T00:00:00Z'), endDate: new Date('2024-01-31T00:00:00Z') },
+                {
+                  startDate: new Date('2024-01-01T00:00:00Z'),
+                  endDate: new Date('2024-01-31T00:00:00Z'),
+                },
               ],
             },
           ],
@@ -154,14 +154,17 @@ describe('AnalyticsService', () => {
           eventGroups: [
             {
               periods: [
-                { startDate: new Date('2024-06-01T00:00:00Z'), endDate: new Date('2024-06-30T00:00:00Z') },
+                {
+                  startDate: new Date('2024-06-01T00:00:00Z'),
+                  endDate: new Date('2024-06-30T00:00:00Z'),
+                },
               ],
             },
           ],
         },
       ] as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.bestCategory).not.toBeNull();
       expect(result.bestCategory!.name).toBe('Work');
@@ -184,26 +187,31 @@ describe('AnalyticsService', () => {
           eventGroups: [
             {
               periods: [
-                { startDate: new Date('2024-01-01T00:00:00Z'), endDate: new Date('2024-01-31T00:00:00Z') },
+                {
+                  startDate: new Date('2024-01-01T00:00:00Z'),
+                  endDate: new Date('2024-01-31T00:00:00Z'),
+                },
               ],
             },
           ],
         },
       ] as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.bestCategory).not.toBeNull();
       expect(result.worstCategory).toBeNull();
     });
 
     it('should handle categories with no periods', async () => {
-      repo.findAllDaysWithMood.mockResolvedValue([makeDay('2024-01-15', 'ds-good')] as any);
+      repo.findAllDaysWithMood.mockResolvedValue([
+        makeDay('2024-01-15', 'ds-good'),
+      ] as any);
       repo.findAllCategoriesWithPeriods.mockResolvedValue([
         { id: 'cat-1', name: 'Empty', eventGroups: [] },
       ] as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.bestCategory).toBeNull();
       expect(result.worstCategory).toBeNull();
@@ -220,18 +228,26 @@ describe('AnalyticsService', () => {
       ] as any);
 
       repo.findAllEventPeriods.mockResolvedValue([
-        { startDate: new Date('2024-01-15T00:00:00Z'), endDate: new Date('2024-02-15T00:00:00Z') }, // starts on this day
-        { startDate: new Date('2024-01-01T00:00:00Z'), endDate: new Date('2024-01-15T00:00:00Z') }, // closes on this day
+        {
+          startDate: new Date('2024-01-15T00:00:00Z'),
+          endDate: new Date('2024-02-15T00:00:00Z'),
+        }, // starts on this day
+        {
+          startDate: new Date('2024-01-01T00:00:00Z'),
+          endDate: new Date('2024-01-15T00:00:00Z'),
+        }, // closes on this day
       ] as any);
 
       // Need at least 14 days with mood for weekday insights to trigger
       const moodDays: ReturnType<typeof makeDay>[] = [];
       for (let i = 1; i <= 15; i++) {
-        moodDays.push(makeDay(`2024-01-${String(i).padStart(2, '0')}`, 'ds-good'));
+        moodDays.push(
+          makeDay(`2024-01-${String(i).padStart(2, '0')}`, 'ds-good'),
+        );
       }
       repo.findAllDaysWithMood.mockResolvedValue(moodDays as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       // If weekday insights are returned, the activity data is computed
       // The key assertion is that the service correctly maps period start/end dates
@@ -248,7 +264,7 @@ describe('AnalyticsService', () => {
         makeDay('2024-07-11', 'ds-bad'),
       ] as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.trendLast30Days).toEqual(
         expect.arrayContaining([
@@ -273,7 +289,7 @@ describe('AnalyticsService', () => {
         },
       ] as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.trendLast30Days).toHaveLength(0);
     });
@@ -285,11 +301,13 @@ describe('AnalyticsService', () => {
     it('should return null weekdayInsights when fewer than 14 days', async () => {
       const fewDays: ReturnType<typeof makeDay>[] = [];
       for (let i = 1; i <= 10; i++) {
-        fewDays.push(makeDay(`2024-01-${String(i).padStart(2, '0')}`, 'ds-good'));
+        fewDays.push(
+          makeDay(`2024-01-${String(i).padStart(2, '0')}`, 'ds-good'),
+        );
       }
       repo.findAllDaysWithMood.mockResolvedValue(fewDays as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.weekdayInsights).toBeNull();
     });
@@ -313,7 +331,7 @@ describe('AnalyticsService', () => {
       }));
       repo.findAllDaysWithMediaCount.mockResolvedValue(actDays as any);
 
-      const result = await service.getMoodOverview(userId);
+      const result = await service.getMoodOverview(userId, 'UTC');
 
       expect(result.weekdayInsights).not.toBeNull();
       expect(result.weekdayInsights).toHaveProperty('bestMoodDay');

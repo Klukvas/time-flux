@@ -2,9 +2,8 @@
 
 import { Suspense, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import type { AuthResponse } from '@lifespan/api';
+import { createApiClient, createApi } from '@lifespan/api';
 import { useAuthStore } from '@/stores/auth-store';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
@@ -28,10 +27,19 @@ function GoogleCallbackContent() {
       return;
     }
 
-    axios
-      .post<AuthResponse>(`${API_BASE_URL}/api/v1/auth/google/exchange`, { code })
-      .then((res) => {
-        const { access_token, refresh_token, user } = res.data;
+    const client = createApiClient({
+      baseURL: API_BASE_URL,
+      getToken: () => null,
+      getRefreshToken: () => null,
+      onTokenRefreshed: () => {},
+      onUnauthorized: () => {},
+    });
+    const api = createApi(client);
+
+    api.auth
+      .exchangeGoogleCode(code)
+      .then((data) => {
+        const { access_token, refresh_token, user } = data;
         setAuth(access_token, refresh_token, user);
         router.replace('/timeline');
       })

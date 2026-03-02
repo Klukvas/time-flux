@@ -6,5 +6,11 @@
   "types": "src/index.ts",
   "dependencies": {
     "axios": "^1.7.9"
+  },
+  "scripts": {
+    "generate:types": "openapi-typescript ../../../be/openapi.json -o src/generated/api-types.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0"
   }
 }

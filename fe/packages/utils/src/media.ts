@@ -16,7 +16,10 @@ export const VIDEO_MIME_TYPES = [
 ] as const;
 
 /** All accepted media MIME types. */
-export const MEDIA_MIME_TYPES = [...IMAGE_MIME_TYPES, ...VIDEO_MIME_TYPES] as const;
+export const MEDIA_MIME_TYPES = [
+  ...IMAGE_MIME_TYPES,
+  ...VIDEO_MIME_TYPES,
+] as const;
 
 /** Accept string for file inputs. */
 export const MEDIA_ACCEPT = MEDIA_MIME_TYPES.join(',');
@@ -39,13 +42,16 @@ export function isAcceptedMediaType(mimeType: string): boolean {
   return (MEDIA_MIME_TYPES as readonly string[]).includes(mimeType);
 }
 
-/** Validate file for upload. Returns error string or null. */
-export function validateMediaFile(file: File): string | null {
+/** Media validation error codes. Consumers should translate via i18n. */
+export type MediaValidationError = 'UNSUPPORTED_TYPE' | 'FILE_TOO_LARGE';
+
+/** Validate file for upload. Returns error code or null. */
+export function validateMediaFile(file: File): MediaValidationError | null {
   if (!isAcceptedMediaType(file.type)) {
-    return 'Unsupported file type. Use JPEG, PNG, WebP, GIF, HEIC, MP4, WebM, or MOV.';
+    return 'UNSUPPORTED_TYPE';
   }
   if (file.size > MAX_FILE_SIZE) {
-    return 'File is too large. Maximum size is 50 MB.';
+    return 'FILE_TOO_LARGE';
   }
   return null;
 }
@@ -58,7 +64,9 @@ export function generateFileName(originalName: string): string {
 }
 
 /** Extract the first frame of a video as a data URL. Returns null on failure. */
-export function extractVideoThumbnail(videoUrl: string): Promise<string | null> {
+export function extractVideoThumbnail(
+  videoUrl: string,
+): Promise<string | null> {
   return new Promise((resolve) => {
     if (typeof document === 'undefined') {
       resolve(null);
@@ -116,8 +124,12 @@ export function extractVideoThumbnail(videoUrl: string): Promise<string | null> 
       resolve(null);
     }, 5000);
 
-    video.addEventListener('seeked', () => clearTimeout(timeout), { once: true });
-    video.addEventListener('error', () => clearTimeout(timeout), { once: true });
+    video.addEventListener('seeked', () => clearTimeout(timeout), {
+      once: true,
+    });
+    video.addEventListener('error', () => clearTimeout(timeout), {
+      once: true,
+    });
 
     video.src = videoUrl;
   });

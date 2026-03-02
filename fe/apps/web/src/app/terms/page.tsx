@@ -12,6 +12,7 @@ const SECTIONS = [
   'ip',
   'termination',
   'liability',
+  'governing_law',
   'contact',
 ] as const;
 

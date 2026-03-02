@@ -3,7 +3,7 @@ import { CategoriesController } from './categories.controller.js';
 import { CategoriesService } from './categories.service.js';
 import { CreateCategoryDto } from './dto/create-category.dto.js';
 import { UpdateCategoryDto } from './dto/update-category.dto.js';
-import { CreateFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
+import { CreateCategoryFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
 import { JwtPayload } from '../common/decorators/current-user.decorator.js';
 
 describe('CategoriesController', () => {
@@ -16,7 +16,11 @@ describe('CategoriesController', () => {
     delete: jest.Mock;
   };
 
-  const mockUser: JwtPayload = { sub: 'user-1', email: 'test@example.com' };
+  const mockUser: JwtPayload = {
+    sub: 'user-1',
+    email: 'test@example.com',
+    timezone: 'UTC',
+  };
 
   beforeEach(async () => {
     service = {
@@ -57,13 +61,18 @@ describe('CategoriesController', () => {
     it('should propagate service errors', async () => {
       service.findAll.mockRejectedValue(new Error('Fetch failed'));
 
-      await expect(controller.findAll(mockUser)).rejects.toThrow('Fetch failed');
+      await expect(controller.findAll(mockUser)).rejects.toThrow(
+        'Fetch failed',
+      );
     });
   });
 
   describe('create', () => {
     it('should delegate to categoriesService.create with user.sub and dto', async () => {
-      const dto: CreateCategoryDto = { name: 'Health', color: '#10B981' } as CreateCategoryDto;
+      const dto: CreateCategoryDto = {
+        name: 'Health',
+        color: '#10B981',
+      } as CreateCategoryDto;
       const expected = { id: 'cat-1', name: 'Health', color: '#10B981' };
       service.create.mockResolvedValue(expected);
 
@@ -87,33 +96,46 @@ describe('CategoriesController', () => {
       const dto = {} as CreateCategoryDto;
       service.create.mockRejectedValue(new Error('Creation failed'));
 
-      await expect(controller.create(mockUser, dto)).rejects.toThrow('Creation failed');
+      await expect(controller.create(mockUser, dto)).rejects.toThrow(
+        'Creation failed',
+      );
     });
   });
 
   describe('createFromRecommendation', () => {
     it('should delegate to categoriesService.createFromRecommendation with user.sub and dto', async () => {
-      const dto: CreateFromRecommendationDto = { key: 'work' } as CreateFromRecommendationDto;
+      const dto: CreateCategoryFromRecommendationDto = {
+        key: 'work',
+      } as CreateCategoryFromRecommendationDto;
       const expected = { id: 'cat-1', name: 'Work', color: '#3B82F6' };
       service.createFromRecommendation.mockResolvedValue(expected);
 
       const result = await controller.createFromRecommendation(mockUser, dto);
 
-      expect(service.createFromRecommendation).toHaveBeenCalledWith('user-1', dto);
+      expect(service.createFromRecommendation).toHaveBeenCalledWith(
+        'user-1',
+        dto,
+      );
       expect(result).toEqual(expected);
     });
 
     it('should propagate service errors for unknown recommendation key', async () => {
-      const dto = { key: 'unknown' } as CreateFromRecommendationDto;
-      service.createFromRecommendation.mockRejectedValue(new Error('Unknown recommendation key'));
+      const dto = { key: 'unknown' } as CreateCategoryFromRecommendationDto;
+      service.createFromRecommendation.mockRejectedValue(
+        new Error('Unknown recommendation key'),
+      );
 
-      await expect(controller.createFromRecommendation(mockUser, dto)).rejects.toThrow('Unknown recommendation key');
+      await expect(
+        controller.createFromRecommendation(mockUser, dto),
+      ).rejects.toThrow('Unknown recommendation key');
     });
   });
 
   describe('update', () => {
     it('should delegate to categoriesService.update with user.sub, id and dto', async () => {
-      const dto: UpdateCategoryDto = { name: 'Updated Work' } as UpdateCategoryDto;
+      const dto: UpdateCategoryDto = {
+        name: 'Updated Work',
+      } as UpdateCategoryDto;
       const expected = { id: 'cat-1', name: 'Updated Work' };
       service.update.mockResolvedValue(expected);
 
@@ -127,7 +149,9 @@ describe('CategoriesController', () => {
       const dto = {} as UpdateCategoryDto;
       service.update.mockRejectedValue(new Error('Category not found'));
 
-      await expect(controller.update(mockUser, 'missing-id', dto)).rejects.toThrow('Category not found');
+      await expect(
+        controller.update(mockUser, 'missing-id', dto),
+      ).rejects.toThrow('Category not found');
     });
   });
 
@@ -151,7 +175,9 @@ describe('CategoriesController', () => {
     it('should propagate not-found errors', async () => {
       service.delete.mockRejectedValue(new Error('Category not found'));
 
-      await expect(controller.delete(mockUser, 'missing-id')).rejects.toThrow('Category not found');
+      await expect(controller.delete(mockUser, 'missing-id')).rejects.toThrow(
+        'Category not found',
+      );
     });
   });
 });

@@ -161,6 +161,7 @@
 - **Webhook handler:** `POST /api/v1/webhooks/paddle` — HMAC-SHA256 verified, idempotent (stores event IDs in `WebhookEvent` table), handles 6 event types: `subscription.created/activated/updated/canceled/past_due/paused`
 - **REST API:** `GET /api/v1/subscriptions` (current plan + limits), `POST /api/v1/subscriptions/cancel` (cancels via Paddle API, optimistic `canceledAt`)
 - **User ↔ Paddle linking:** frontend sends `customData: { userId }` in checkout → Paddle webhook returns it → backend updates subscription
+- **Legal pages for Paddle:** Terms of Service (references Paddle as MoR, links to Paddle legal, cancellation instructions, governing law), Privacy Policy (Paddle named as data recipient), Refund Policy (`/refund` — 14-day refund window, eligibility, process via Paddle, cancellation vs refund distinction)
 - **Conditional init:** Paddle SDK and webhook verification gracefully disabled when env vars not set (works in dev without credentials)
 - **Frontend (Web):** Subscription section in Settings page — current plan badge, renewal date, cancellation banner, "Compare Plans" expandable pricing cards (3-column grid), overlay checkout
 - **Frontend (Mobile):** Subscription section in Settings tab — plan info, limits overview, upgrade via browser, cancel with Alert confirmation
@@ -187,6 +188,7 @@
 | Categories | `/categories` | Grid of color-coded category cards with CRUD |
 | Day States | `/day-states` | Grid of mood cards with CRUD |
 | Settings | `/settings` | Account info, theme and language selectors, sign out |
+| Refund Policy | `/refund` | Refund policy — 14-day window, cancellation vs refund, Paddle processing |
 | Google Callback | `/auth/google/callback` | Handles Google OAuth redirect, extracts token, stores auth |
 | Week (legacy) | `/week` | Redirects to `/timeline` (legacy route kept for backward compat) |
 
@@ -281,6 +283,18 @@
 - Desktop sidebar is `sticky top-0 h-dvh` — stays in place while document scrolls
 - Shared design tokens across web and mobile
 
+### SEO & AI Discoverability
+- **robots.ts** — Allow `/`, `/terms`, `/privacy`; disallow all dashboard routes; explicit rules for AI crawlers (GPTBot, ClaudeBot, Google-Extended)
+- **sitemap.ts** — 3 public pages with priority and changeFrequency
+- **manifest.ts** — PWA manifest (standalone, theme color, icon, categories)
+- **Root metadata** — `metadataBase`, title template (`%s | LifeSpan`), OpenGraph, Twitter Cards (`summary_large_image`), canonical URL, keywords, authors, googleBot directives
+- **Dynamic OG image** — `opengraph-image.tsx` renders 1200x630 PNG via `next/og` (dark gradient, colored dots, title)
+- **JSON-LD** — `WebApplication` + `Organization` schema.org structured data in root layout
+- **Per-page metadata** — terms/privacy have custom titles, descriptions, canonical URLs; auth callback is noindex
+- **Dashboard noindex** — all `(dashboard)/*` routes have `robots: { index: false, follow: false }` via server-component layout
+- **Env var** — `NEXT_PUBLIC_APP_URL` for metadataBase and canonical URLs
+- **SEO constants** — centralized in `fe/apps/web/src/lib/constants/seo.ts`
+
 ---
 
 ## Architecture at a Glance
@@ -333,6 +347,25 @@ LifeSpan/
 **Backend:** NestJS 11 · TypeScript · PostgreSQL · Prisma 7 · JWT · Swagger · SWC · Helmet · @nestjs/throttler
 **Frontend:** Next.js 14 · Expo · React 18 · Zustand · TanStack Query · Tailwind CSS · Luxon
 
+### OpenAPI Type Generation (Frontend ↔ Backend Contract Safety)
+
+Frontend types are **auto-generated** from the backend's OpenAPI spec, ensuring compile-time type safety between frontend and backend.
+
+**How it works:**
+1. `be/scripts/generate-openapi.ts` — bootstraps app metadata (no DB) and writes `be/openapi.json`
+2. `openapi-typescript` generates TS types from the JSON into `fe/packages/api/src/generated/api-types.ts`
+3. `fe/packages/api/src/types.ts` re-exports generated types with stable names — zero changes to downstream consumers
+4. `fe/packages/api/src/types-local.ts` contains frontend-only types (query params, error codes, etc.)
+
+**Developer workflow:**
+```bash
+cd be && npm run openapi:generate    # 1. Regenerate OpenAPI spec
+cd fe && npm run generate:api        # 2. Regenerate frontend types
+# IDE immediately shows type errors in affected frontend code
+```
+
+**CI enforcement:** `openapi-check` job verifies spec freshness (`git diff --exit-code openapi.json`); `frontend-typecheck` job runs `tsc --noEmit` on the web app.
+
 ### Backend Infrastructure
 
 | Component | Description |
@@ -360,7 +393,38 @@ LifeSpan/
 | **WebhookEvent** | id (Paddle event ID), type, processed, payload (JSON) |
 | **AuthProvider** (enum) | LOCAL, GOOGLE |
 
-### Test Coverage (42 suites, 542 tests)
+### E2E Test Coverage (20 suites, 151 tests)
+
+Full end-to-end tests against a real PostgreSQL database (`lifespan_test`) running the complete NestJS pipeline (validation, guards, filters).
+
+| Suite | Tests | Coverage |
+|-------|-------|----------|
+| auth-register | 9 | Registration, duplicate email, weak passwords, validation, timezone |
+| auth-login | 6 | Login, wrong password, case-insensitive email, JWT format |
+| auth-refresh | 6 | Token rotation, replay attack prevention, old token invalidation |
+| auth-logout | 3 | Logout, refresh token revocation, no auth |
+| auth-onboarding | 3 | Onboarding completion, idempotency, no auth |
+| categories | 13 | CRUD, validation, in-use guard, recommendations, FREE tier limit (5), PRO upgrade |
+| day-states | 12 | CRUD, score boundaries (0-10), in-use guard, recommendations, tier limit |
+| days | 11 | Upsert, comments, location CRUD, future date rejection, date range query |
+| event-groups | 12 | CRUD, category ref, delete-with-periods guard, tier limit (5 chapters), details |
+| event-periods | 16 | Create/close/delete, overlap detection (full/partial/boundary), active-period constraint, update overlap |
+| timeline | 8 | Default/custom range, periods & day-states inclusion, week view, invalid range |
+| media | 9 | Add/list/delete, auto-cover, future date, content type validation, tier usage |
+| uploads | 5 | Presigned URL, userId in key, invalid content type, file size limit |
+| analytics | 5 | FREE denied (FEATURE_LOCKED), PRO/PREMIUM allowed, mood data |
+| memories | 6 | FREE/PRO denied, PREMIUM allowed, day/week context modes |
+| subscriptions | 6 | FREE subscription, usage counts, PRO tier, cancel without Paddle |
+| webhooks-paddle | 10 | HMAC signature, subscription.created/canceled/updated/past_due, idempotency |
+| idor | 7 | Cross-user isolation for category, dayState, eventGroup, period, day, media, subscription |
+| recommendations | 3 | List, structure validation, no auth |
+| health | 1 | Health check endpoint |
+
+**Infrastructure:** `be/test/helpers/` — test app factory (S3 mock, throttle bypass), DB truncation, auth helpers, subscription tier helpers, Paddle webhook signature builder. Sequential execution (`maxWorkers: 1`), 30s timeout, dedicated `lifespan_test` database.
+
+**OpenAPI Contract Testing:** Every E2E test automatically validates 2xx API responses against the Swagger/OpenAPI spec using `openapi-response-validator`. The test app helper generates the OpenAPI document from the shared `buildSwaggerConfig()` at startup and stores it via `setOpenApiDocument()`. A Proxy-wrapped supertest agent (`apiRequest(app)`) intercepts all HTTP method calls and validates response bodies against the matching schema — including `$ref` resolution, `oneOf` polymorphic responses, and nullable fields. Validation is skipped for 204 No Content, 4xx/5xx responses, and unmatched paths. Any schema mismatch throws a descriptive error with path, expected schema, and actual body. This ensures DTO decorators always match real API responses — catching missing `@ApiProperty()`, wrong nullable types, and undocumented fields at test time.
+
+### Unit Test Coverage (45 suites, 566 tests)
 
 | Test File | Tests | What It Covers |
 |-----------|-------|----------------|
@@ -390,15 +454,37 @@ LifeSpan/
 
 | Layer | Protection |
 |-------|-----------|
-| HTTP | Helmet (CSP, frameguard, referrer-policy), CORS origin whitelist, 1 MB body size limit |
+| HTTP | Helmet (CSP, frameguard, referrer-policy), CORS origin whitelist, 1 MB body size limit, CSP `connectSrc` includes frontend URL + S3 endpoint dynamically |
 | Rate Limiting | Global 100 req/60s, register 3/min, login 5/min (`@nestjs/throttler`) |
-| Auth | Short-lived JWT (15 min), refresh token rotation (SHA-256 hashed, 7-day expiry), password complexity |
+| Auth | Short-lived JWT (15 min), refresh token rotation (SHA-256 hashed, 7-day expiry), password complexity, Google OAuth DTO validation (`GoogleExchangeDto`) |
 | S3 Uploads | MIME whitelist, server-derived extensions, ContentLength enforcement, max 50 MB |
-| Google OAuth | Transaction-safe account linking, email normalization, provider not overwritten |
+| Google OAuth | Transaction-safe account linking + registration (`$transaction`), email normalization, provider not overwritten, OAuth code store with periodic cleanup (30s) + max size cap (1000) |
+| Webhooks | Await handler (no fire-and-forget), fail-closed on missing secret, timestamp staleness check (300s window), atomic idempotency (P2002 unique violation), throw on unknown price ID |
+| Quota Enforcement | TOCTOU-safe: count+create wrapped in Serializable `$transaction` for media, categories, and day-states |
 | DB Integrity | `updatedAt` on all tables, unique constraints (category/mood names per user), FK for mainMediaId |
 | DB Constraints | Partial unique index (one active period per group), CHECK (LOCAL→password required) |
-| Indexes | Composite indexes on days(userId, dayStateId), event_periods(eventGroupId, endDate) |
-| Validation | `@IsNotEmpty()` on all name/title fields, ISO 8601 date pipe, future date limit, period overlap detection |
+| DB Connection | Pool: min 2, max 20, connection timeout 5s, statement timeout 30s, idle timeout 30s |
+| Indexes | Composite indexes on days(userId, dayStateId), event_periods(eventGroupId, endDate); standalone days(userId), event_periods(startDate) |
+| Validation | `@IsNotEmpty()` on all name/title fields, ISO 8601 date pipe, future date limit, period overlap detection, lat/lng paired constraint |
+| Env Validation | Fail-fast startup: `DATABASE_URL`, `JWT_SECRET` always required; production adds `FRONTEND_URL`, `S3_*` (5 vars), `PADDLE_WEBHOOK_SECRET` |
+| Logging | Structured JSON logging via `nestjs-pino` + `pino-http`; auto request logging with duration, pretty-print in dev, JSON in production; `Authorization` header redacted |
+| Error Boundaries | Next.js `error.tsx` at root and `(dashboard)` levels — runtime errors show user-friendly fallback UI instead of white screen |
+| Frontend | Blog markdown sanitized via `rehype-sanitize`, modal ARIA attributes (`role="dialog"`, `aria-modal`, `aria-labelledby`), keyboard-accessible media uploader, auth guard try/catch hydration |
+| Accessibility | Modal: `role="dialog"`, `aria-modal="true"`, `aria-labelledby="modal-title"`, close button `aria-label`; Media uploader: `role="button"`, `tabIndex`, keyboard Enter/Space activation |
+
+### Performance Optimizations
+
+| Optimization | Description |
+|-------------|-------------|
+| **Subscription tier cache** | In-memory `Map<userId, tier>` with 60s TTL in `SubscriptionsService`, invalidated on webhook events — eliminates 1 DB query per protected request |
+| **Analytics O(n) rewrite** | `getMoodOverview()` category scoring uses timestamp range check (`periodBounds`) for O(1) point-in-interval lookups instead of date Set expansion |
+| **Group details optimization** | `getGroupDetails()` pre-computes period boundaries as timestamps before filter loop — avoids repeated DateTime allocations |
+| **S3 presigned URL cache** | In-memory `Map<s3Key, url>` with 1h TTL (URLs valid 24h), max 10K entries, LRU-style eviction (oldest 20%) instead of full cache clear |
+| **Response compression** | `compression` middleware applied before all routes — 50-80% smaller JSON responses |
+| **Connection pool tuning** | `PrismaPg` configured with `max: 20, min: 2, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000`, statement timeout 30s |
+| **Timezone in JWT** | User timezone included in JWT payload — eliminates User table queries in DaysService, TimelineService, AnalyticsService, EventGroupsService, MemoriesService, MediaService |
+| **Shared format utils** | `formatMedia()` and `formatDay()` extracted to `common/utils/` — shared across DaysService, TimelineService, EventGroupsService (eliminates duplicate code) |
+| **assertResourceLimit optimization** | Single `getTier()` call cached locally — avoids double tier lookup in quota enforcement |
 
 ---
 
@@ -425,18 +511,51 @@ terraform apply
 ssh deploy@<server_ip>
 ```
 
+### HTTPS / SSL (Let's Encrypt)
+
+Nginx terminates TLS with certificates from Let's Encrypt via certbot. The `nginx.conf` uses `${DOMAIN}` placeholder, substituted at runtime by `envsubst` in the docker entrypoint.
+
+**First-time setup (run once on the server after first deploy):**
+
+```bash
+ssh deploy@<server_ip>
+cd /opt/lifespan
+./scripts/init-ssl.sh yourdomain.com your@email.com
+```
+
+The script: creates a temporary self-signed cert → starts nginx → requests a real cert via ACME HTTP challenge → reloads nginx.
+
+**Auto-renewal (add to cron):**
+
+```bash
+sudo crontab -e
+# Add this line:
+0 3 * * * /opt/lifespan/scripts/renew-ssl.sh >> /var/log/ssl-renew.log 2>&1
+```
+
+Certbot checks daily at 3:00 AM, renews only when < 30 days remain.
+
+**Files:**
+- `nginx.conf` — HTTP→HTTPS redirect, ACME challenge path, TLS 1.2/1.3, HSTS
+- `docker-compose.prod.yml` — certbot container, cert volumes, `envsubst` entrypoint for nginx
+- `scripts/init-ssl.sh` — first-time certificate acquisition
+- `scripts/renew-ssl.sh` — cron renewal script
+
 ---
 
 ## CI/CD (GitHub Actions)
 
-Pipeline defined in `.github/workflows/ci.yml` with three parallel/gated jobs:
+Pipeline defined in `.github/workflows/ci.yml` with five parallel/gated jobs:
 
 | Job | Trigger | What it does |
 |-----|---------|--------------|
-| **backend-test** | push + PR to main | `npm ci` → `npm test --ci --coverage` in `be/` |
+| **backend-test** | push + PR to main | `npm ci` → `npm test --ci --coverage` in `be/` (80% threshold) |
+| **backend-e2e** | push + PR to main | E2E tests against real PostgreSQL service container (20 suites, 151 tests + OpenAPI contract validation) |
 | **frontend-lint** | push + PR to main | `npm ci` → `npm run lint -w apps/web` in `fe/` |
-| **docker-build-and-push** | push to main only | Builds + pushes backend & frontend Docker images |
-| **deploy** | after docker-build-and-push | Creates .env, SCPs to Hetzner, `docker compose up -d` |
+| **openapi-check** | backend changes | Regenerates `openapi.json` and verifies `git diff --exit-code` (spec freshness) |
+| **frontend-typecheck** | frontend or backend changes | `tsc --noEmit` on `apps/web` (catches type drift from OpenAPI changes) |
+| **docker-build-and-push** | push to main only | Builds + pushes backend & frontend Docker images (gated on all test/check jobs) |
+| **deploy** | after docker-build-and-push | Creates .env, SCPs to Hetzner (incl. `scripts/`), `docker compose up -d` |
 
 ### Docker Images
 
@@ -474,6 +593,10 @@ Images tagged with `latest` + short commit SHA, pushed to GHCR (configurable to 
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | Production .env |
 | `GOOGLE_CALLBACK_URL` | Google OAuth callback URL | Production .env |
 | `FRONTEND_URL` | Frontend URL for OAuth redirects | Production .env |
+| `DOMAIN` | Domain for SSL certificate (e.g. `app.lifespan.com`) | Production .env / nginx envsubst |
+| `PADDLE_API_KEY` | Paddle payments API key | Production .env |
+| `PADDLE_WEBHOOK_SECRET` | Paddle webhook signature verification | Production .env |
+| `PADDLE_ENVIRONMENT` | Paddle environment (`production` or `sandbox`) | Production .env |
 
 ### Optimizations
 - Node dependency caching via `actions/setup-node`

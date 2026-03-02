@@ -14,10 +14,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: { sub?: string; email?: string }): JwtPayload {
+  validate(payload: {
+    sub?: string;
+    email?: string;
+    timezone?: string;
+  }): JwtPayload {
     if (!payload.sub || !payload.email) {
       throw new UnauthorizedException('Malformed token payload');
     }
-    return { sub: payload.sub, email: payload.email };
+    return {
+      sub: payload.sub,
+      email: payload.email,
+      timezone: payload.timezone ?? 'UTC',
+    };
   }
 }

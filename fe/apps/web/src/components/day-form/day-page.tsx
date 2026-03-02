@@ -4,7 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { extractApiError } from '@lifespan/api';
-import type { DayMedia } from '@lifespan/api';
+import type {
+  CreateDayMediaRequest,
+  DayContextMemory,
+  DayMedia,
+} from '@lifespan/api';
 import { getPeriodsForDate, getUserMessage } from '@lifespan/domain';
 import {
   useCreateDayMedia,
@@ -51,7 +55,7 @@ interface DayPageProps {
 function toMediaItem(m: DayMedia): MediaItem {
   return {
     id: m.id,
-    previewUrl: m.url,
+    previewUrl: m.url ?? '',
     mimeType: m.contentType,
     key: m.s3Key,
     uploading: false,
@@ -115,6 +119,8 @@ export function DayPage({ date }: DayPageProps) {
     const allPeriods = allGroups.flatMap((g) =>
       g.periods.map((p) => ({
         ...p,
+        endDate: p.endDate ?? null,
+        comment: p.comment ?? null,
         eventGroup: { id: g.id, title: g.title },
         category: g.category,
       })),
@@ -154,7 +160,7 @@ export function DayPage({ date }: DayPageProps) {
         const firstVideo = existingMedia.find((m) =>
           isVideoType(m.contentType),
         );
-        if (firstVideo) {
+        if (firstVideo && firstVideo.url) {
           setSelectedMainMediaId(firstVideo.id);
           extractVideoThumbnail(firstVideo.url).then((thumb) => {
             if (thumb) {
@@ -210,7 +216,8 @@ export function DayPage({ date }: DayPageProps) {
             data: {
               s3Key: result.key,
               fileName: item.file!.name,
-              contentType: item.file!.type,
+              contentType: item.file!
+                .type as CreateDayMediaRequest['contentType'],
               size: item.file!.size,
             },
           });
@@ -371,8 +378,10 @@ export function DayPage({ date }: DayPageProps) {
   const today = isToday(date);
   const futureDisabled = isBeyondTomorrow(date);
   const isPending = upsertDay.isPending;
-  const memories =
-    (memoriesData?.type === 'day' ? memoriesData.memories : []) ?? [];
+  const memories: DayContextMemory[] =
+    (memoriesData?.type === 'day'
+      ? (memoriesData.memories as DayContextMemory[])
+      : []) ?? [];
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
@@ -406,7 +415,7 @@ export function DayPage({ date }: DayPageProps) {
               onClick={() => navigateDay(-1)}
               disabled={!!registrationDate && date <= registrationDate}
               className="rounded-lg border border-edge px-3 py-1.5 text-sm text-content hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-default"
-              title="Previous day"
+              title={t('day_form.previous_day')}
             >
               &larr;
             </button>
@@ -414,12 +423,12 @@ export function DayPage({ date }: DayPageProps) {
               onClick={() => router.push(`/timeline/day/${todayISO()}`)}
               className="rounded-lg border border-edge px-3 py-1.5 text-sm text-content hover:bg-surface-secondary"
             >
-              Today
+              {t('day_form.today')}
             </button>
             <button
               onClick={() => navigateDay(1)}
               className="rounded-lg border border-edge px-3 py-1.5 text-sm text-content hover:bg-surface-secondary"
-              title="Next day"
+              title={t('day_form.next_day')}
             >
               &rarr;
             </button>
@@ -446,7 +455,7 @@ export function DayPage({ date }: DayPageProps) {
           )}
           {futureDisabled && (
             <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-danger/10 px-3 py-1 text-xs font-medium text-danger">
-              Future date — read only
+              {t('day_form.future_read_only')}
             </div>
           )}
         </div>

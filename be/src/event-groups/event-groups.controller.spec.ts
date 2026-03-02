@@ -17,7 +17,11 @@ describe('EventGroupsController', () => {
     getGroupDetails: jest.Mock;
   };
 
-  const mockUser = { sub: 'user-1' };
+  const mockUser = {
+    sub: 'user-1',
+    email: 'test@example.com',
+    timezone: 'UTC',
+  };
 
   beforeEach(async () => {
     service = {
@@ -49,7 +53,7 @@ describe('EventGroupsController', () => {
 
       const result = await controller.create(mockUser, dto);
 
-      expect(service.createGroup).toHaveBeenCalledWith('user-1', dto);
+      expect(service.createGroup).toHaveBeenCalledWith('user-1', dto, 'UTC');
       expect(result).toEqual(expected);
     });
 
@@ -70,7 +74,7 @@ describe('EventGroupsController', () => {
 
       const result = await controller.findAll(mockUser);
 
-      expect(service.findAllGroups).toHaveBeenCalledWith('user-1');
+      expect(service.findAllGroups).toHaveBeenCalledWith('user-1', 'UTC');
       expect(result).toEqual(expected);
     });
 
@@ -90,7 +94,11 @@ describe('EventGroupsController', () => {
 
       const result = await controller.findOne(mockUser, 'group-1');
 
-      expect(service.findGroupById).toHaveBeenCalledWith('user-1', 'group-1');
+      expect(service.findGroupById).toHaveBeenCalledWith(
+        'user-1',
+        'group-1',
+        'UTC',
+      );
       expect(result).toEqual(expected);
     });
 
@@ -117,6 +125,7 @@ describe('EventGroupsController', () => {
         'user-1',
         'group-1',
         dto,
+        'UTC',
       );
       expect(result).toEqual(expected);
     });
@@ -164,6 +173,7 @@ describe('EventGroupsController', () => {
         'user-1',
         'group-1',
         dto,
+        'UTC',
       );
       expect(result).toEqual(expected);
     });
@@ -187,7 +197,11 @@ describe('EventGroupsController', () => {
 
       const result = await controller.getDetails(mockUser, 'group-1');
 
-      expect(service.getGroupDetails).toHaveBeenCalledWith('user-1', 'group-1');
+      expect(service.getGroupDetails).toHaveBeenCalledWith(
+        'user-1',
+        'group-1',
+        'UTC',
+      );
       expect(result).toEqual(expected);
     });
 

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DayStatesRepository } from './day-states.repository.js';
 import { CreateDayStateDto } from './dto/create-day-state.dto.js';
 import { UpdateDayStateDto } from './dto/update-day-state.dto.js';
-import { CreateFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
+import { CreateDayStateFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
 import {
   DayStateNotFoundError,
   DayStateInUseError,
@@ -25,43 +25,57 @@ export class DayStatesService {
   }
 
   async create(userId: string, dto: CreateDayStateDto) {
-    const count = await this.dayStatesRepository.countByUserId(userId);
-    await this.subscriptionsService.assertResourceLimit(
-      userId,
-      'dayStates',
-      count,
+    return this.prisma.$transaction(
+      async (tx) => {
+        const count = await tx.dayState.count({ where: { userId } });
+        await this.subscriptionsService.assertResourceLimit(
+          userId,
+          'dayStates',
+          count,
+        );
+        return tx.dayState.create({
+          data: {
+            userId,
+            name: dto.name,
+            color: dto.color,
+            order: dto.order ?? count,
+            score: dto.score,
+          },
+        });
+      },
+      { isolationLevel: 'Serializable' },
     );
-    return this.dayStatesRepository.create({
-      userId,
-      name: dto.name,
-      color: dto.color,
-      order: dto.order ?? count,
-      score: dto.score,
-    });
   }
 
   async createFromRecommendation(
     userId: string,
-    dto: CreateFromRecommendationDto,
+    dto: CreateDayStateFromRecommendationDto,
   ) {
     const recommendation = MOOD_RECOMMENDATIONS.find((r) => r.key === dto.key);
     if (!recommendation) {
       throw new RecommendationNotFoundError({ key: dto.key });
     }
 
-    const count = await this.dayStatesRepository.countByUserId(userId);
-    await this.subscriptionsService.assertResourceLimit(
-      userId,
-      'dayStates',
-      count,
+    return this.prisma.$transaction(
+      async (tx) => {
+        const count = await tx.dayState.count({ where: { userId } });
+        await this.subscriptionsService.assertResourceLimit(
+          userId,
+          'dayStates',
+          count,
+        );
+        return tx.dayState.create({
+          data: {
+            userId,
+            name: dto.name,
+            color: recommendation.color,
+            order: count,
+            score: recommendation.score,
+          },
+        });
+      },
+      { isolationLevel: 'Serializable' },
     );
-    return this.dayStatesRepository.create({
-      userId,
-      name: dto.name,
-      color: recommendation.color,
-      order: count,
-      score: recommendation.score,
-    });
   }
 
   async update(userId: string, id: string, dto: UpdateDayStateDto) {

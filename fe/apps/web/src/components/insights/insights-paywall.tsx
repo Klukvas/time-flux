@@ -3,8 +3,12 @@
 import Link from 'next/link';
 import { useTranslation } from '@lifespan/hooks';
 
+const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
+
 export function InsightsPaywall() {
   const { t } = useTranslation();
+
+  if (!PAYMENTS_ENABLED) return null;
 
   return (
     <div>

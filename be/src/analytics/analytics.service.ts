@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { AnalyticsRepository } from './analytics.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 import {
   buildMoodScoreMap,
   computeAverageMoodScore,
@@ -14,18 +13,10 @@ import {
 
 @Injectable()
 export class AnalyticsService {
-  constructor(
-    private readonly repo: AnalyticsRepository,
-    private readonly authRepository: AuthRepository,
-  ) {}
+  constructor(private readonly repo: AnalyticsRepository) {}
 
-  private async getUserTimezone(userId: string): Promise<string> {
-    const user = await this.authRepository.findUserById(userId);
-    return user?.timezone ?? 'UTC';
-  }
-
-  async getMoodOverview(userId: string) {
-    const tz = await this.getUserTimezone(userId);
+  async getMoodOverview(userId: string, timezone: string) {
+    const tz = timezone;
 
     const [
       dayStates,
@@ -99,33 +90,46 @@ export class AnalyticsService {
         averageMoodScore: number;
       }[] = [];
 
+      // Pre-convert all day dates to ISO strings once (O(n))
+      const dayIsoMap = new Map<(typeof allDaysWithMood)[number], string>();
+      for (const day of allDaysWithMood) {
+        dayIsoMap.set(
+          day,
+          DateTime.fromJSDate(day.date, { zone: 'utc' })
+            .setZone(tz)
+            .toISODate()!,
+        );
+      }
+
       for (const cat of categoriesWithPeriods) {
-        const dateRanges: { start: Date; end: Date }[] = [];
+        // Pre-compute period boundaries as timestamps for fast range checks
+        const periodBounds: { startMs: number; endMs: number }[] = [];
         for (const group of cat.eventGroups) {
           for (const p of group.periods) {
-            dateRanges.push({
-              start: p.startDate,
-              end: p.endDate ?? new Date(),
-            });
+            const startMs = DateTime.fromJSDate(p.startDate, { zone: 'utc' })
+              .setZone(tz)
+              .startOf('day')
+              .toMillis();
+            const endMs = DateTime.fromJSDate(p.endDate ?? new Date(), {
+              zone: 'utc',
+            })
+              .setZone(tz)
+              .startOf('day')
+              .toMillis();
+            periodBounds.push({ startMs, endMs });
           }
         }
-        if (dateRanges.length === 0) continue;
+        if (periodBounds.length === 0) continue;
 
-        // Filter days that fall within any of this category's period ranges
+        // Point-in-interval check: day falls within any period's [start, end]
         const categoryDays = allDaysWithMood.filter((day) => {
-          const dayDate = DateTime.fromJSDate(day.date, { zone: 'utc' })
+          const dayMs = DateTime.fromJSDate(day.date, { zone: 'utc' })
             .setZone(tz)
-            .startOf('day');
-
-          return dateRanges.some((r) => {
-            const start = DateTime.fromJSDate(r.start, { zone: 'utc' })
-              .setZone(tz)
-              .startOf('day');
-            const end = DateTime.fromJSDate(r.end, { zone: 'utc' })
-              .setZone(tz)
-              .startOf('day');
-            return dayDate >= start && dayDate <= end;
-          });
+            .startOf('day')
+            .toMillis();
+          return periodBounds.some(
+            (b) => dayMs >= b.startMs && dayMs <= b.endMs,
+          );
         });
 
         const avg = computeAverageMoodScore(categoryDays, scoreMap);
@@ -211,27 +215,23 @@ export class AnalyticsService {
     }
 
     const todayIso = now.toISODate()!;
-    const daysWithActivity: DayWithActivity[] = allDaysWithMedia
-      .filter((day) => {
-        const dayIso = DateTime.fromJSDate(day.date, { zone: 'utc' })
-          .setZone(tz)
-          .toISODate()!;
-        return dayIso <= todayIso;
-      })
-      .map((day) => {
-        const dayIso = DateTime.fromJSDate(day.date, { zone: 'utc' })
-          .setZone(tz)
-          .toISODate()!;
-
-        const mediaCount = day._count.media;
-        const periodsStarted = periodStartDates.get(dayIso) ?? 0;
-        const periodsClosed = periodEndDates.get(dayIso) ?? 0;
-
-        return {
+    const daysWithActivity: DayWithActivity[] = allDaysWithMedia.reduce<
+      DayWithActivity[]
+    >((acc, day) => {
+      const dayIso = DateTime.fromJSDate(day.date, { zone: 'utc' })
+        .setZone(tz)
+        .toISODate()!;
+      if (dayIso <= todayIso) {
+        acc.push({
           date: day.date,
-          activityScore: mediaCount + periodsStarted + periodsClosed,
-        };
-      });
+          activityScore:
+            day._count.media +
+            (periodStartDates.get(dayIso) ?? 0) +
+            (periodEndDates.get(dayIso) ?? 0),
+        });
+      }
+      return acc;
+    }, []);
 
     const weekdayInsights = computeWeekdayInsights(
       daysWithScore,

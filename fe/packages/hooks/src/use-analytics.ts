@@ -8,6 +8,6 @@ export function useMoodOverview(options?: { enabled?: boolean }) {
     queryKey: QUERY_KEYS.moodOverview,
     queryFn: () => api.analytics.moodOverview(),
     staleTime: STALE_TIMES.analytics,
-    enabled: options?.enabled,
+    enabled: options?.enabled ?? true,
   });
 }

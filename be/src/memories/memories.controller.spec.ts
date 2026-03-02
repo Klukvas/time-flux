@@ -15,7 +15,11 @@ describe('MemoriesController', () => {
   };
   let subscriptionsService: { assertFeatureAccess: jest.Mock };
 
-  const mockUser: JwtPayload = { sub: 'user-1', email: 'test@example.com' };
+  const mockUser: JwtPayload = {
+    sub: 'user-1',
+    email: 'test@example.com',
+    timezone: 'UTC',
+  };
 
   beforeEach(async () => {
     service = {
@@ -48,7 +52,11 @@ describe('MemoriesController', () => {
 
       const result = await controller.getOnThisDay(mockUser, query);
 
-      expect(service.getOnThisDay).toHaveBeenCalledWith('user-1', '2024-01-15');
+      expect(service.getOnThisDay).toHaveBeenCalledWith(
+        'user-1',
+        'UTC',
+        '2024-01-15',
+      );
       expect(result).toEqual(expected);
     });
 
@@ -60,7 +68,11 @@ describe('MemoriesController', () => {
 
       await controller.getOnThisDay(mockUser, query);
 
-      expect(service.getOnThisDay).toHaveBeenCalledWith('user-1', '2024-06-15');
+      expect(service.getOnThisDay).toHaveBeenCalledWith(
+        'user-1',
+        'UTC',
+        '2024-06-15',
+      );
       expect(service.getOnThisDay).not.toHaveBeenCalledWith('user-1', query);
     });
 
@@ -71,7 +83,11 @@ describe('MemoriesController', () => {
 
       const result = await controller.getOnThisDay(mockUser, query);
 
-      expect(service.getOnThisDay).toHaveBeenCalledWith('user-1', undefined);
+      expect(service.getOnThisDay).toHaveBeenCalledWith(
+        'user-1',
+        'UTC',
+        undefined,
+      );
       expect(result).toEqual(expected);
     });
 
@@ -118,6 +134,7 @@ describe('MemoriesController', () => {
         'user-1',
         'day',
         '2024-01-15',
+        'UTC',
       );
       expect(result).toEqual(expected);
     });
@@ -135,6 +152,7 @@ describe('MemoriesController', () => {
         'user-1',
         'week',
         '2024-03-10',
+        'UTC',
       );
       expect(service.getContext).not.toHaveBeenCalledWith('user-1', query);
     });

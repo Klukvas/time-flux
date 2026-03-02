@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
 
-export class CreateFromRecommendationDto {
+export class CreateDayStateFromRecommendationDto {
   @ApiProperty({ example: 'great', description: 'Recommendation key' })
   @IsString()
   @IsNotEmpty()

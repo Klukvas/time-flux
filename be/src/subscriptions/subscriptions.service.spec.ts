@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionsService } from './subscriptions.service.js';
 import { SubscriptionsRepository } from './subscriptions.repository.js';
 import { PaddleService } from './paddle.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import {
   QuotaExceededError,
   FeatureLockedError,
@@ -29,6 +30,7 @@ describe('SubscriptionsService', () => {
   let service: SubscriptionsService;
   let repo: Record<string, jest.Mock>;
   let paddleService: Record<string, jest.Mock | boolean>;
+  let prisma: Record<string, Record<string, jest.Mock>>;
 
   beforeEach(async () => {
     repo = {
@@ -46,11 +48,19 @@ describe('SubscriptionsService', () => {
       getSubscription: jest.fn(),
     };
 
+    prisma = {
+      dayMedia: { count: jest.fn().mockResolvedValue(10) },
+      eventGroup: { count: jest.fn().mockResolvedValue(2) },
+      category: { count: jest.fn().mockResolvedValue(3) },
+      dayState: { count: jest.fn().mockResolvedValue(5) },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SubscriptionsService,
         { provide: SubscriptionsRepository, useValue: repo },
         { provide: PaddleService, useValue: paddleService },
+        { provide: PrismaService, useValue: prisma },
       ],
     }).compile();
 
@@ -60,7 +70,7 @@ describe('SubscriptionsService', () => {
   // ─── getSubscription ───────────────────────────────────────
 
   describe('getSubscription', () => {
-    it('should return existing subscription with limits', async () => {
+    it('should return existing subscription with limits and usage', async () => {
       repo.upsertFree.mockResolvedValue(makeSub({ tier: 'PRO' }));
 
       const result = await service.getSubscription(USER_ID);
@@ -70,6 +80,12 @@ describe('SubscriptionsService', () => {
       expect(result.limits.media).toBe(500);
       expect(result.limits.analytics).toBe(true);
       expect(result.limits.memories).toBe(false);
+      expect(result.usage).toEqual({
+        media: 10,
+        chapters: 2,
+        categories: 3,
+        dayStates: 5,
+      });
     });
 
     it('should upsert FREE subscription atomically', async () => {

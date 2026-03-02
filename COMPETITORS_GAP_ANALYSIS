@@ -1,0 +1,183 @@
+COMPETITOR FEATURE GAP ANALYSIS
+================================
+Features competitors have that LifeSpan does NOT.
+Grouped by priority based on competitive impact.
+
+
+========================================
+HIGH PRIORITY (core competitive gaps)
+========================================
+
+1. MULTIPLE DAILY ENTRIES
+   Who has it: Daylio, Bearable, Diarly
+   What it is: Log mood/notes several times a day (morning, afternoon, evening)
+   Why it matters: Single daily entry misses intraday mood swings. Users who track
+   granularly get more accurate data. Daylio's most requested feature.
+
+2. ACTIVITY / HABIT TRACKING
+   Who has it: Daylio, Bearable, Moodfit, Awesome Habits
+   What it is: Log daily activities (exercise, reading, socializing) alongside mood.
+   See which activities correlate with better/worse mood.
+   Why it matters: This is Daylio's #1 differentiator. Without it, LifeSpan can't
+   answer "what makes me feel good?" -- only "how did I feel?"
+
+3. CORRELATION / IMPACT REPORTS
+   Who has it: Bearable (premium), Daylio (premium), Moodfit
+   What it is: Automatic analysis showing which activities, habits, sleep patterns
+   correlate with mood changes. E.g. "Exercise correlates with +1.2 mood points."
+   Why it matters: This is the "aha moment" that converts free users to paid.
+   LifeSpan has basic analytics but no cross-variable correlations.
+
+4. DATA EXPORT (CSV / PDF)
+   Who has it: Daylio, Bearable, Day One, eMoods
+   What it is: Export all entries as CSV, PDF, or structured data.
+   Why it matters: Users need this for therapy sessions, personal backups, and
+   trust (knowing they can leave). Also a regulatory expectation (GDPR).
+
+5. REMINDERS / PUSH NOTIFICATIONS
+   Who has it: Daylio, Reflectly, Bearable, Calm, every competitor
+   What it is: Configurable daily reminders to log mood/journal.
+   Why it matters: Consistency is the #1 challenge for journaling apps. Without
+   reminders, users forget and churn. This is table stakes.
+
+6. SEARCH ACROSS ENTRIES
+   Who has it: Day One, Daylio, Bearable
+   What it is: Full-text search across all daily notes, chapter descriptions.
+   Why it matters: "What was happening last March?" is a core use case.
+   Currently impossible in LifeSpan without manual scrolling.
+
+
+========================================
+MEDIUM PRIORITY (strong differentiators)
+========================================
+
+7. YEAR IN PIXELS
+   Who has it: Daylio, Bearable
+   What it is: Full-year view where each day is a colored square based on mood.
+   One screen = 365 days of emotional data at a glance.
+   Why it matters: Viral-shareable visualization. Users screenshot and post it.
+   Fits perfectly with LifeSpan's timeline DNA.
+
+8. SLEEP TRACKING
+   Who has it: Bearable, Daylio, Moodfit, Calm
+   What it is: Log sleep duration, quality, bedtime/wake time. Correlate with mood.
+   Why it matters: Sleep is the #1 mood predictor. Without it, analytics miss
+   the most important variable.
+
+9. VOICE NOTES / AUDIO ENTRIES
+   Who has it: Daylio, Day One, Reflectly
+   What it is: Record voice memos as journal entries. Some with transcription.
+   Why it matters: Lower friction than typing. Captures tone and emotion that
+   text can't. Especially useful on mobile.
+
+10. AI-POWERED JOURNALING PROMPTS
+    Who has it: Reflectly, Day One, MyLifeNote
+    What it is: AI generates personalized questions based on your history.
+    E.g. "You mentioned stress at work 3 times this week. What's driving that?"
+    Why it matters: Solves "blank page syndrome." Increases engagement and entry
+    quality. Major trend in 2025-2026 journaling apps.
+
+11. CUSTOM MOOD SCALES / EMOJIS
+    Who has it: Daylio, Bearable, MoodCast
+    What it is: Users can create custom mood options beyond the defaults.
+    Edit emoji, color, and label for each mood level.
+    Why it matters: Personalization increases ownership. LifeSpan has custom
+    day states but they're simple name+color, no custom icons/emojis.
+
+12. ON THIS DAY (enhanced)
+    Who has it: Day One (automatic, with photos)
+    What it is: Daily notification with "On this day X years ago..." including
+    photos and full entry preview. Push notification driven.
+    Why it matters: LifeSpan has the data endpoint but no push notification
+    to surface it. Day One users cite this as their favorite feature.
+
+13. BIOMETRIC LOCK (PIN / FACE ID / FINGERPRINT)
+    Who has it: Day One, Daylio, Reflectly, Bearable
+    What it is: App-level lock separate from phone lock.
+    Why it matters: Journals contain sensitive data. Users want an extra layer.
+    Especially important for shared devices.
+
+
+========================================
+LOWER PRIORITY (nice to have)
+========================================
+
+14. CLOUD BACKUP / RESTORE
+    Who has it: Daylio, Day One, Reflectly, Bearable
+    What it is: Automatic encrypted backup to iCloud/Google Drive.
+    Manual restore from backup.
+    Why it matters: Peace of mind. LifeSpan stores data server-side already,
+    but users may want local backup control.
+
+15. BOOK / PDF PRINTING
+    Who has it: Day One
+    What it is: Print your journal as a physical hardcover book.
+    Why it matters: Niche but high-margin feature. Strong emotional appeal.
+    "Turn your year into a book."
+
+16. WEARABLE INTEGRATIONS
+    Who has it: Bearable (Apple Health, Google Fit, Fitbit)
+    What it is: Auto-import steps, heart rate, sleep from wearables.
+    Why it matters: Reduces manual entry. Richer correlation data.
+    Growing trend as wearables become standard.
+
+17. GRATITUDE JOURNAL
+    Who has it: Reflectly, Bearable, Moodfit
+    What it is: Dedicated gratitude prompt (3 things you're grateful for today).
+    Why it matters: Proven positive psychology intervention. Simple to implement.
+    Increases daily engagement.
+
+18. CBT / THERAPY TOOLS
+    Who has it: Moodfit, MoodTools, Reflectly, MindDoc
+    What it is: Cognitive behavioral therapy exercises, thought diaries,
+    negative thinking challenges. Some include PHQ-9 depression screening.
+    Why it matters: Positions app for clinical/therapeutic use. LifeSpan is
+    lifestyle-focused, so this is only relevant if pivoting toward mental health.
+
+19. GOAL SETTING
+    Who has it: Daylio, Moodfit, Bearable
+    What it is: Set daily/weekly/monthly goals. Track streaks and completion.
+    Why it matters: Gamification drives retention. Simple to implement.
+
+20. SHARING / SOCIAL FEATURES
+    Who has it: Daylio (shareable stats), Life in Weeks (shareable timeline link)
+    What it is: Share mood charts, year-in-pixels, or timeline with friends/therapist.
+    Why it matters: Organic growth via social sharing. Also useful for therapy
+    (sharing reports with therapist).
+
+21. WIDGET (HOME SCREEN / LOCK SCREEN)
+    Who has it: Daylio, Reflectly, Diarly
+    What it is: iOS/Android home screen widget for quick mood entry or
+    displaying motivational quote.
+    Why it matters: Reduces friction to zero. User can log mood without
+    opening the app.
+
+22. OFFLINE MODE
+    Who has it: Daylio, Day One
+    What it is: Full functionality without internet. Syncs when back online.
+    Why it matters: Users want to journal on flights, in nature, etc.
+    LifeSpan requires API connectivity.
+
+23. WEATHER INTEGRATION
+    Who has it: MoodCast, Day One
+    What it is: Auto-tag entries with weather at time of writing.
+    Why it matters: Weather affects mood. Interesting correlation data.
+    No manual effort required.
+
+24. TEMPLATES FOR ENTRIES
+    Who has it: Daylio, Diarly
+    What it is: Pre-built journaling templates (Morning Reflection, Evening
+    Review, Gratitude, Weekly Review).
+    Why it matters: Guides users who don't know what to write. Increases
+    consistency and entry quality.
+
+
+========================================
+SUMMARY: TOP 5 GAPS TO CLOSE FIRST
+========================================
+
+1. Reminders / Push Notifications  -- table stakes, every competitor has this
+2. Activity/Habit Tracking          -- Daylio's core moat, unlocks correlations
+3. Data Export (CSV/PDF)            -- trust + GDPR + therapy use case
+4. Search Across Entries            -- basic utility, expected by users
+5. Year in Pixels                   -- viral growth + fits LifeSpan brand perfectly

@@ -1,12 +1,31 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { DayStatesService } from './day-states.service.js';
 import { CreateDayStateDto } from './dto/create-day-state.dto.js';
 import { UpdateDayStateDto } from './dto/update-day-state.dto.js';
-import { CreateFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
+import { CreateDayStateFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
 import { DayStateResponseDto } from './dto/day-state-response.dto.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
-import { CurrentUser, JwtPayload } from '../common/decorators/current-user.decorator.js';
+import {
+  CurrentUser,
+  JwtPayload,
+} from '../common/decorators/current-user.decorator.js';
 
 @ApiTags('Day States')
 @ApiBearerAuth()
@@ -18,7 +37,9 @@ export class DayStatesController {
   @Get()
   @ApiOperation({ summary: 'Get all day states for the current user' })
   @ApiResponse({ status: 200, type: [DayStateResponseDto] })
-  async findAll(@CurrentUser() user: JwtPayload): Promise<DayStateResponseDto[]> {
+  async findAll(
+    @CurrentUser() user: JwtPayload,
+  ): Promise<DayStateResponseDto[]> {
     return this.dayStatesService.findAll(user.sub);
   }
 
@@ -39,7 +60,7 @@ export class DayStatesController {
   @ApiResponse({ status: 400, description: 'Unknown recommendation key' })
   async createFromRecommendation(
     @CurrentUser() user: JwtPayload,
-    @Body() dto: CreateFromRecommendationDto,
+    @Body() dto: CreateDayStateFromRecommendationDto,
   ): Promise<DayStateResponseDto> {
     return this.dayStatesService.createFromRecommendation(user.sub, dto);
   }

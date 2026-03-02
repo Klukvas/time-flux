@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { EventGroupsRepository } from './event-groups.repository.js';
 import { CategoriesRepository } from '../categories/categories.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 import { DaysRepository } from '../days/days.repository.js';
 import { S3Service } from '../s3/s3.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -72,17 +71,11 @@ export class EventGroupsService {
   constructor(
     private readonly repo: EventGroupsRepository,
     private readonly categoriesRepository: CategoriesRepository,
-    private readonly authRepository: AuthRepository,
     private readonly daysRepository: DaysRepository,
     private readonly s3Service: S3Service,
     private readonly prisma: PrismaService,
     private readonly subscriptionsService: SubscriptionsService,
   ) {}
-
-  private async getUserTimezone(userId: string): Promise<string> {
-    const user = await this.authRepository.findUserById(userId);
-    return user?.timezone ?? 'UTC';
-  }
 
   private assertNotTooFarInFuture(dateStr: string, timezone: string) {
     const target = DateTime.fromISO(dateStr, { zone: timezone }).startOf('day');
@@ -137,7 +130,11 @@ export class EventGroupsService {
 
   // ─── EventGroup operations ────────────────────────────────
 
-  async createGroup(userId: string, dto: CreateEventGroupDto) {
+  async createGroup(
+    userId: string,
+    dto: CreateEventGroupDto,
+    timezone: string,
+  ) {
     const count = await this.repo.countGroupsByUserId(userId);
     await this.subscriptionsService.assertResourceLimit(
       userId,
@@ -145,7 +142,7 @@ export class EventGroupsService {
       count,
     );
 
-    const tz = await this.getUserTimezone(userId);
+    const tz = timezone;
 
     const category = await this.categoriesRepository.findByIdAndUserId(
       dto.categoryId,
@@ -165,8 +162,13 @@ export class EventGroupsService {
     return formatGroup(group, tz);
   }
 
-  async updateGroup(userId: string, id: string, dto: UpdateEventGroupDto) {
-    const tz = await this.getUserTimezone(userId);
+  async updateGroup(
+    userId: string,
+    id: string,
+    dto: UpdateEventGroupDto,
+    timezone: string,
+  ) {
+    const tz = timezone;
 
     const group = await this.repo.findGroupByIdAndUserId(id, userId);
     if (!group) {
@@ -206,14 +208,14 @@ export class EventGroupsService {
     await this.repo.deleteGroup(id, userId);
   }
 
-  async findAllGroups(userId: string) {
-    const tz = await this.getUserTimezone(userId);
+  async findAllGroups(userId: string, timezone: string) {
+    const tz = timezone;
     const groups = await this.repo.findAllGroupsByUserId(userId);
     return groups.map((g) => formatGroup(g, tz));
   }
 
-  async findGroupById(userId: string, id: string) {
-    const tz = await this.getUserTimezone(userId);
+  async findGroupById(userId: string, id: string, timezone: string) {
+    const tz = timezone;
 
     const group = await this.repo.findGroupByIdAndUserId(id, userId);
     if (!group) {
@@ -229,8 +231,9 @@ export class EventGroupsService {
     userId: string,
     groupId: string,
     dto: CreateEventPeriodDto,
+    timezone: string,
   ) {
-    const tz = await this.getUserTimezone(userId);
+    const tz = timezone;
 
     const group = await this.repo.findGroupByIdAndUserId(groupId, userId);
     if (!group) {
@@ -284,8 +287,9 @@ export class EventGroupsService {
     userId: string,
     periodId: string,
     dto: UpdateEventPeriodDto,
+    timezone: string,
   ) {
-    const tz = await this.getUserTimezone(userId);
+    const tz = timezone;
 
     const period = await this.repo.findPeriodByIdAndUserId(periodId, userId);
     if (!period) {
@@ -368,8 +372,9 @@ export class EventGroupsService {
     userId: string,
     periodId: string,
     dto: CloseEventPeriodDto,
+    timezone: string,
   ) {
-    const tz = await this.getUserTimezone(userId);
+    const tz = timezone;
 
     const period = await this.repo.findPeriodByIdAndUserId(periodId, userId);
     if (!period) {
@@ -425,8 +430,8 @@ export class EventGroupsService {
 
   // ─── Details endpoint ─────────────────────────────────────
 
-  async getGroupDetails(userId: string, groupId: string) {
-    const tz = await this.getUserTimezone(userId);
+  async getGroupDetails(userId: string, groupId: string, timezone: string) {
+    const tz = timezone;
 
     const group = await this.repo.findGroupByIdAndUserId(groupId, userId);
     if (!group) {
@@ -469,22 +474,25 @@ export class EventGroupsService {
         toDate,
       );
 
+      // Pre-compute period boundaries as timestamps once (avoid DateTime in loop)
+      const periodBounds = dateRanges.map((r) => ({
+        startTime: new Date(
+          DateTime.fromJSDate(r.start, { zone: 'utc' })
+            .setZone(tz)
+            .toISODate()! + 'T00:00:00Z',
+        ).getTime(),
+        endTime: new Date(
+          DateTime.fromJSDate(r.end, { zone: 'utc' }).setZone(tz).toISODate()! +
+            'T00:00:00Z',
+        ).getTime(),
+      }));
+
       // Filter to only days that overlap with at least one period
       allDays = days.filter((day: any) => {
         const dayTime = day.date.getTime();
-        return dateRanges.some((r) => {
-          const startTime = new Date(
-            DateTime.fromJSDate(r.start, { zone: 'utc' })
-              .setZone(tz)
-              .toISODate()! + 'T00:00:00Z',
-          ).getTime();
-          const endTime = new Date(
-            DateTime.fromJSDate(r.end, { zone: 'utc' })
-              .setZone(tz)
-              .toISODate()! + 'T00:00:00Z',
-          ).getTime();
-          return dayTime >= startTime && dayTime <= endTime;
-        });
+        return periodBounds.some(
+          (b) => dayTime >= b.startTime && dayTime <= b.endTime,
+        );
       });
     }
 
@@ -578,7 +586,14 @@ export class EventGroupsService {
           totalMoodDays > 0 ? Math.round((m.count / totalMoodDays) * 100) : 0,
       }));
 
+    // Pre-compute day timestamps once for density lookups
+    const dayTimestamps = allDays.map((day: any) => ({
+      time: day.date.getTime(),
+      active: !!(day.dayState || (day.media && day.media.length > 0)),
+    }));
+
     // Density: for each period, count days that have mood or media
+    const nowTz = DateTime.now().setZone(tz).startOf('day');
     const density = group.periods.map((p: any) => {
       const pStart = DateTime.fromJSDate(p.startDate, { zone: 'utc' })
         .setZone(tz)
@@ -587,15 +602,13 @@ export class EventGroupsService {
         ? DateTime.fromJSDate(p.endDate, { zone: 'utc' })
             .setZone(tz)
             .startOf('day')
-        : DateTime.now().setZone(tz).startOf('day');
+        : nowTz;
 
-      const activeDays = allDays.filter((day: any) => {
-        const dayDt = DateTime.fromJSDate(day.date, { zone: 'utc' })
-          .setZone(tz)
-          .startOf('day');
-        if (dayDt < pStart || dayDt > pEnd) return false;
-        return day.dayState || (day.media && day.media.length > 0);
-      }).length;
+      const pStartMs = pStart.toMillis();
+      const pEndMs = pEnd.toMillis();
+      const activeDays = dayTimestamps.filter(
+        (d) => d.active && d.time >= pStartMs && d.time <= pEndMs,
+      ).length;
 
       return {
         start: pStart.toISODate()!,

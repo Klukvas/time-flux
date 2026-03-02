@@ -5,7 +5,6 @@ import { DateTime } from 'luxon';
 import { TimelineService } from './timeline.service.js';
 import { EventGroupsRepository } from '../event-groups/event-groups.repository.js';
 import { DaysRepository } from '../days/days.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 import { S3Service } from '../s3/s3.service.js';
 import { InvalidDateRangeError } from '../common/errors/app.error.js';
 
@@ -82,7 +81,6 @@ describe('TimelineService', () => {
   let service: TimelineService;
   let eventGroupsRepo: jest.Mocked<EventGroupsRepository>;
   let daysRepo: jest.Mocked<DaysRepository>;
-  let authRepo: jest.Mocked<AuthRepository>;
   let s3Service: jest.Mocked<S3Service>;
 
   beforeEach(async () => {
@@ -102,12 +100,6 @@ describe('TimelineService', () => {
           },
         },
         {
-          provide: AuthRepository,
-          useValue: {
-            findUserById: jest.fn(),
-          },
-        },
-        {
           provide: S3Service,
           useValue: {
             getPresignedReadUrl: jest.fn(),
@@ -121,7 +113,6 @@ describe('TimelineService', () => {
       EventGroupsRepository,
     ) as jest.Mocked<EventGroupsRepository>;
     daysRepo = module.get(DaysRepository) as jest.Mocked<DaysRepository>;
-    authRepo = module.get(AuthRepository) as jest.Mocked<AuthRepository>;
     s3Service = module.get(S3Service) as jest.Mocked<S3Service>;
   });
 
@@ -133,7 +124,6 @@ describe('TimelineService', () => {
 
   describe('getTimeline', () => {
     beforeEach(() => {
-      authRepo.findUserById.mockResolvedValue({ timezone: 'UTC' } as any);
       s3Service.getPresignedReadUrl.mockResolvedValue(
         'https://s3.example.com/presigned/photo.jpg',
       );
@@ -146,10 +136,14 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([rawPeriod]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([rawDay]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-06-30',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-06-30',
+        },
+        'UTC',
+      );
 
       expect(result.from).toBe('2025-01-01');
       expect(result.to).toBe('2025-06-30');
@@ -182,7 +176,7 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getTimeline(USER_ID, {});
+      const result = await service.getTimeline(USER_ID, {}, 'UTC');
 
       const today = DateTime.now().setZone('UTC').startOf('day');
       const oneYearAgo = today.minus({ years: 1 });
@@ -195,10 +189,14 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2024-03-01',
-        to: '2024-09-30',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2024-03-01',
+          to: '2024-09-30',
+        },
+        'UTC',
+      );
 
       expect(result.from).toBe('2024-03-01');
       expect(result.to).toBe('2024-09-30');
@@ -217,10 +215,14 @@ describe('TimelineService', () => {
 
     it('throws InvalidDateRangeError when from is after to', async () => {
       await expect(
-        service.getTimeline(USER_ID, {
-          from: '2025-12-31',
-          to: '2025-01-01',
-        }),
+        service.getTimeline(
+          USER_ID,
+          {
+            from: '2025-12-31',
+            to: '2025-01-01',
+          },
+          'UTC',
+        ),
       ).rejects.toThrow(InvalidDateRangeError);
 
       expect(eventGroupsRepo.findPeriodsWithDateRange).not.toHaveBeenCalled();
@@ -229,10 +231,14 @@ describe('TimelineService', () => {
 
     it('throws InvalidDateRangeError with correct error code', async () => {
       await expect(
-        service.getTimeline(USER_ID, {
-          from: '2025-06-01',
-          to: '2025-01-01',
-        }),
+        service.getTimeline(
+          USER_ID,
+          {
+            from: '2025-06-01',
+            to: '2025-01-01',
+          },
+          'UTC',
+        ),
       ).rejects.toMatchObject({
         errorCode: 'INVALID_DATE_RANGE',
         statusCode: 400,
@@ -249,10 +255,14 @@ describe('TimelineService', () => {
         'https://s3.example.com/presigned/photo.jpg',
       );
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-12-31',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-12-31',
+        },
+        'UTC',
+      );
 
       expect(s3Service.getPresignedReadUrl).toHaveBeenCalledWith(
         'uploads/user-abc/photo.jpg',
@@ -287,39 +297,49 @@ describe('TimelineService', () => {
         .mockResolvedValueOnce('https://s3.example.com/a')
         .mockResolvedValueOnce('https://s3.example.com/b');
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-12-31',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-12-31',
+        },
+        'UTC',
+      );
 
       expect(s3Service.getPresignedReadUrl).toHaveBeenCalledTimes(2);
       expect(result.days[0].media[0].url).toBe('https://s3.example.com/a');
       expect(result.days[0].media[1].url).toBe('https://s3.example.com/b');
     });
 
-    it('defaults to UTC timezone when user has no timezone set', async () => {
-      authRepo.findUserById.mockResolvedValue({ timezone: null } as any);
+    it('defaults to UTC timezone when UTC is passed', async () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-06-30',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-06-30',
+        },
+        'UTC',
+      );
 
       expect(result.from).toBe('2025-01-01');
       expect(result.to).toBe('2025-06-30');
     });
 
-    it('defaults to UTC timezone when findUserById returns null', async () => {
-      authRepo.findUserById.mockResolvedValue(null as any);
+    it('uses timezone parameter for date range formatting', async () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-03-01',
-        to: '2025-03-31',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-03-01',
+          to: '2025-03-31',
+        },
+        'UTC',
+      );
 
       expect(result.from).toBe('2025-03-01');
       expect(result.to).toBe('2025-03-31');
@@ -329,10 +349,14 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-01-31',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-01-31',
+        },
+        'UTC',
+      );
 
       expect(result.periods).toEqual([]);
       expect(result.days).toEqual([]);
@@ -344,10 +368,14 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([rawDay]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-12-31',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-12-31',
+        },
+        'UTC',
+      );
 
       expect(result.days[0].dayState).toBeNull();
     });
@@ -358,19 +386,19 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([rawDay]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-12-31',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-12-31',
+        },
+        'UTC',
+      );
 
       expect(result.days[0].mainMediaId).toBe('media-1');
     });
 
     it('applies user timezone when formatting period dates', async () => {
-      authRepo.findUserById.mockResolvedValue({
-        timezone: 'America/New_York',
-      } as any);
-
       // A period starting at midnight UTC on Jan 1 is Dec 31 in New York (UTC-5)
       const rawPeriod = makePeriodRaw({
         startDate: new Date('2025-01-01T00:00:00Z'),
@@ -380,10 +408,14 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([rawPeriod]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2024-12-31',
-        to: '2025-06-01',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2024-12-31',
+          to: '2025-06-01',
+        },
+        'America/New_York',
+      );
 
       // UTC midnight Jan 1 = Dec 31 in America/New_York
       expect(result.periods[0].startDate).toBe('2024-12-31');
@@ -393,10 +425,14 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-05-01',
-        to: '2025-05-01',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-05-01',
+          to: '2025-05-01',
+        },
+        'UTC',
+      );
 
       expect(result.from).toBe('2025-05-01');
       expect(result.to).toBe('2025-05-01');
@@ -406,10 +442,14 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-03-31',
-      });
+      await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-03-31',
+        },
+        'UTC',
+      );
 
       expect(eventGroupsRepo.findPeriodsWithDateRange).toHaveBeenCalledTimes(1);
       expect(daysRepo.findByUserIdAndDateRange).toHaveBeenCalledTimes(1);
@@ -420,7 +460,6 @@ describe('TimelineService', () => {
 
   describe('getWeekTimeline', () => {
     beforeEach(() => {
-      authRepo.findUserById.mockResolvedValue({ timezone: 'UTC' } as any);
       s3Service.getPresignedReadUrl.mockResolvedValue(
         'https://s3.example.com/presigned/photo.jpg',
       );
@@ -431,9 +470,13 @@ describe('TimelineService', () => {
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
       // Wednesday 2025-03-19 — week should be Mon 17 to Sun 23
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-19',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-19',
+        },
+        'UTC',
+      );
 
       expect(result.weekStart).toBe('2025-03-17');
       expect(result.weekEnd).toBe('2025-03-23');
@@ -444,9 +487,13 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-19',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-19',
+        },
+        'UTC',
+      );
 
       expect(result.days).toHaveLength(7);
       result.days.forEach((day) => {
@@ -461,9 +508,13 @@ describe('TimelineService', () => {
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
       // Monday 2025-03-17 chosen directly
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-17',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-17',
+        },
+        'UTC',
+      );
 
       const expectedDates = [
         '2025-03-17',
@@ -488,9 +539,13 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([existingDay]);
 
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-19',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-19',
+        },
+        'UTC',
+      );
 
       const wednesday = result.days.find((d) => d.date === '2025-03-19');
       expect(wednesday).toBeDefined();
@@ -511,9 +566,13 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([existingDay]);
 
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-19',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-19',
+        },
+        'UTC',
+      );
 
       const monday = result.days.find((d) => d.date === '2025-03-17');
       expect(monday!.dayState).toBeNull();
@@ -530,9 +589,13 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([rawPeriod]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-19',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-19',
+        },
+        'UTC',
+      );
 
       expect(result.periods).toHaveLength(1);
       expect(result.periods[0]).toEqual({
@@ -550,9 +613,13 @@ describe('TimelineService', () => {
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
       // Sunday 2025-03-23 — ISO week still Mon 17 to Sun 23
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-23',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-23',
+        },
+        'UTC',
+      );
 
       expect(result.weekStart).toBe('2025-03-17');
       expect(result.weekEnd).toBe('2025-03-23');
@@ -571,9 +638,13 @@ describe('TimelineService', () => {
         'https://s3.example.com/presigned/photo.jpg',
       );
 
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-19',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-19',
+        },
+        'UTC',
+      );
 
       const wednesday = result.days.find((d) => d.date === '2025-03-19');
       expect(wednesday!.media).toHaveLength(1);
@@ -591,37 +662,41 @@ describe('TimelineService', () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-19',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-19',
+        },
+        'UTC',
+      );
 
       expect(result.periods).toEqual([]);
     });
 
     it('uses user timezone when calculating week boundaries', async () => {
-      // UTC-5 user: 2025-03-17T02:00:00Z is still Sunday March 16 local time
-      authRepo.findUserById.mockResolvedValue({
-        timezone: 'America/New_York',
-      } as any);
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
       // Monday 2025-03-17 in New York — week is still 17-23 because it IS Monday local time
-      const result = await service.getWeekTimeline(USER_ID, {
-        date: '2025-03-19',
-      });
+      const result = await service.getWeekTimeline(
+        USER_ID,
+        {
+          date: '2025-03-19',
+        },
+        'America/New_York',
+      );
 
       expect(result.days).toHaveLength(7);
     });
 
-    it('calls authRepository once per request', async () => {
+    it('calls repositories once per request', async () => {
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([]);
       daysRepo.findByUserIdAndDateRange.mockResolvedValue([]);
 
-      await service.getWeekTimeline(USER_ID, { date: '2025-03-19' });
+      await service.getWeekTimeline(USER_ID, { date: '2025-03-19' }, 'UTC');
 
-      expect(authRepo.findUserById).toHaveBeenCalledTimes(1);
-      expect(authRepo.findUserById).toHaveBeenCalledWith(USER_ID);
+      expect(eventGroupsRepo.findPeriodsWithDateRange).toHaveBeenCalledTimes(1);
+      expect(daysRepo.findByUserIdAndDateRange).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -629,7 +704,6 @@ describe('TimelineService', () => {
 
   describe('formatPeriod — via getTimeline output', () => {
     beforeEach(() => {
-      authRepo.findUserById.mockResolvedValue({ timezone: 'UTC' } as any);
       s3Service.getPresignedReadUrl.mockResolvedValue(
         'https://s3.example.com/presigned/x',
       );
@@ -646,10 +720,14 @@ describe('TimelineService', () => {
 
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([rawPeriod]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2024-06-01',
-        to: '2024-08-31',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2024-06-01',
+          to: '2024-08-31',
+        },
+        'UTC',
+      );
 
       expect(result.periods[0]).toEqual({
         id: 'period-closed',
@@ -671,10 +749,14 @@ describe('TimelineService', () => {
 
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([rawPeriod]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-12-31',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-12-31',
+        },
+        'UTC',
+      );
 
       expect(result.periods[0].endDate).toBeNull();
       expect(result.periods[0].startDate).toBe('2025-01-01');
@@ -692,10 +774,14 @@ describe('TimelineService', () => {
 
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([rawPeriod]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-06-30',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-06-30',
+        },
+        'UTC',
+      );
 
       expect(result.periods[0].category).toEqual({
         id: 'cat-health',
@@ -713,10 +799,14 @@ describe('TimelineService', () => {
 
       eventGroupsRepo.findPeriodsWithDateRange.mockResolvedValue([rawPeriod]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2025-01-01',
-        to: '2025-06-30',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2025-01-01',
+          to: '2025-06-30',
+        },
+        'UTC',
+      );
 
       expect(result.periods[0].comment).toBeNull();
     });
@@ -740,10 +830,14 @@ describe('TimelineService', () => {
         period2,
       ]);
 
-      const result = await service.getTimeline(USER_ID, {
-        from: '2024-01-01',
-        to: '2024-12-31',
-      });
+      const result = await service.getTimeline(
+        USER_ID,
+        {
+          from: '2024-01-01',
+          to: '2024-12-31',
+        },
+        'UTC',
+      );
 
       expect(result.periods).toHaveLength(2);
       expect(result.periods[0].id).toBe('p-1');

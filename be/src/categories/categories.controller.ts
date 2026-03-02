@@ -1,12 +1,31 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CategoriesService } from './categories.service.js';
 import { CreateCategoryDto } from './dto/create-category.dto.js';
 import { UpdateCategoryDto } from './dto/update-category.dto.js';
-import { CreateFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
+import { CreateCategoryFromRecommendationDto } from './dto/create-from-recommendation.dto.js';
 import { CategoryResponseDto } from './dto/category-response.dto.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
-import { CurrentUser, JwtPayload } from '../common/decorators/current-user.decorator.js';
+import {
+  CurrentUser,
+  JwtPayload,
+} from '../common/decorators/current-user.decorator.js';
 
 @ApiTags('Categories')
 @ApiBearerAuth()
@@ -18,7 +37,9 @@ export class CategoriesController {
   @Get()
   @ApiOperation({ summary: 'Get all categories for the current user' })
   @ApiResponse({ status: 200, type: [CategoryResponseDto] })
-  async findAll(@CurrentUser() user: JwtPayload): Promise<CategoryResponseDto[]> {
+  async findAll(
+    @CurrentUser() user: JwtPayload,
+  ): Promise<CategoryResponseDto[]> {
     return this.categoriesService.findAll(user.sub);
   }
 
@@ -39,7 +60,7 @@ export class CategoriesController {
   @ApiResponse({ status: 400, description: 'Unknown recommendation key' })
   async createFromRecommendation(
     @CurrentUser() user: JwtPayload,
-    @Body() dto: CreateFromRecommendationDto,
+    @Body() dto: CreateCategoryFromRecommendationDto,
   ): Promise<CategoryResponseDto> {
     return this.categoriesService.createFromRecommendation(user.sub, dto);
   }

@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       SecureStore.setItemAsync(TOKEN_KEY, token),
       SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken),
       SecureStore.setItemAsync(USER_KEY, JSON.stringify(user)),
-    ]).catch(() => {});
+    ]).catch((err) => console.warn('SecureStore write failed', err));
   },
 
   setTokens: (token, refreshToken) => {
@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     Promise.all([
       SecureStore.setItemAsync(TOKEN_KEY, token),
       SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken),
-    ]).catch(() => {});
+    ]).catch((err) => console.warn('SecureStore write failed', err));
   },
 
   logout: () => {
@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       SecureStore.deleteItemAsync(TOKEN_KEY),
       SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
       SecureStore.deleteItemAsync(USER_KEY),
-    ]).catch(() => {});
+    ]).catch((err) => console.warn('SecureStore delete failed', err));
   },
 
   hydrate: async () => {

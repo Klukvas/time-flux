@@ -37,10 +37,7 @@ export class WebhookController {
 
     const payload = JSON.parse(rawBody.toString());
 
-    // Process async — return immediately
-    this.webhookService.handleEvent(payload).catch((err) => {
-      this.logger.error(`Webhook processing failed: ${err.message}`, err.stack);
-    });
+    await this.webhookService.handleEvent(payload);
 
     return { received: true };
   }
@@ -50,10 +47,7 @@ export class WebhookController {
     rawBody: Buffer,
   ): void {
     if (!this.webhookSecret) {
-      this.logger.warn(
-        'PADDLE_WEBHOOK_SECRET not set — skipping signature verification',
-      );
-      return;
+      throw new UnauthorizedError('Webhook secret not configured');
     }
 
     if (!signature) {
@@ -72,6 +66,12 @@ export class WebhookController {
     const h1 = parts['h1'];
     if (!ts || !h1) {
       throw new UnauthorizedError('Invalid paddle-signature format');
+    }
+
+    // Reject stale timestamps (replay protection: 5-minute window)
+    const timestampAge = Math.abs(Date.now() / 1000 - Number(ts));
+    if (Number.isNaN(timestampAge) || timestampAge > 300) {
+      throw new UnauthorizedError('Webhook timestamp too old or invalid');
     }
 
     const signedPayload = `${ts}:${rawBody.toString()}`;

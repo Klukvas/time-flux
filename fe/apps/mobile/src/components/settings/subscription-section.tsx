@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import {
@@ -11,6 +11,8 @@ import type { SubscriptionTier } from '@lifespan/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { borderRadius, fontSize, spacing } from '@/lib/theme';
 import { useTheme } from '@lifespan/hooks';
+
+const PAYMENTS_ENABLED = process.env.EXPO_PUBLIC_PAYMENTS_ENABLED === 'true';
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   ACTIVE: { bg: '#dcfce7', text: '#166534' },
@@ -32,6 +34,13 @@ export function SubscriptionSection({
   const { data: subscription, refetch } = useSubscription();
   const cancelMutation = useCancelSubscription();
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Clean up polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
 
   const tier = (subscription?.tier ?? 'FREE') as SubscriptionTier;
   const status = subscription?.status ?? 'ACTIVE';
@@ -126,6 +135,15 @@ export function SubscriptionSection({
         </View>
       )}
 
+      {/* Coming soon banner (when payments disabled) */}
+      {!PAYMENTS_ENABLED && (
+        <View style={styles.comingSoonBanner}>
+          <Text style={styles.comingSoonText}>
+            {t('subscription.payments_coming_soon')}
+          </Text>
+        </View>
+      )}
+
       {/* Limits overview */}
       <View style={styles.limitsContainer}>
         <Text
@@ -152,7 +170,7 @@ export function SubscriptionSection({
       </View>
 
       {/* Actions */}
-      {tier !== 'PREMIUM' && paddleCheckoutUrl && (
+      {PAYMENTS_ENABLED && tier !== 'PREMIUM' && paddleCheckoutUrl && (
         <Pressable onPress={handleUpgrade} style={styles.upgradeBtn}>
           <View style={styles.gradientBg}>
             <View style={styles.gradientLeft} />
@@ -167,7 +185,7 @@ export function SubscriptionSection({
         </Pressable>
       )}
 
-      {tier !== 'FREE' && !subscription?.canceledAt && (
+      {PAYMENTS_ENABLED && tier !== 'FREE' && !subscription?.canceledAt && (
         <Pressable
           onPress={handleCancel}
           disabled={cancelMutation.isPending}
@@ -220,6 +238,18 @@ const styles = StyleSheet.create({
   renewText: {
     fontSize: fontSize.sm,
     marginTop: 4,
+  },
+  comingSoonBanner: {
+    marginTop: spacing.sm,
+    backgroundColor: '#eff6ff',
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    padding: spacing.sm,
+  },
+  comingSoonText: {
+    fontSize: fontSize.sm,
+    color: '#1e40af',
   },
   cancelBanner: {
     marginTop: spacing.sm,

@@ -23,6 +23,7 @@ export class DayResponseDto {
   dayState: DayStateSummaryDto | null;
 
   @ApiProperty({
+    type: String,
     nullable: true,
     example: 'media-uuid',
     description: 'ID of the cover media',
@@ -30,19 +31,31 @@ export class DayResponseDto {
   mainMediaId: string | null;
 
   @ApiProperty({
+    type: String,
     nullable: true,
     example: 'Kyiv, Ukraine',
     description: 'Location name',
   })
   locationName: string | null;
 
-  @ApiProperty({ nullable: true, example: 50.4501, description: 'Latitude' })
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    example: 50.4501,
+    description: 'Latitude',
+  })
   latitude: number | null;
 
-  @ApiProperty({ nullable: true, example: 30.5234, description: 'Longitude' })
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    example: 30.5234,
+    description: 'Longitude',
+  })
   longitude: number | null;
 
   @ApiProperty({
+    type: String,
     nullable: true,
     example: 'Had a great day!',
     description: 'Day comment',

@@ -144,7 +144,7 @@ export function ChaptersList() {
                       <span>
                         {formatDateRange(
                           latestPeriod.startDate,
-                          latestPeriod.endDate,
+                          latestPeriod.endDate ?? null,
                         )}
                       </span>
                     )}

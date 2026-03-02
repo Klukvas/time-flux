@@ -1,7 +1,8 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { LoggerModule } from 'nestjs-pino';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { CategoriesModule } from './categories/categories.module.js';
@@ -16,13 +17,23 @@ import { RecommendationsModule } from './recommendations/recommendations.module.
 import { AnalyticsModule } from './analytics/analytics.module.js';
 import { HealthModule } from './health/health.module.js';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
-import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware.js';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot({
       throttlers: [{ name: 'default', ttl: 60000, limit: 100 }],
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: isProduction ? 'info' : 'debug',
+        transport: isProduction ? undefined : { target: 'pino-pretty' },
+        autoLogging: true,
+        quietReqLogger: true,
+        redact: ['req.headers.authorization'],
+      },
     }),
     PrismaModule,
     AuthModule,
@@ -41,8 +52,4 @@ import { RequestLoggerMiddleware } from './common/middleware/request-logger.midd
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}

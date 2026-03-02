@@ -27,6 +27,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       PORT: 3000
+      NODE_ENV: production
       S3_ENDPOINT: ${S3_ENDPOINT}
       S3_REGION: ${S3_REGION}
       S3_BUCKET: ${S3_BUCKET}
@@ -36,6 +37,9 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
       FRONTEND_URL: ${FRONTEND_URL}
+      PADDLE_API_KEY: ${PADDLE_API_KEY}
+      PADDLE_WEBHOOK_SECRET: ${PADDLE_WEBHOOK_SECRET}
+      PADDLE_ENVIRONMENT: ${PADDLE_ENVIRONMENT:-production}
 
   frontend:
     image: ${FRONTEND_IMAGE}:latest
@@ -52,11 +56,25 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - backend
       - frontend
+    environment:
+      DOMAIN: ${DOMAIN}
+    entrypoint: /bin/sh -c "envsubst '$${DOMAIN}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf.template:ro
+      - certbot-webroot:/var/www/certbot:ro
+      - certbot-certs:/etc/letsencrypt:ro
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot-webroot:/var/www/certbot
+      - certbot-certs:/etc/letsencrypt
 
 volumes:
   pgdata:
+  certbot-webroot:
+  certbot-certs:

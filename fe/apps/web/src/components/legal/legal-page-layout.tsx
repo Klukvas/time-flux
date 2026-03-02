@@ -72,20 +72,29 @@ export function LegalPageLayout({ children }: LegalPageLayoutProps) {
       </header>
 
       {/* Content */}
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        {children}
-      </main>
+      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">{children}</main>
 
       {/* Footer */}
       <footer className="border-t border-edge px-4 py-8 text-center text-xs text-content-tertiary">
         LifeSpan &copy; {new Date().getFullYear()}
         {' \u00B7 '}
+        <Link href="/blog" className="underline hover:text-content-secondary">
+          Blog
+        </Link>
+        {' \u00B7 '}
         <Link href="/terms" className="underline hover:text-content-secondary">
           {t('legal.terms_title')}
         </Link>
         {' \u00B7 '}
-        <Link href="/privacy" className="underline hover:text-content-secondary">
+        <Link
+          href="/privacy"
+          className="underline hover:text-content-secondary"
+        >
           {t('legal.privacy_title')}
+        </Link>
+        {' \u00B7 '}
+        <Link href="/refund" className="underline hover:text-content-secondary">
+          {t('legal.refund_title')}
         </Link>
       </footer>
     </div>

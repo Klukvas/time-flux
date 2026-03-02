@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { MemoriesRepository } from './memories.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 import type {
   ContextResponseDto,
   DayContextResponseDto,
@@ -26,17 +25,14 @@ function dayKey(d: Date): string {
 
 @Injectable()
 export class MemoriesService {
-  constructor(
-    private readonly memoriesRepository: MemoriesRepository,
-    private readonly authRepository: AuthRepository,
-  ) {}
+  constructor(private readonly memoriesRepository: MemoriesRepository) {}
 
   async getOnThisDay(
     userId: string,
+    timezone: string,
     dateParam?: string,
   ): Promise<OnThisDayResponseDto> {
-    const user = await this.authRepository.findUserById(userId);
-    const tz = user?.timezone ?? 'UTC';
+    const tz = timezone;
 
     const selectedDate = dateParam
       ? DateTime.fromISO(dateParam, { zone: tz })
@@ -57,9 +53,9 @@ export class MemoriesService {
     userId: string,
     mode: MemoryMode,
     dateParam: string,
+    timezone: string,
   ): Promise<ContextResponseDto> {
-    const user = await this.authRepository.findUserById(userId);
-    const tz = user?.timezone ?? 'UTC';
+    const tz = timezone;
 
     const selectedDate = DateTime.fromISO(dateParam, { zone: tz });
     if (!selectedDate.isValid) {
@@ -93,7 +89,9 @@ export class MemoriesService {
     // Compute 3 target dates
     const targets = INTERVALS.map((interval) => ({
       interval,
-      dateStr: selectedDate.minus({ [interval.type]: interval.value }).toISODate()!,
+      dateStr: selectedDate
+        .minus({ [interval.type]: interval.value })
+        .toISODate()!,
     }));
 
     // Query 2: Fetch historical days

@@ -239,7 +239,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
             </div>
             <div className="rounded-lg border border-edge bg-surface-card p-3 text-center">
               <p className="text-xl font-bold text-content">
-                {details.analytics.averageMoodScore !== null
+                {details.analytics.averageMoodScore != null
                   ? details.analytics.averageMoodScore.toFixed(1)
                   : '—'}
               </p>
@@ -361,7 +361,10 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-content">
-                        {formatDateRange(period.startDate, period.endDate)}
+                        {formatDateRange(
+                          period.startDate,
+                          period.endDate ?? null,
+                        )}
                       </span>
                       {isActive && (
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-success">
@@ -471,7 +474,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
               >
                 {isImageType(m.contentType) ? (
                   <img
-                    src={m.url}
+                    src={m.url ?? undefined}
                     alt={m.fileName}
                     className="h-full w-full object-cover"
                   />

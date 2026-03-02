@@ -61,8 +61,20 @@ describe('AuthService', () => {
         delete: jest.fn(),
         deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
+      subscription: {
+        upsert: jest.fn().mockResolvedValue({}),
+      },
       $transaction: jest.fn(),
     };
+
+    // Default $transaction: run callback with tx that reuses outer mocks
+    prisma.$transaction.mockImplementation(async (cb: any) => {
+      const tx = {
+        user: prisma.user,
+        subscription: prisma.subscription,
+      };
+      return cb(tx);
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -88,10 +100,7 @@ describe('AuthService', () => {
         {
           provide: SubscriptionsService,
           useValue: {
-            getSubscription: jest.fn().mockResolvedValue({
-              tier: 'FREE',
-              status: 'ACTIVE',
-            }),
+            getTier: jest.fn().mockResolvedValue('FREE'),
           },
         },
       ],
@@ -105,6 +114,14 @@ describe('AuthService', () => {
   // ─── REGISTRATION ──────────────────────────────────────────
 
   describe('register', () => {
+    beforeAll(() => {
+      jest.setTimeout(30_000);
+    });
+
+    afterAll(() => {
+      jest.setTimeout(5_000);
+    });
+
     it('should normalize email to lowercase and trim whitespace', async () => {
       authRepository.findUserByEmail.mockResolvedValue(null);
 
@@ -132,8 +149,6 @@ describe('AuthService', () => {
     });
 
     it('should hash password with bcrypt (12 rounds) before storing', async () => {
-      // bcrypt is CPU-intensive, increase timeout for coverage runs
-      jest.setTimeout(30_000);
       authRepository.findUserByEmail.mockResolvedValue(null);
 
       await service.register({
@@ -212,7 +227,7 @@ describe('AuthService', () => {
       });
 
       expect(jwtService.sign).toHaveBeenCalledWith(
-        { sub: 'new-user-id', email: 'new@example.com' },
+        { sub: 'new-user-id', email: 'new@example.com', timezone: 'UTC' },
         { expiresIn: '15m' },
       );
     });
@@ -412,7 +427,7 @@ describe('AuthService', () => {
       const result = await service.refresh('raw-token');
 
       expect(jwtService.sign).toHaveBeenCalledWith(
-        { sub: 'user-1', email: 'test@example.com' },
+        { sub: 'user-1', email: 'test@example.com', timezone: 'UTC' },
         { expiresIn: '15m' },
       );
       expect(result.user.id).toBe('user-1');
@@ -675,6 +690,77 @@ describe('AuthService', () => {
       await expect(service.googleLogin(mockGoogleProfile)).rejects.toThrow(
         UserCreationFailedError,
       );
+    });
+  });
+
+  // ─── OAUTH CODE EXCHANGE ────────────────────────────────
+
+  describe('storeOAuthCode / exchangeOAuthCode', () => {
+    const tokenData = {
+      access_token: 'jwt-token',
+      refresh_token: 'rt-token',
+      user: {
+        id: 'user-1',
+        email: 'test@example.com',
+        timezone: 'UTC',
+        onboardingCompleted: false,
+        tier: 'FREE',
+        createdAt: new Date().toISOString(),
+      },
+    };
+
+    it('should store and retrieve OAuth code', () => {
+      const code = service.storeOAuthCode(tokenData);
+
+      expect(code).toEqual(expect.any(String));
+      expect(code.length).toBe(64); // 32 bytes hex
+
+      const result = service.exchangeOAuthCode(code);
+      expect(result).toEqual(tokenData);
+    });
+
+    it('should invalidate code after single use', () => {
+      const code = service.storeOAuthCode(tokenData);
+
+      service.exchangeOAuthCode(code);
+
+      expect(() => service.exchangeOAuthCode(code)).toThrow(UnauthorizedError);
+    });
+
+    it('should reject unknown code', () => {
+      expect(() => service.exchangeOAuthCode('invalid-code')).toThrow(
+        UnauthorizedError,
+      );
+    });
+
+    it('should reject expired code', () => {
+      const code = service.storeOAuthCode(tokenData);
+
+      // Fast-forward time past the 60s TTL
+      jest.useFakeTimers();
+      jest.advanceTimersByTime(61_000);
+
+      expect(() => service.exchangeOAuthCode(code)).toThrow(UnauthorizedError);
+
+      jest.useRealTimers();
+    });
+  });
+
+  // ─── COMPLETE ONBOARDING ────────────────────────────────
+
+  describe('completeOnboarding', () => {
+    it('should call repository and return user response', async () => {
+      const updatedUser = {
+        ...mockUser,
+        onboardingCompleted: true,
+      };
+      authRepository.completeOnboarding.mockResolvedValue(updatedUser);
+
+      const result = await service.completeOnboarding('user-1');
+
+      expect(authRepository.completeOnboarding).toHaveBeenCalledWith('user-1');
+      expect(result.id).toBe('user-1');
+      expect(result.onboardingCompleted).toBe(true);
     });
   });
 });

@@ -9,7 +9,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DaysService } from './days.service.js';
 import { DaysRepository } from './days.repository.js';
 import { DayStatesRepository } from '../day-states/day-states.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 import { S3Service } from '../s3/s3.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
@@ -24,12 +23,6 @@ import {
 const USER_ID = 'user-1';
 const DATE_STR = '2025-01-15';
 const DATE_OBJ = new Date('2025-01-15T00:00:00Z');
-
-const mockUser = {
-  id: USER_ID,
-  email: 'test@example.com',
-  timezone: 'UTC',
-};
 
 const mockDay = {
   id: 'day-1',
@@ -57,7 +50,6 @@ describe('DaysService', () => {
   let service: DaysService;
   let daysRepo: Record<string, jest.Mock>;
   let dayStatesRepo: Record<string, jest.Mock>;
-  let authRepo: Record<string, jest.Mock>;
   let prismaMock: { dayMedia: { findFirst: jest.Mock } };
 
   beforeEach(async () => {
@@ -71,16 +63,11 @@ describe('DaysService', () => {
       findByIdAndUserId: jest.fn(),
     };
 
-    authRepo = {
-      findUserById: jest.fn().mockResolvedValue(mockUser),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DaysService,
         { provide: DaysRepository, useValue: daysRepo },
         { provide: DayStatesRepository, useValue: dayStatesRepo },
-        { provide: AuthRepository, useValue: authRepo },
         {
           provide: S3Service,
           useValue: {
@@ -106,11 +93,16 @@ describe('DaysService', () => {
     it('should update location with name and coordinates', async () => {
       daysRepo.upsertLocation.mockResolvedValue(mockDayWithLocation);
 
-      const result = await service.updateLocation(USER_ID, DATE_STR, {
-        locationName: 'Kyiv, Ukraine',
-        latitude: 50.4501,
-        longitude: 30.5234,
-      });
+      const result = await service.updateLocation(
+        USER_ID,
+        DATE_STR,
+        {
+          locationName: 'Kyiv, Ukraine',
+          latitude: 50.4501,
+          longitude: 30.5234,
+        },
+        'UTC',
+      );
 
       expect(result.locationName).toBe('Kyiv, Ukraine');
       expect(result.latitude).toBe(50.4501);
@@ -125,11 +117,16 @@ describe('DaysService', () => {
     it('should clear location when all fields are null', async () => {
       daysRepo.upsertLocation.mockResolvedValue(mockDay);
 
-      const result = await service.updateLocation(USER_ID, DATE_STR, {
-        locationName: null,
-        latitude: null,
-        longitude: null,
-      });
+      const result = await service.updateLocation(
+        USER_ID,
+        DATE_STR,
+        {
+          locationName: null,
+          latitude: null,
+          longitude: null,
+        },
+        'UTC',
+      );
 
       expect(result.locationName).toBeNull();
       expect(result.latitude).toBeNull();
@@ -144,18 +141,28 @@ describe('DaysService', () => {
     it('should reject future dates', async () => {
       const futureDate = '2099-12-31';
       await expect(
-        service.updateLocation(USER_ID, futureDate, {
-          locationName: 'Future Place',
-        }),
+        service.updateLocation(
+          USER_ID,
+          futureDate,
+          {
+            locationName: 'Future Place',
+          },
+          'UTC',
+        ),
       ).rejects.toThrow(FutureDateError);
     });
 
     it('should upsert day if it does not exist (passes to repo)', async () => {
       daysRepo.upsertLocation.mockResolvedValue(mockDayWithLocation);
 
-      await service.updateLocation(USER_ID, DATE_STR, {
-        locationName: 'New York',
-      });
+      await service.updateLocation(
+        USER_ID,
+        DATE_STR,
+        {
+          locationName: 'New York',
+        },
+        'UTC',
+      );
 
       expect(daysRepo.upsertLocation).toHaveBeenCalledWith(USER_ID, DATE_OBJ, {
         locationName: 'New York',
@@ -168,9 +175,14 @@ describe('DaysService', () => {
       const dayWithName = { ...mockDay, locationName: 'London' };
       daysRepo.upsertLocation.mockResolvedValue(dayWithName);
 
-      const result = await service.updateLocation(USER_ID, DATE_STR, {
-        locationName: 'London',
-      });
+      const result = await service.updateLocation(
+        USER_ID,
+        DATE_STR,
+        {
+          locationName: 'London',
+        },
+        'UTC',
+      );
 
       expect(result.locationName).toBe('London');
       expect(result.latitude).toBeNull();
@@ -184,11 +196,16 @@ describe('DaysService', () => {
     it('should return location fields in day response', async () => {
       daysRepo.upsertLocation.mockResolvedValue(mockDayWithLocation);
 
-      const result = await service.updateLocation(USER_ID, DATE_STR, {
-        locationName: 'Kyiv, Ukraine',
-        latitude: 50.4501,
-        longitude: 30.5234,
-      });
+      const result = await service.updateLocation(
+        USER_ID,
+        DATE_STR,
+        {
+          locationName: 'Kyiv, Ukraine',
+          latitude: 50.4501,
+          longitude: 30.5234,
+        },
+        'UTC',
+      );
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -204,11 +221,16 @@ describe('DaysService', () => {
     it('should return null location fields when not set', async () => {
       daysRepo.upsertLocation.mockResolvedValue(mockDay);
 
-      const result = await service.updateLocation(USER_ID, DATE_STR, {
-        locationName: null,
-        latitude: null,
-        longitude: null,
-      });
+      const result = await service.updateLocation(
+        USER_ID,
+        DATE_STR,
+        {
+          locationName: null,
+          latitude: null,
+          longitude: null,
+        },
+        'UTC',
+      );
 
       expect(result.locationName).toBeNull();
       expect(result.latitude).toBeNull();
@@ -231,9 +253,14 @@ describe('DaysService', () => {
         dayState: { id: 'ds-1', name: 'Happy', color: '#00FF00' },
       });
 
-      const result = await service.upsert(USER_ID, DATE_STR, {
-        dayStateId: 'ds-1',
-      });
+      const result = await service.upsert(
+        USER_ID,
+        DATE_STR,
+        {
+          dayStateId: 'ds-1',
+        },
+        'UTC',
+      );
 
       expect(result.date).toBe('2025-01-15');
       expect(result.dayState).toEqual({
@@ -251,7 +278,7 @@ describe('DaysService', () => {
     it('should create day without dayStateId', async () => {
       daysRepo.upsert.mockResolvedValue(mockDay);
 
-      const result = await service.upsert(USER_ID, DATE_STR, {});
+      const result = await service.upsert(USER_ID, DATE_STR, {}, 'UTC');
 
       expect(result.dayState).toBeNull();
       expect(daysRepo.upsert).toHaveBeenCalledWith(USER_ID, DATE_OBJ, {
@@ -265,13 +292,13 @@ describe('DaysService', () => {
       dayStatesRepo.findByIdAndUserId.mockResolvedValue(null);
 
       await expect(
-        service.upsert(USER_ID, DATE_STR, { dayStateId: 'nonexistent' }),
+        service.upsert(USER_ID, DATE_STR, { dayStateId: 'nonexistent' }, 'UTC'),
       ).rejects.toThrow(DayStateNotFoundError);
     });
 
     it('should reject future dates', async () => {
       await expect(
-        service.upsert(USER_ID, '2099-12-31', { dayStateId: 'ds-1' }),
+        service.upsert(USER_ID, '2099-12-31', { dayStateId: 'ds-1' }, 'UTC'),
       ).rejects.toThrow(FutureDateError);
     });
 
@@ -282,9 +309,14 @@ describe('DaysService', () => {
       });
       daysRepo.upsert.mockResolvedValue({ ...mockDay, mainMediaId: 'media-1' });
 
-      const result = await service.upsert(USER_ID, DATE_STR, {
-        mainMediaId: 'media-1',
-      });
+      const result = await service.upsert(
+        USER_ID,
+        DATE_STR,
+        {
+          mainMediaId: 'media-1',
+        },
+        'UTC',
+      );
 
       expect(result.mainMediaId).toBe('media-1');
       expect(daysRepo.upsert).toHaveBeenCalledWith(USER_ID, DATE_OBJ, {
@@ -298,7 +330,12 @@ describe('DaysService', () => {
       prismaMock.dayMedia.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.upsert(USER_ID, DATE_STR, { mainMediaId: 'foreign-media' }),
+        service.upsert(
+          USER_ID,
+          DATE_STR,
+          { mainMediaId: 'foreign-media' },
+          'UTC',
+        ),
       ).rejects.toThrow(MediaNotFoundError);
     });
 
@@ -318,7 +355,7 @@ describe('DaysService', () => {
       };
       daysRepo.upsert.mockResolvedValue(dayWithMedia);
 
-      const result = await service.upsert(USER_ID, DATE_STR, {});
+      const result = await service.upsert(USER_ID, DATE_STR, {}, 'UTC');
 
       expect(result.media).toHaveLength(1);
       expect(result.media[0]).toEqual(
@@ -393,26 +430,21 @@ describe('DaysService', () => {
     });
   });
 
-  // ─── getUserTimezone ───────────────────────────────────────
+  // ─── timezone handling ─────────────────────────────────────
 
-  describe('getUserTimezone', () => {
-    it('should default to UTC when user has no timezone', async () => {
-      authRepo.findUserById.mockResolvedValue({
-        ...mockUser,
-        timezone: undefined,
-      });
+  describe('timezone handling', () => {
+    it('should accept UTC timezone parameter', async () => {
       daysRepo.upsert.mockResolvedValue(mockDay);
 
-      const result = await service.upsert(USER_ID, DATE_STR, {});
+      const result = await service.upsert(USER_ID, DATE_STR, {}, 'UTC');
 
       expect(result.date).toBe('2025-01-15');
     });
 
-    it('should default to UTC when user not found', async () => {
-      authRepo.findUserById.mockResolvedValue(null);
+    it('should accept custom timezone parameter', async () => {
       daysRepo.upsert.mockResolvedValue(mockDay);
 
-      const result = await service.upsert(USER_ID, DATE_STR, {});
+      const result = await service.upsert(USER_ID, DATE_STR, {}, 'Europe/Kyiv');
 
       expect(result.date).toBe('2025-01-15');
     });

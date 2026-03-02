@@ -65,9 +65,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    hydrateAuth();
-    hydrateView();
-    setReady(true);
+    Promise.all([hydrateAuth(), hydrateView()])
+      .catch((err) => console.warn('Hydration failed', err))
+      .finally(() => setReady(true));
   }, [hydrateAuth, hydrateView]);
 
   useEffect(() => {

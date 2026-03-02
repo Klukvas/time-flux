@@ -16,7 +16,13 @@ const sizeClasses = {
   xl: 'max-w-4xl',
 };
 
-export function Modal({ open, onClose, title, children, size = 'md' }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  size = 'md',
+}: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,20 +38,38 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   return (
     <div
       ref={overlayRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)] p-4"
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
     >
-      <div className={`w-full ${sizeClasses[size]} rounded-xl bg-surface-card p-4 shadow-xl sm:p-6 max-h-[90dvh] overflow-y-auto`}>
+      <div
+        className={`w-full ${sizeClasses[size]} rounded-xl bg-surface-card p-4 shadow-xl sm:p-6 max-h-[90dvh] overflow-y-auto`}
+      >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-content">{title}</h2>
+          <h2 id="modal-title" className="text-lg font-semibold text-content">
+            {title}
+          </h2>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="rounded-lg p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>

@@ -366,7 +366,9 @@ export default function InsightsScreen() {
   const { t } = useTranslation();
   const { tokens } = useTheme();
   const { data: subscription } = useSubscription();
-  const analyticsLocked = subscription?.limits.analytics === false;
+  const paymentsEnabled = process.env.EXPO_PUBLIC_PAYMENTS_ENABLED === 'true';
+  const analyticsLocked =
+    paymentsEnabled && subscription?.limits.analytics === false;
   const { data, isLoading, error } = useMoodOverview({
     enabled: !analyticsLocked,
   });

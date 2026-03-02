@@ -1,10 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class UpsertDayDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
+    type: String,
     example: 'day-state-id',
-    required: false,
     nullable: true,
     description: 'Day state ID. Pass null to clear the day state.',
   })
@@ -12,9 +12,9 @@ export class UpsertDayDto {
   @IsUUID()
   dayStateId?: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
+    type: String,
     example: 'media-uuid',
-    required: false,
     nullable: true,
     description:
       'ID of the media item to use as the day cover. Pass null to clear.',
@@ -23,9 +23,9 @@ export class UpsertDayDto {
   @IsUUID()
   mainMediaId?: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
+    type: String,
     example: 'Had a great day!',
-    required: false,
     nullable: true,
     description: 'Day comment (max 500 chars). Pass null to clear.',
   })

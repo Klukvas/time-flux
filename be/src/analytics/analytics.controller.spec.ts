@@ -12,7 +12,11 @@ describe('AnalyticsController', () => {
   };
   let subscriptionsService: { assertFeatureAccess: jest.Mock };
 
-  const mockUser: JwtPayload = { sub: 'user-1', email: 'test@example.com' };
+  const mockUser: JwtPayload = {
+    sub: 'user-1',
+    email: 'test@example.com',
+    timezone: 'UTC',
+  };
 
   beforeEach(async () => {
     service = {
@@ -46,7 +50,7 @@ describe('AnalyticsController', () => {
 
       const result = await controller.getMoodOverview(mockUser);
 
-      expect(service.getMoodOverview).toHaveBeenCalledWith('user-1');
+      expect(service.getMoodOverview).toHaveBeenCalledWith('user-1', 'UTC');
       expect(result).toEqual(expected);
     });
 
@@ -59,12 +63,12 @@ describe('AnalyticsController', () => {
       expect(result).toBe(serviceResult);
     });
 
-    it('should only pass user.sub, not the full user object', async () => {
+    it('should only pass user.sub and user.timezone, not the full user object', async () => {
       service.getMoodOverview.mockResolvedValue({});
 
       await controller.getMoodOverview(mockUser);
 
-      expect(service.getMoodOverview).toHaveBeenCalledWith('user-1');
+      expect(service.getMoodOverview).toHaveBeenCalledWith('user-1', 'UTC');
       expect(service.getMoodOverview).not.toHaveBeenCalledWith(mockUser);
     });
 

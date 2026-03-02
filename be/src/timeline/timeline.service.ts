@@ -2,10 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import { EventGroupsRepository } from '../event-groups/event-groups.repository.js';
 import { DaysRepository } from '../days/days.repository.js';
-import { AuthRepository } from '../auth/auth.repository.js';
 import { S3Service } from '../s3/s3.service.js';
 import { TimelineQueryDto, WeekQueryDto } from './dto/timeline-query.dto.js';
 import { InvalidDateRangeError } from '../common/errors/app.error.js';
+import { formatMedia } from '../common/utils/format-media.js';
+import { formatDay } from '../common/utils/format-day.js';
 
 function formatPeriod(period: any, timezone: string) {
   const startDate = DateTime.fromJSDate(period.startDate, { zone: 'utc' })
@@ -36,53 +37,11 @@ export class TimelineService {
   constructor(
     private readonly eventGroupsRepository: EventGroupsRepository,
     private readonly daysRepository: DaysRepository,
-    private readonly authRepository: AuthRepository,
     private readonly s3Service: S3Service,
   ) {}
 
-  private async formatMedia(m: any) {
-    let url: string | null = null;
-    try {
-      url = await this.s3Service.getPresignedReadUrl(m.s3Key);
-    } catch (err) {
-      this.logger.warn(
-        `Failed to generate presigned URL for s3Key=${m.s3Key}: ${err}`,
-      );
-    }
-    return {
-      id: m.id,
-      s3Key: m.s3Key,
-      url,
-      fileName: m.fileName,
-      contentType: m.contentType,
-      size: m.size,
-      createdAt: m.createdAt.toISOString(),
-    };
-  }
-
-  private async formatDay(day: any) {
-    return {
-      id: day.id,
-      date: day.date.toISOString().split('T')[0],
-      dayState: day.dayState,
-      mainMediaId: day.mainMediaId ?? null,
-      locationName: day.locationName ?? null,
-      latitude: day.latitude ?? null,
-      longitude: day.longitude ?? null,
-      comment: day.comment ?? null,
-      media: await Promise.all(
-        (day.media ?? []).map((m: any) => this.formatMedia(m)),
-      ),
-    };
-  }
-
-  private async getUserTimezone(userId: string): Promise<string> {
-    const user = await this.authRepository.findUserById(userId);
-    return user?.timezone ?? 'UTC';
-  }
-
-  async getTimeline(userId: string, query: TimelineQueryDto) {
-    const tz = await this.getUserTimezone(userId);
+  async getTimeline(userId: string, query: TimelineQueryDto, timezone: string) {
+    const tz = timezone;
     const now = DateTime.now().setZone(tz);
     const today = now.startOf('day');
     const oneYearAgo = today.minus({ years: 1 });
@@ -116,12 +75,14 @@ export class TimelineService {
       from: from.toISODate()!,
       to: to.toISODate()!,
       periods: periods.map((p) => formatPeriod(p, tz)),
-      days: await Promise.all(days.map((d) => this.formatDay(d))),
+      days: await Promise.all(
+        days.map((d) => formatDay(d, this.s3Service, this.logger)),
+      ),
     };
   }
 
-  async getWeekTimeline(userId: string, query: WeekQueryDto) {
-    const tz = await this.getUserTimezone(userId);
+  async getWeekTimeline(userId: string, query: WeekQueryDto, timezone: string) {
+    const tz = timezone;
     const targetDate = DateTime.fromISO(query.date, { zone: tz });
     const monday = targetDate.startOf('week');
     const sunday = monday.plus({ days: 6 });
@@ -164,7 +125,9 @@ export class TimelineService {
         longitude: existing?.longitude ?? null,
         comment: existing?.comment ?? null,
         media: await Promise.all(
-          (existing?.media ?? []).map((m: any) => this.formatMedia(m)),
+          (existing?.media ?? []).map((m: any) =>
+            formatMedia(m, this.s3Service, this.logger),
+          ),
         ),
       });
     }

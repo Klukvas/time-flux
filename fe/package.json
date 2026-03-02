@@ -10,6 +10,7 @@
     "web:build": "npm run build -w apps/web",
     "mobile:start": "npm run start -w apps/mobile",
     "mobile:ios": "npm run ios -w apps/mobile",
-    "mobile:android": "npm run android -w apps/mobile"
+    "mobile:android": "npm run android -w apps/mobile",
+    "generate:api": "npm run generate:types -w packages/api"
   }
 }

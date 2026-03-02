@@ -221,7 +221,7 @@ function getMainImageUrl(
     const main = media.find((m) => m.id === mainMediaId);
     if (main?.url) return main.url;
   }
-  return media.find((m) => isImageType(m.contentType))?.url;
+  return media.find((m) => isImageType(m.contentType))?.url ?? undefined;
 }
 
 // ─── Horizontal Mode ───────────────────────────────────────
