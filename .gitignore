@@ -42,6 +42,7 @@ client_secret_493253956370-cqkgffnpfgcq6i86ppjb28suvkejmid4.apps.googleuserconte
 *.md
 !PROJECT_OVERVIEW.md
 !README.md
+!fe/apps/web/content/blog/*.md
 
 # Personal files
 *.csv
