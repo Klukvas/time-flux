@@ -11,8 +11,8 @@ out
 .env.*
 !.env.example
 
-# Prisma
-generated
+# Prisma (generated client output only)
+**/prisma/generated
 
 # IDE
 .idea
