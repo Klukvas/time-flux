@@ -14,7 +14,7 @@ import {
   BASE_COLORS,
   contrastTextColor,
   getMoodEmoji,
-  getMoodLabel,
+  getMoodLabelKey,
 } from '@timeflux/utils';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
@@ -158,7 +158,7 @@ export function DayStateFormModal({
           <div className="mt-1 flex items-center justify-between">
             <span className="text-xs text-content-tertiary">0</span>
             <span className="text-sm font-medium text-content-secondary">
-              {score} — {getMoodLabel(score)}
+              {score} — {t(getMoodLabelKey(score))}
             </span>
             <span className="text-xs text-content-tertiary">10</span>
           </div>

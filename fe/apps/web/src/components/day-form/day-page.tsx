@@ -66,7 +66,7 @@ function toMediaItem(m: DayMedia): MediaItem {
 
 export function DayPage({ date }: DayPageProps) {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const timelineMode = useViewStore((s) => s.timelineMode);
   const user = useAuthStore((s) => s.user);
 
@@ -439,7 +439,7 @@ export function DayPage({ date }: DayPageProps) {
         <div className="text-center">
           <div className="flex items-center justify-center gap-3">
             <h1 className="text-2xl font-bold text-content">
-              {formatDate(date, 'cccc, MMMM d, yyyy')}
+              {formatDate(date, 'cccc, MMMM d, yyyy', language)}
             </h1>
             <CalendarPopover
               value={date}
@@ -482,7 +482,7 @@ export function DayPage({ date }: DayPageProps) {
                 <button
                   key={memory.date}
                   onClick={() => router.push(`/timeline/day/${memory.date}`)}
-                  className="group w-full rounded-xl border border-edge bg-surface-card p-3 text-left transition-all hover:border-accent/30 hover:shadow-md"
+                  className="group w-full rounded-xl border border-edge bg-surface-elevated p-3 text-left transition-all hover:border-accent/30 hover:shadow-md"
                 >
                   <p className="mb-2 text-xs font-medium text-accent">
                     {label}
@@ -596,7 +596,7 @@ export function DayPage({ date }: DayPageProps) {
             {t('day_form.location')}
           </h3>
           {dayRecord?.locationName ? (
-            <div className="flex items-center gap-3 rounded-lg border border-edge bg-surface-card px-3 py-2.5">
+            <div className="flex items-center gap-3 rounded-lg border border-edge bg-surface-elevated px-3 py-2.5">
               <span className="text-base">📍</span>
               <span className="min-w-0 flex-1 truncate text-sm text-content">
                 {dayRecord.locationName}
@@ -669,7 +669,7 @@ export function DayPage({ date }: DayPageProps) {
             maxLength={MAX_COMMENT_LENGTH}
             rows={3}
             placeholder={t('day_form.comment_placeholder')}
-            className="block w-full rounded-lg border border-edge bg-surface-card px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
+            className="block w-full rounded-lg border border-edge bg-surface-elevated px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
             disabled={isPending || futureDisabled}
           />
           <p className="mt-1 text-right text-xs text-content-tertiary">

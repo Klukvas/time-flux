@@ -1,13 +1,19 @@
 import { DateTime } from 'luxon';
 
 /** Format an ISO date string (YYYY-MM-DD) for display. */
-export function formatDate(isoDate: string, format: string = 'MMM d, yyyy'): string {
-  return DateTime.fromISO(isoDate).toFormat(format);
+export function formatDate(
+  isoDate: string,
+  format: string = 'MMM d, yyyy',
+  locale?: string,
+): string {
+  const dt = DateTime.fromISO(isoDate);
+  return (locale ? dt.reconfigure({ locale }) : dt).toFormat(format);
 }
 
 /** Format an ISO date string as a short day label (e.g., "Mon"). */
-export function formatDayShort(isoDate: string): string {
-  return DateTime.fromISO(isoDate).toFormat('ccc');
+export function formatDayShort(isoDate: string, locale?: string): string {
+  const dt = DateTime.fromISO(isoDate);
+  return (locale ? dt.reconfigure({ locale }) : dt).toFormat('ccc');
 }
 
 /** Format an ISO date string as day number (e.g., "15"). */
@@ -16,8 +22,9 @@ export function formatDayNumber(isoDate: string): string {
 }
 
 /** Format an ISO date string as month year (e.g., "January 2024"). */
-export function formatMonthYear(isoDate: string): string {
-  return DateTime.fromISO(isoDate).toFormat('LLLL yyyy');
+export function formatMonthYear(isoDate: string, locale?: string): string {
+  const dt = DateTime.fromISO(isoDate);
+  return (locale ? dt.reconfigure({ locale }) : dt).toFormat('LLLL yyyy');
 }
 
 /** Get today's date as YYYY-MM-DD. */
@@ -38,22 +45,36 @@ export function isBeyondTomorrow(isoDate: string): boolean {
 }
 
 /** Get a human-friendly relative description (e.g., "2 days ago", "ongoing"). */
-export function formatRelative(isoDate: string): string {
-  const dt = DateTime.fromISO(isoDate);
+export function formatRelative(
+  isoDate: string,
+  locale?: string,
+  todayLabel?: string,
+): string {
+  const dt = locale
+    ? DateTime.fromISO(isoDate).reconfigure({ locale })
+    : DateTime.fromISO(isoDate);
   const diff = dt.diffNow('days').days;
-  if (Math.abs(diff) < 1) return 'Today';
+  if (Math.abs(diff) < 1) return todayLabel ?? 'Today';
   return dt.toRelative() ?? isoDate;
 }
 
 /** Format a date range for display. */
-export function formatDateRange(start: string, end: string | null): string {
-  const startFormatted = formatDate(start);
-  if (!end) return `${startFormatted} — Present`;
-  return `${startFormatted} — ${formatDate(end)}`;
+export function formatDateRange(
+  start: string,
+  end: string | null,
+  locale?: string,
+  presentLabel?: string,
+): string {
+  const startFormatted = formatDate(start, undefined, locale);
+  if (!end) return `${startFormatted} — ${presentLabel ?? 'Present'}`;
+  return `${startFormatted} — ${formatDate(end, undefined, locale)}`;
 }
 
 /** Calculate duration in days between two dates. Returns null if end is null (ongoing). */
-export function durationInDays(start: string, end: string | null): number | null {
+export function durationInDays(
+  start: string,
+  end: string | null,
+): number | null {
   if (!end) return null;
   const startDt = DateTime.fromISO(start);
   const endDt = DateTime.fromISO(end);
@@ -92,6 +113,7 @@ export function getYearMonth(isoDate: string): { year: number; month: number } {
 }
 
 /** Format a month label like "January 2024" from an ISO date. */
-export function formatMonthLabel(isoDate: string): string {
-  return DateTime.fromISO(isoDate).toFormat('LLLL yyyy');
+export function formatMonthLabel(isoDate: string, locale?: string): string {
+  const dt = DateTime.fromISO(isoDate);
+  return (locale ? dt.reconfigure({ locale }) : dt).toFormat('LLLL yyyy');
 }

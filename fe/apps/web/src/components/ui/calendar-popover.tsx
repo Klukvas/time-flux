@@ -2,10 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
+import { enUS } from 'react-day-picker/locale/en-US';
+import { uk } from 'react-day-picker/locale/uk';
 import 'react-day-picker/style.css';
 import { DateTime } from 'luxon';
+import type { Language } from '@timeflux/i18n';
 import { useTranslation } from '@timeflux/hooks';
 import { Button } from './button';
+
+const DAY_PICKER_LOCALES: Record<Language, typeof enUS> = { en: enUS, uk };
 
 interface CalendarPopoverProps {
   value: string; // ISO date string YYYY-MM-DD
@@ -18,7 +23,7 @@ export function CalendarPopover({
   onChange,
   minDate,
 }: CalendarPopoverProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [open, setOpen] = useState(false);
   const [tempDate, setTempDate] = useState<string>(value);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -71,6 +76,8 @@ export function CalendarPopover({
 
   const hasChanged = tempDate !== value;
 
+  const pickerLocale = DAY_PICKER_LOCALES[language] ?? enUS;
+
   return (
     <div ref={containerRef} className="relative inline-block">
       <Button variant="secondary" size="sm" onClick={() => setOpen((o) => !o)}>
@@ -91,12 +98,13 @@ export function CalendarPopover({
       </Button>
 
       {open && (
-        <div className="absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 rounded-xl border border-edge bg-surface-card p-4 shadow-xl">
+        <div className="absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 rounded-xl border border-edge bg-surface-elevated p-4 shadow-xl">
           <DayPicker
             mode="single"
             selected={selectedJS}
             onSelect={handleSelect}
             defaultMonth={selectedJS}
+            locale={pickerLocale}
             disabled={{
               after: todayJS,
               ...(minDate

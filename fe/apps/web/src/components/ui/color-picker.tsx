@@ -6,6 +6,7 @@ import {
   contrastTextColor,
   generateShades,
 } from '@timeflux/utils';
+import { useTranslation } from '@timeflux/hooks';
 
 interface ColorPickerProps {
   value: string;
@@ -13,6 +14,7 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({ value, onChange }: ColorPickerProps) {
+  const { t } = useTranslation();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const handleBaseClick = (index: number) => {
@@ -48,7 +50,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
               }`}
               style={{ backgroundColor: base.hex }}
               onClick={() => handleBaseClick(index)}
-              title={base.label}
+              title={t(base.labelKey)}
             >
               {isSelected && !isExpanded && (
                 <svg
@@ -89,7 +91,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
       {expandedIndex !== null && (
         <div className="flex items-center gap-1.5 rounded-lg border border-edge bg-surface-secondary px-3 py-2">
           <span className="mr-1 text-xs font-medium text-content-secondary">
-            {BASE_COLORS[expandedIndex].label}
+            {t(BASE_COLORS[expandedIndex].labelKey)}
           </span>
           {generateShades(BASE_COLORS[expandedIndex].hex).map((shade) => {
             const selected = value.toUpperCase() === shade.toUpperCase();

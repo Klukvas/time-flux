@@ -33,11 +33,6 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
 import type { TimelineMode } from '@/stores/view-store';
 
-const MODE_OPTIONS: { value: TimelineMode; label: string }[] = [
-  { value: 'horizontal', label: 'All Time' },
-  { value: 'week', label: 'Week' },
-];
-
 /** Derive registration date (YYYY-MM-DD) from user's createdAt ISO string, in their timezone. */
 function getRegistrationDate(
   createdAt: string | undefined,
@@ -49,10 +44,19 @@ function getRegistrationDate(
 
 export function TimelineView() {
   const router = useRouter();
+  const { t, language } = useTranslation();
   const timelineMode = useViewStore((s) => s.timelineMode);
   const setTimelineMode = useViewStore((s) => s.setTimelineMode);
   const onboarding = useOnboarding();
   const user = useAuthStore((s) => s.user);
+
+  const modeOptions: { value: TimelineMode; label: string }[] = useMemo(
+    () => [
+      { value: 'horizontal', label: t('timeline.modes.horizontal') },
+      { value: 'week', label: t('timeline.modes.week') },
+    ],
+    [t],
+  );
 
   const registrationDate = useMemo(
     () => getRegistrationDate(user?.createdAt, user?.timezone ?? 'UTC'),
@@ -112,7 +116,9 @@ export function TimelineView() {
       {/* Header */}
       <div className="mb-6 space-y-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-content">Timeline</h1>
+          <h1 className="text-2xl font-bold text-content">
+            {t('timeline.title')}
+          </h1>
 
           {/* Navigation for Week */}
           {showNavigation && (
@@ -127,7 +133,7 @@ export function TimelineView() {
                 onClick={goToToday}
                 className="rounded-lg border border-edge px-3 py-1.5 text-sm text-content hover:bg-surface-secondary"
               >
-                Today
+                {t('week.today')}
               </button>
               <button
                 onClick={() => navigateWeek(1)}
@@ -144,7 +150,7 @@ export function TimelineView() {
           <SegmentedControl
             value={timelineMode}
             onChange={setTimelineMode}
-            options={MODE_OPTIONS}
+            options={modeOptions}
           />
 
           {/* Date range filter for Horizontal mode */}
@@ -152,7 +158,7 @@ export function TimelineView() {
             <div className="flex flex-wrap items-center gap-2">
               <input
                 type="date"
-                className="rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-base sm:text-sm text-content"
+                className="rounded-lg border border-edge bg-surface-elevated px-3 py-1.5 text-base sm:text-sm text-content"
                 value={dateRange.from ?? ''}
                 min={registrationDate}
                 onChange={(e) =>
@@ -165,7 +171,7 @@ export function TimelineView() {
               <span className="text-content-tertiary">—</span>
               <input
                 type="date"
-                className="rounded-lg border border-edge bg-surface-card px-3 py-1.5 text-base sm:text-sm text-content"
+                className="rounded-lg border border-edge bg-surface-elevated px-3 py-1.5 text-base sm:text-sm text-content"
                 value={dateRange.to ?? ''}
                 min={registrationDate}
                 onChange={(e) =>
@@ -181,7 +187,7 @@ export function TimelineView() {
                   size="sm"
                   onClick={() => setDateRange({})}
                 >
-                  Clear
+                  {t('common.clear')}
                 </Button>
               )}
             </div>
@@ -235,6 +241,7 @@ function HorizontalMode({
   onDayClick: DayClickHandler;
   registrationDate?: string;
 }) {
+  const { t, language } = useTranslation();
   const { data, isLoading, error } = useTimeline(dateRange);
 
   const horizontalWeeks = useMemo(
@@ -249,7 +256,10 @@ function HorizontalMode({
     return (
       <div>
         <p className="mb-4 text-sm text-content-secondary">
-          Showing {formatDate(data.from)} — {formatDate(data.to)}
+          {t('timeline.showing_range', {
+            from: formatDate(data.from, undefined, language),
+            to: formatDate(data.to, undefined, language),
+          })}
         </p>
         <HorizontalTimeline
           weeks={horizontalWeeks}
@@ -272,27 +282,31 @@ function HorizontalTimeline({
   onDayClick: DayClickHandler;
   registrationDate?: string;
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   if (weeks.length === 0) {
     return (
       <EmptyState
-        title="No timeline data"
-        description="Create some chapters to see your timeline."
+        title={t('timeline.empty.title')}
+        description={t('timeline.empty.description')}
       />
     );
   }
 
-  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  // Generate locale-aware weekday labels from a known Monday (2024-01-01 is a Monday)
+  const dayLabels = Array.from({ length: 7 }, (_, i) => {
+    const date = DateTime.fromISO('2024-01-01').plus({ days: i });
+    return (language ? date.reconfigure({ locale: language }) : date).toFormat('ccc');
+  });
 
   return (
     <div>
       <div>
         {/* Day headers */}
         <div className="mb-3 grid grid-cols-7 gap-1 sm:gap-2 px-1">
-          {dayLabels.map((label) => (
+          {dayLabels.map((label, i) => (
             <div
-              key={label}
+              key={i}
               className="text-center text-xs font-medium text-content-tertiary"
             >
               <span className="hidden sm:inline">{label}</span>
@@ -366,7 +380,7 @@ function HorizontalTimeline({
                           color={day.dayState?.color}
                           imageUrl={getMainImageUrl(day.media, day.mainMediaId)}
                           size="md"
-                          label={`${formatDate(day.date)} — ${day.dayState?.name ?? 'No mood'}`}
+                          label={`${formatDate(day.date, undefined, language)} — ${day.dayState?.name ?? t('timeline.no_mood')}`}
                           onClick={
                             disabled ? undefined : () => onDayClick(day.date)
                           }
@@ -397,8 +411,8 @@ function HorizontalTimeline({
                 <div
                   className={`mt-1 text-right text-xs text-content-tertiary ${week.days.length < 7 ? 'mt-5' : ''}`}
                 >
-                  {formatDate(week.weekStart, 'MMM d')} —{' '}
-                  {formatDate(week.weekEnd, 'MMM d')}
+                  {formatDate(week.weekStart, 'MMM d', language)} —{' '}
+                  {formatDate(week.weekEnd, 'MMM d', language)}
                 </div>
               </div>
             );
@@ -420,6 +434,7 @@ function WeekMode({
   onDayClick: DayClickHandler;
   registrationDate?: string;
 }) {
+  const { t, language } = useTranslation();
   const { data: weekData, isLoading } = useWeekTimeline({ date: currentDate });
 
   const weekDays = useMemo(() => {
@@ -438,7 +453,8 @@ function WeekMode({
     return (
       <div>
         <p className="mb-4 text-sm text-content-secondary">
-          {formatDate(weekData.weekStart)} — {formatDate(weekData.weekEnd)}
+          {formatDate(weekData.weekStart, undefined, language)} —{' '}
+          {formatDate(weekData.weekEnd, undefined, language)}
         </p>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7">
@@ -453,10 +469,10 @@ function WeekMode({
                   disabled ? 'opacity-40 cursor-default' : 'hover:shadow-md'
                 } ${
                   isToday(day.date) ? 'ring-2 ring-accent' : ''
-                } bg-surface-card`}
+                } bg-surface-elevated`}
               >
                 <p className="text-xs font-medium text-content-secondary">
-                  {formatDayShort(day.date)}
+                  {formatDayShort(day.date, language)}
                 </p>
                 <p className="text-xl font-bold text-content md:text-2xl">
                   {formatDayNumber(day.date)}
@@ -468,7 +484,7 @@ function WeekMode({
                     color={day.dayState?.color}
                     imageUrl={getMainImageUrl(day.media, day.mainMediaId)}
                     size="lg"
-                    label={day.dayState?.name ?? 'No mood'}
+                    label={day.dayState?.name ?? t('timeline.no_mood')}
                   />
                 </div>
 
@@ -492,7 +508,9 @@ function WeekMode({
                     ))}
                     {day.periods.length > 3 && (
                       <p className="text-center text-xs text-content-tertiary">
-                        +{day.periods.length - 3} more
+                        {t('timeline.more_periods', {
+                          count: day.periods.length - 3,
+                        })}
                       </p>
                     )}
                   </div>
@@ -505,15 +523,16 @@ function WeekMode({
     );
   }
 
-  return <EmptyState title="No data for this week" />;
+  return <EmptyState title={t('timeline.no_week_data')} />;
 }
 
 // ─── Shared UI Helpers ─────────────────────────────────────
 
 function ErrorMessage() {
+  const { t } = useTranslation();
   return (
     <div className="py-16 text-center text-sm text-danger">
-      Failed to load timeline.
+      {t('timeline.failed_to_load')}
     </div>
   );
 }

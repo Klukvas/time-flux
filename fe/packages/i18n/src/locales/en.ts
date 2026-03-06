@@ -54,6 +54,11 @@ const en: TranslationDictionary = {
       week: 'Week',
     },
     journey_begins: 'Your journey begins',
+    showing_range: 'Showing {from} — {to}',
+    no_mood: 'No mood',
+    more_periods: '+{count} more',
+    no_week_data: 'No data for this week',
+    failed_to_load: 'Failed to load timeline.',
   },
 
   week: {
@@ -111,6 +116,7 @@ const en: TranslationDictionary = {
     close_description: 'Close the period by setting an end date.',
     no_periods_on_day: 'No periods on this day.',
     start_new_chapter: 'Create a chapter to track this',
+    count: '{count} periods',
     confirm_delete_message: 'Are you sure you want to delete this period?',
     form: {
       start_date: 'Start Date',
@@ -291,6 +297,27 @@ const en: TranslationDictionary = {
     days_count: '{count} days',
   },
 
+  mood_score: {
+    very_negative: 'Very Negative',
+    negative: 'Negative',
+    neutral: 'Neutral',
+    positive: 'Positive',
+    very_positive: 'Very Positive',
+  },
+
+  colors: {
+    red: 'Red',
+    orange: 'Orange',
+    amber: 'Amber',
+    green: 'Green',
+    teal: 'Teal',
+    blue: 'Blue',
+    indigo: 'Indigo',
+    purple: 'Purple',
+    pink: 'Pink',
+    slate: 'Slate',
+  },
+
   day_form: {
     mood: 'Mood',
     photos_videos: 'Photos & Videos',
@@ -333,6 +360,7 @@ const en: TranslationDictionary = {
     previous_day: 'Previous day',
     next_day: 'Next day',
     future_read_only: 'Future date — read only',
+    media_hint: 'Drop photos or videos here, or click to browse',
   },
 
   confirm_delete: {
@@ -467,6 +495,7 @@ const en: TranslationDictionary = {
     paywall_description:
       'Upgrade to Pro to see mood analytics, trends, and patterns.',
     paywall_cta: 'Upgrade to Pro',
+    score_tooltip: 'Score',
   },
 
   landing: {

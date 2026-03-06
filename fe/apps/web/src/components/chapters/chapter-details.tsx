@@ -25,7 +25,7 @@ interface ChapterDetailsProps {
 }
 
 export function ChapterDetails({ groupId }: ChapterDetailsProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const router = useRouter();
   const { data: details, isLoading, error } = useEventGroupDetails(groupId);
   const deleteGroup = useDeleteEventGroup();
@@ -150,7 +150,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
 
       {/* Stats row */}
       {details.totalDays > 0 && (
-        <div className="mb-6 flex items-center gap-6 rounded-lg border border-edge bg-surface-card p-4">
+        <div className="mb-6 flex items-center gap-6 rounded-lg border border-edge bg-surface-elevated p-4">
           <div>
             <p className="text-2xl font-bold text-content">
               {details.totalDays}
@@ -213,7 +213,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
 
           {/* Stats grid */}
           <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-lg border border-edge bg-surface-card p-3 text-center">
+            <div className="rounded-lg border border-edge bg-surface-elevated p-3 text-center">
               <p className="text-xl font-bold text-content">
                 {details.analytics.totalDays}
               </p>
@@ -221,7 +221,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                 {t('insights.total_days')}
               </p>
             </div>
-            <div className="rounded-lg border border-edge bg-surface-card p-3 text-center">
+            <div className="rounded-lg border border-edge bg-surface-elevated p-3 text-center">
               <p className="text-xl font-bold text-content">
                 {details.analytics.totalPeriods}
               </p>
@@ -229,7 +229,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                 {t('insights.total_periods')}
               </p>
             </div>
-            <div className="rounded-lg border border-edge bg-surface-card p-3 text-center">
+            <div className="rounded-lg border border-edge bg-surface-elevated p-3 text-center">
               <p className="text-xl font-bold text-content">
                 {details.analytics.totalMedia}
               </p>
@@ -237,7 +237,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                 {t('insights.total_media')}
               </p>
             </div>
-            <div className="rounded-lg border border-edge bg-surface-card p-3 text-center">
+            <div className="rounded-lg border border-edge bg-surface-elevated p-3 text-center">
               <p className="text-xl font-bold text-content">
                 {details.analytics.averageMoodScore != null
                   ? details.analytics.averageMoodScore.toFixed(1)
@@ -302,7 +302,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                   return (
                     <div
                       key={i}
-                      className="rounded-lg border border-edge bg-surface-card px-3 py-2"
+                      className="rounded-lg border border-edge bg-surface-elevated px-3 py-2"
                     >
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-content-secondary">
@@ -356,7 +356,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
               return (
                 <div
                   key={period.id}
-                  className="flex items-center justify-between rounded-lg border border-edge bg-surface-card px-4 py-3"
+                  className="flex items-center justify-between rounded-lg border border-edge bg-surface-elevated px-4 py-3"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -364,6 +364,8 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                         {formatDateRange(
                           period.startDate,
                           period.endDate ?? null,
+                          language,
+                          t('common.present'),
                         )}
                       </span>
                       {isActive && (
@@ -518,6 +520,8 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
         onConfirm={handleDeletePeriod}
         title={t('periods.delete')}
         message={t('periods.confirm_delete_message')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         loading={deletePeriod.isPending}
       />
 
@@ -527,6 +531,8 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
         onConfirm={handleDeleteGroup}
         title={t('chapters.delete')}
         message={t('chapters.confirm_delete_message')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         loading={deleteGroup.isPending}
       />
     </div>

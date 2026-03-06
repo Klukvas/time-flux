@@ -8,6 +8,7 @@ import {
   isVideoType,
 } from '@timeflux/utils';
 import type { MediaItem } from '@timeflux/utils';
+import { useTranslation } from '@timeflux/hooks';
 
 interface MediaUploaderProps {
   items: MediaItem[];
@@ -26,6 +27,7 @@ export function MediaUploader({
   onSetCover,
   disabled,
 }: MediaUploaderProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -169,7 +171,7 @@ export function MediaUploader({
       <div
         role="button"
         tabIndex={0}
-        aria-label="Upload photos or videos"
+        aria-label={t('day_form.media_hint')}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -202,7 +204,7 @@ export function MediaUploader({
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
           />
         </svg>
-        Drop photos or videos here, or click to browse
+        {t('day_form.media_hint')}
       </div>
 
       <input

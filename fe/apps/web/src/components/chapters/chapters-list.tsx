@@ -19,7 +19,7 @@ import { ChaptersSkeleton } from '@/components/ui/skeleton';
 import { ChapterFormModal } from './chapter-form-modal';
 
 export function ChaptersList() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const router = useRouter();
   const { data: groups, isLoading } = useEventGroups();
   const deleteGroup = useDeleteEventGroup();
@@ -102,7 +102,7 @@ export function ChaptersList() {
             return (
               <div
                 key={group.id}
-                className="flex items-start justify-between gap-2 rounded-lg border border-edge bg-surface-card p-4 transition-shadow hover:shadow-md cursor-pointer"
+                className="flex items-start justify-between gap-2 rounded-lg border border-edge bg-surface-elevated p-4 transition-shadow hover:shadow-md cursor-pointer"
                 style={{
                   borderLeftWidth: 4,
                   borderLeftColor: group.category.color,
@@ -137,14 +137,15 @@ export function ChaptersList() {
                   )}
                   <div className="mt-1 flex items-center gap-3 text-xs text-content-tertiary">
                     <span>
-                      {group.periods.length}{' '}
-                      {group.periods.length === 1 ? 'period' : 'periods'}
+                      {t('periods.count', { count: group.periods.length })}
                     </span>
                     {latestPeriod && (
                       <span>
                         {formatDateRange(
                           latestPeriod.startDate,
                           latestPeriod.endDate ?? null,
+                          language,
+                          t('common.present'),
                         )}
                       </span>
                     )}
@@ -223,6 +224,8 @@ export function ChaptersList() {
         onConfirm={handleDelete}
         title={t('chapters.delete')}
         message={t('chapters.confirm_delete_message')}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         loading={deleteGroup.isPending}
       />
     </div>

@@ -10,6 +10,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import type { TrendPoint } from '@timeflux/api';
+import { useTranslation } from '@timeflux/hooks';
 
 interface MoodTrendChartProps {
   data: TrendPoint[];
@@ -21,6 +22,8 @@ function formatDate(dateStr: string) {
 }
 
 export function MoodTrendChart({ data }: MoodTrendChartProps) {
+  const { t } = useTranslation();
+
   return (
     <ResponsiveContainer width="100%" height={240}>
       <LineChart
@@ -55,13 +58,16 @@ export function MoodTrendChart({ data }: MoodTrendChartProps) {
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: 'var(--color-surface-card, #fff)',
+            backgroundColor: 'var(--color-bg-elevated, #fff)',
             border: '1px solid var(--color-edge, #e5e7eb)',
             borderRadius: 8,
             fontSize: 12,
           }}
           labelFormatter={(label) => formatDate(String(label))}
-          formatter={(value) => [Number(value).toFixed(1), 'Score']}
+          formatter={(value) => [
+            Number(value).toFixed(1),
+            t('insights.score_tooltip'),
+          ]}
         />
         <Line
           type="monotone"

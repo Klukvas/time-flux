@@ -146,7 +146,7 @@ export function DayStatesList() {
             />
           )}
 
-          <div className="rounded-xl border border-edge bg-surface-card p-5">
+          <div className="rounded-xl border border-edge bg-surface-elevated p-5">
             <div className="mb-1 text-sm font-semibold text-content">
               {t('day_states.recommendations.title')}
             </div>
@@ -197,7 +197,7 @@ export function DayStatesList() {
                       type="button"
                       onClick={() => handleDismissRecommendation(s.key)}
                       className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary transition-colors"
-                      title="Dismiss"
+                      title={t('day_states.recommendations.dismiss')}
                     >
                       <svg
                         className="h-3.5 w-3.5"
@@ -245,7 +245,7 @@ export function DayStatesList() {
           {dayStates.map((ds) => (
             <div
               key={ds.id}
-              className="rounded-xl border border-edge bg-surface-card transition-shadow hover:shadow-md"
+              className="rounded-xl border border-edge bg-surface-elevated transition-shadow hover:shadow-md"
             >
               <div className="flex items-center gap-3 p-4">
                 <div
@@ -308,6 +308,8 @@ export function DayStatesList() {
         message={t('day_states.confirm_delete_message', {
           name: deletingDayState?.name ?? '',
         })}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         loading={deleteDayState.isPending}
       />
     </div>

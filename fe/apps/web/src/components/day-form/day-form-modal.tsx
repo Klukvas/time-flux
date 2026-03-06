@@ -57,7 +57,7 @@ export function DayFormModal({
   currentDayStateColor,
   currentMainMediaId,
 }: DayFormModalProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { data: dayStates } = useDayStates();
   const { data: allGroups } = useEventGroups();
   const { data: recommendations } = useRecommendations();
@@ -237,7 +237,7 @@ export function DayFormModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={formatDate(date, 'cccc, MMMM d, yyyy')}
+      title={formatDate(date, 'cccc, MMMM d, yyyy', language)}
     >
       <div className="space-y-5">
         {/* Today indicator */}
@@ -374,7 +374,7 @@ export function DayFormModal({
             maxLength={MAX_COMMENT_LENGTH}
             rows={2}
             placeholder={t('day_form.comment_placeholder')}
-            className="block w-full rounded-lg border border-edge bg-surface-card px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
+            className="block w-full rounded-lg border border-edge bg-surface-elevated px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
             disabled={isPending}
           />
           <p className="mt-1 text-right text-xs text-content-tertiary">

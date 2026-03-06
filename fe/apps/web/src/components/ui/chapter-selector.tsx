@@ -93,7 +93,7 @@ export function ChapterSelector({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-40 mt-1 w-72 rounded-xl border border-edge bg-surface-card shadow-xl">
+        <div className="absolute left-0 top-full z-40 mt-1 w-72 rounded-xl border border-edge bg-surface-elevated shadow-xl">
           {/* Search input */}
           <div className="border-b border-edge p-2">
             <input
@@ -143,7 +143,7 @@ export function ChapterSelector({
                           color: group.category.color,
                         }}
                       >
-                        Active
+                        {t('periods.active')}
                       </span>
                     )}
                   </button>

@@ -22,29 +22,44 @@ export function contrastTextColor(hex: string): string {
 
 /** Preset color palette for picking category/day-state colors. */
 export const COLOR_PALETTE = [
-  '#4285F4', '#EA4335', '#E91E63', '#4CAF50',
-  '#FF9800', '#00BCD4', '#9C27B0', '#607D8B',
-  '#F44336', '#8BC34A', '#FFC107', '#03A9F4',
-  '#FF5722', '#009688', '#673AB7', '#795548',
-  '#2196F3', '#CDDC39', '#FF4081', '#00E5FF',
+  '#4285F4',
+  '#EA4335',
+  '#E91E63',
+  '#4CAF50',
+  '#FF9800',
+  '#00BCD4',
+  '#9C27B0',
+  '#607D8B',
+  '#F44336',
+  '#8BC34A',
+  '#FFC107',
+  '#03A9F4',
+  '#FF5722',
+  '#009688',
+  '#673AB7',
+  '#795548',
+  '#2196F3',
+  '#CDDC39',
+  '#FF4081',
+  '#00E5FF',
 ];
 
 // ---------------------------------------------------------------------------
 // Base colors & shade generation for the expanded color picker
 // ---------------------------------------------------------------------------
 
-/** Curated base colors for the shade picker (10 hues). */
+/** Curated base colors for the shade picker (10 hues). `labelKey` is an i18n key. */
 export const BASE_COLORS = [
-  { label: 'Red',    hex: '#EF4444' },
-  { label: 'Orange', hex: '#F97316' },
-  { label: 'Amber',  hex: '#F59E0B' },
-  { label: 'Green',  hex: '#22C55E' },
-  { label: 'Teal',   hex: '#14B8A6' },
-  { label: 'Blue',   hex: '#3B82F6' },
-  { label: 'Indigo', hex: '#6366F1' },
-  { label: 'Purple', hex: '#A855F7' },
-  { label: 'Pink',   hex: '#EC4899' },
-  { label: 'Slate',  hex: '#64748B' },
+  { labelKey: 'colors.red', hex: '#EF4444' },
+  { labelKey: 'colors.orange', hex: '#F97316' },
+  { labelKey: 'colors.amber', hex: '#F59E0B' },
+  { labelKey: 'colors.green', hex: '#22C55E' },
+  { labelKey: 'colors.teal', hex: '#14B8A6' },
+  { labelKey: 'colors.blue', hex: '#3B82F6' },
+  { labelKey: 'colors.indigo', hex: '#6366F1' },
+  { labelKey: 'colors.purple', hex: '#A855F7' },
+  { labelKey: 'colors.pink', hex: '#EC4899' },
+  { labelKey: 'colors.slate', hex: '#64748B' },
 ] as const;
 
 export type BaseColor = (typeof BASE_COLORS)[number];
@@ -92,10 +107,10 @@ function mixColor(hex: string, factor: number): string {
  */
 export function generateShades(baseHex: string): string[] {
   return [
-    mixColor(baseHex, 0.45),  // lighter
-    mixColor(baseHex, 0.2),   // light
-    baseHex.toUpperCase(),     // base
-    mixColor(baseHex, -0.2),  // dark
-    mixColor(baseHex, -0.4),  // darker
+    mixColor(baseHex, 0.45), // lighter
+    mixColor(baseHex, 0.2), // light
+    baseHex.toUpperCase(), // base
+    mixColor(baseHex, -0.2), // dark
+    mixColor(baseHex, -0.4), // darker
   ];
 }

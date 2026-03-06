@@ -55,6 +55,11 @@ const uk: TranslationDictionary = {
       week: 'Тиждень',
     },
     journey_begins: 'Ваша подорож починається',
+    showing_range: 'Показ {from} — {to}',
+    no_mood: 'Без настрою',
+    more_periods: 'ще +{count}',
+    no_week_data: 'Немає даних за цей тиждень',
+    failed_to_load: 'Не вдалося завантажити хронологію.',
   },
 
   week: {
@@ -112,6 +117,7 @@ const uk: TranslationDictionary = {
     close_description: 'Закрийте період, встановивши дату завершення.',
     no_periods_on_day: 'Немає періодів у цей день.',
     start_new_chapter: 'Створіть розділ для відстеження',
+    count: '{count} періодів',
     confirm_delete_message: 'Ви впевнені, що хочете видалити цей період?',
     form: {
       start_date: 'Дата початку',
@@ -291,6 +297,27 @@ const uk: TranslationDictionary = {
     days_count: '{count} днів',
   },
 
+  mood_score: {
+    very_negative: 'Дуже погано',
+    negative: 'Погано',
+    neutral: 'Нейтрально',
+    positive: 'Добре',
+    very_positive: 'Дуже добре',
+  },
+
+  colors: {
+    red: 'Червоний',
+    orange: 'Помаранчевий',
+    amber: 'Бурштиновий',
+    green: 'Зелений',
+    teal: 'Бірюзовий',
+    blue: 'Синій',
+    indigo: 'Індиго',
+    purple: 'Фіолетовий',
+    pink: 'Рожевий',
+    slate: 'Сірий',
+  },
+
   day_form: {
     mood: 'Настрій',
     photos_videos: 'Фото та відео',
@@ -333,6 +360,7 @@ const uk: TranslationDictionary = {
     previous_day: 'Попередній день',
     next_day: 'Наступний день',
     future_read_only: 'Майбутня дата — лише перегляд',
+    media_hint: 'Перетягніть фото чи відео сюди, або натисніть для вибору',
   },
 
   confirm_delete: {
@@ -469,6 +497,7 @@ const uk: TranslationDictionary = {
     paywall_description:
       'Покращіть до Pro, щоб бачити аналітику настроїв, тренди та патерни.',
     paywall_cta: 'Покращити до Pro',
+    score_tooltip: 'Оцінка',
   },
 
   landing: {
