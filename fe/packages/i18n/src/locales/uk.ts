@@ -254,7 +254,8 @@ const uk: TranslationDictionary = {
     categories_unlimited: 'Необмежено категорій',
     moods_limit: 'До {count} настроїв',
     moods_unlimited: 'Необмежено настроїв',
-    analytics_included: 'Аналітика включена',
+    analytics_included: 'Повна аналітика',
+    analytics_basic: 'Базова аналітика',
     analytics_locked: 'Аналітика заблокована',
     memories_included: 'Спогади включені',
     memories_locked: 'Спогади заблоковані',
@@ -497,6 +498,9 @@ const uk: TranslationDictionary = {
     paywall_description:
       'Покращіть до Pro, щоб бачити аналітику настроїв, тренди та патерни.',
     paywall_cta: 'Покращити до Pro',
+    section_locked_title: 'Розблокуйте розширену аналітику',
+    section_locked_description:
+      'Оновіть до Pro, щоб отримати детальну аналітику',
     score_tooltip: 'Оцінка',
   },
 

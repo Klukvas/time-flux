@@ -6,6 +6,7 @@ import {
   type TierLimitResource,
   type TierFeature,
   type TierLimits,
+  type AnalyticsAccess,
 } from '../common/constants/tier-limits.js';
 import {
   QuotaExceededError,
@@ -101,6 +102,11 @@ export class SubscriptionsService {
         tier,
       });
     }
+  }
+
+  async getAnalyticsAccessLevel(userId: string): Promise<AnalyticsAccess> {
+    const limits = await this.getLimits(userId);
+    return limits.analytics;
   }
 
   async assertFeatureAccess(userId: string, feature: TierFeature) {

@@ -253,7 +253,8 @@ const en: TranslationDictionary = {
     categories_unlimited: 'Unlimited categories',
     moods_limit: 'Up to {count} moods',
     moods_unlimited: 'Unlimited moods',
-    analytics_included: 'Analytics included',
+    analytics_included: 'Full analytics',
+    analytics_basic: 'Basic analytics',
     analytics_locked: 'Analytics locked',
     memories_included: 'Memories included',
     memories_locked: 'Memories locked',
@@ -495,6 +496,8 @@ const en: TranslationDictionary = {
     paywall_description:
       'Upgrade to Pro to see mood analytics, trends, and patterns.',
     paywall_cta: 'Upgrade to Pro',
+    section_locked_title: 'Unlock Advanced Insights',
+    section_locked_description: 'Upgrade to Pro to access detailed analytics',
     score_tooltip: 'Score',
   },
 

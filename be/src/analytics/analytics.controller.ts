@@ -13,6 +13,7 @@ import {
 } from '../common/decorators/current-user.decorator.js';
 import { MoodOverviewResponseDto } from './dto/mood-overview.dto.js';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
+import { FeatureLockedError } from '../common/errors/app.error.js';
 
 @ApiTags('Analytics')
 @ApiBearerAuth()
@@ -36,7 +37,20 @@ export class AnalyticsController {
     type: MoodOverviewResponseDto,
   })
   async getMoodOverview(@CurrentUser() user: JwtPayload) {
-    await this.subscriptionsService.assertFeatureAccess(user.sub, 'analytics');
-    return this.analyticsService.getMoodOverview(user.sub, user.timezone);
+    const access = await this.subscriptionsService.getAnalyticsAccessLevel(
+      user.sub,
+    );
+    if (access === false) {
+      throw new FeatureLockedError({
+        feature: 'analytics',
+        tier: await this.subscriptionsService.getTier(user.sub),
+      });
+    }
+    const fullAccess = access === true;
+    return this.analyticsService.getMoodOverview(
+      user.sub,
+      user.timezone,
+      fullAccess,
+    );
   }
 }

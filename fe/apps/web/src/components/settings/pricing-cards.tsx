@@ -149,10 +149,12 @@ export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
                   ? t('subscription.moods_unlimited')
                   : t('subscription.moods_limit', { count: limits.dayStates })}
               </FeatureRow>
-              <FeatureRow included={limits.analytics}>
-                {limits.analytics
+              <FeatureRow included={!!limits.analytics}>
+                {limits.analytics === true
                   ? t('subscription.analytics_included')
-                  : t('subscription.analytics_locked')}
+                  : limits.analytics === 'basic'
+                    ? t('subscription.analytics_basic')
+                    : t('subscription.analytics_locked')}
               </FeatureRow>
               <FeatureRow included={limits.memories}>
                 {limits.memories

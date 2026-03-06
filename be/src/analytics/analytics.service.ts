@@ -15,22 +15,31 @@ import {
 export class AnalyticsService {
   constructor(private readonly repo: AnalyticsRepository) {}
 
-  async getMoodOverview(userId: string, timezone: string) {
+  async getMoodOverview(
+    userId: string,
+    timezone: string,
+    fullAccess: boolean = true,
+  ) {
     const tz = timezone;
 
-    const [
-      dayStates,
-      allDaysWithMood,
-      categoriesWithPeriods,
-      allDaysWithMedia,
-      allEventPeriods,
-    ] = await Promise.all([
+    // Basic queries needed for all tiers
+    const basicQueries = [
       this.repo.findAllDayStates(userId),
       this.repo.findAllDaysWithMood(userId),
-      this.repo.findAllCategoriesWithPeriods(userId),
-      this.repo.findAllDaysWithMediaCount(userId),
-      this.repo.findAllEventPeriods(userId),
-    ]);
+    ] as const;
+
+    // Pro-only queries
+    const proQueries = fullAccess
+      ? ([
+          this.repo.findAllCategoriesWithPeriods(userId),
+          this.repo.findAllDaysWithMediaCount(userId),
+          this.repo.findAllEventPeriods(userId),
+        ] as const)
+      : null;
+
+    const [dayStates, allDaysWithMood] = await Promise.all(basicQueries);
+    const [categoriesWithPeriods, allDaysWithMedia, allEventPeriods] =
+      proQueries ? await Promise.all(proQueries) : [[], [], []];
 
     const scoreMap = buildMoodScoreMap(dayStates);
 
@@ -71,7 +80,19 @@ export class AnalyticsService {
             : 0,
       }));
 
-    // ── Best / worst category ──────────────────────────────────
+    // ── PRO-only: Best / worst category, 30-day trend, weekday insights ──
+    if (!fullAccess) {
+      return {
+        totalDaysWithMood,
+        averageMoodScore: avgScore ?? 0,
+        moodDistribution,
+        bestCategory: null,
+        worstCategory: null,
+        trendLast30Days: [],
+        weekdayInsights: null,
+      };
+    }
+
     let bestCategory: {
       categoryId: string;
       name: string;

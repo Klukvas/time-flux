@@ -25,16 +25,20 @@ describe('Analytics E2E', () => {
     r.set('Authorization', `Bearer ${user.accessToken}`);
 
   describe('GET /api/v1/analytics/mood-overview', () => {
-    it('should return 403 FEATURE_LOCKED for FREE tier', async () => {
+    it('should return 200 with basic data for FREE tier', async () => {
       const user = await registerTestUser(app);
 
       const res = await auth(
         apiRequest(app).get('/api/v1/analytics/mood-overview'),
         user,
-      ).expect(403);
+      ).expect(200);
 
-      expect(res.body.error_code).toBe('FEATURE_LOCKED');
-      expect(res.body.details.feature).toBe('analytics');
+      expect(res.body.averageMoodScore).toBeDefined();
+      expect(Array.isArray(res.body.moodDistribution)).toBe(true);
+      expect(res.body.bestCategory).toBeNull();
+      expect(res.body.worstCategory).toBeNull();
+      expect(res.body.trendLast30Days).toEqual([]);
+      expect(res.body.weekdayInsights).toBeNull();
     });
 
     it('should return 200 for PRO tier', async () => {
