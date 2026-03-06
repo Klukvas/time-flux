@@ -27,8 +27,11 @@ class SubscriptionLimitsDto {
   @ApiProperty({ example: 5 })
   dayStates!: number;
 
-  @ApiProperty({ example: false })
-  analytics!: boolean;
+  @ApiProperty({
+    oneOf: [{ type: 'boolean' }, { type: 'string', enum: ['basic'] }],
+    example: 'basic',
+  })
+  analytics!: boolean | 'basic';
 
   @ApiProperty({ example: false })
   memories!: boolean;

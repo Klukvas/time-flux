@@ -1841,8 +1841,18 @@
             "example": 5
           },
           "analytics": {
-            "type": "boolean",
-            "example": false
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "basic"
+                ]
+              }
+            ],
+            "example": "basic"
           },
           "memories": {
             "type": "boolean",
