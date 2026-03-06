@@ -1,5 +1,3 @@
-'use client';
-
 interface SkeletonProps {
   className?: string;
 }
@@ -7,7 +5,7 @@ interface SkeletonProps {
 export function Skeleton({ className = '' }: SkeletonProps) {
   return (
     <div
-      className={`animate-pulse rounded-md bg-surface-secondary ${className}`}
+      className={`animate-pulse rounded-md bg-[var(--color-border)] ${className}`}
     />
   );
 }
@@ -21,8 +19,8 @@ export function SkeletonTitle() {
   );
 }
 
-/** Card shell with inner lines. */
-export function SkeletonCard({
+/** Card shell used by page-specific skeletons. */
+export function SkeletonSection({
   lines = 3,
   className = '',
 }: {
@@ -31,14 +29,17 @@ export function SkeletonCard({
 }) {
   return (
     <div
-      className={`rounded-xl border border-edge bg-surface-card p-6 ${className}`}
+      className={`rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 ${className}`}
     >
       <Skeleton className="mb-4 h-4 w-32" />
       <div className="space-y-3">
         {Array.from({ length: lines }).map((_, i) => {
           const widths = ['w-full', 'w-4/5', 'w-3/5', 'w-2/5'];
           return (
-            <Skeleton key={i} className={`h-3 ${widths[i % widths.length]}`} />
+            <Skeleton
+              key={`line-${i}`}
+              className={`h-3 ${widths[i % widths.length]}`}
+            />
           );
         })}
       </div>
@@ -54,17 +55,17 @@ export function InsightsSkeleton() {
       <SkeletonTitle />
       <div className="space-y-6">
         {/* Average mood */}
-        <div className="rounded-lg border border-edge bg-surface-card p-6">
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
           <Skeleton className="mb-3 h-4 w-28" />
           <Skeleton className="mb-2 h-10 w-16" />
           <Skeleton className="h-3 w-48" />
         </div>
         {/* Distribution */}
-        <div className="rounded-lg border border-edge bg-surface-card p-6">
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
           <Skeleton className="mb-4 h-4 w-36" />
           <div className="space-y-3">
-            {[80, 65, 50, 35, 20].map((w, i) => (
-              <div key={i} className="flex items-center gap-3">
+            {[80, 65, 50, 35, 20].map((width) => (
+              <div key={width} className="flex items-center gap-3">
                 <Skeleton className="h-3 w-3 rounded-full" />
                 <Skeleton className="h-3 w-20" />
                 <Skeleton className="h-2.5 flex-1" />
@@ -74,11 +75,11 @@ export function InsightsSkeleton() {
         </div>
         {/* Categories */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <SkeletonCard lines={2} />
-          <SkeletonCard lines={2} />
+          <SkeletonSection lines={2} />
+          <SkeletonSection lines={2} />
         </div>
         {/* Trend */}
-        <div className="rounded-lg border border-edge bg-surface-card p-6">
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
           <Skeleton className="mb-4 h-4 w-32" />
           <Skeleton className="h-[180px] w-full" />
         </div>
@@ -97,8 +98,8 @@ export function CategoriesSkeleton() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
-            key={i}
-            className="rounded-xl border border-edge bg-surface-card p-4"
+            key={`cat-${i}`}
+            className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
           >
             <div className="flex items-center gap-3">
               <Skeleton className="h-8 w-8 rounded-full" />
@@ -121,8 +122,8 @@ export function ChaptersSkeleton() {
       <div className="space-y-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
-            key={i}
-            className="rounded-xl border border-edge bg-surface-card p-5"
+            key={`ch-${i}`}
+            className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -149,8 +150,8 @@ export function DayStatesSkeleton() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 5 }).map((_, i) => (
           <div
-            key={i}
-            className="rounded-xl border border-edge bg-surface-card p-4"
+            key={`ds-${i}`}
+            className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
           >
             <div className="flex items-center gap-3">
               <Skeleton className="h-8 w-8 rounded-full" />
@@ -171,9 +172,9 @@ export function SettingsSkeleton() {
     <div>
       <SkeletonTitle />
       <div className="space-y-6">
-        <SkeletonCard lines={4} />
-        <SkeletonCard lines={3} />
-        <SkeletonCard lines={2} />
+        <SkeletonSection lines={4} />
+        <SkeletonSection lines={3} />
+        <SkeletonSection lines={2} />
       </div>
     </div>
   );
@@ -185,13 +186,13 @@ export function ChapterDetailsSkeleton() {
       <Skeleton className="mb-2 h-8 w-48" />
       <Skeleton className="mb-6 h-4 w-32" />
       <div className="space-y-6">
-        <SkeletonCard lines={3} />
-        <SkeletonCard lines={4} />
+        <SkeletonSection lines={3} />
+        <SkeletonSection lines={4} />
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
-              key={i}
-              className="rounded-lg border border-edge bg-surface-card p-4"
+              key={`detail-${i}`}
+              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
             >
               <Skeleton className="mb-2 h-3 w-16" />
               <Skeleton className="h-6 w-10" />
@@ -212,11 +213,14 @@ export function TimelineSkeleton() {
       </div>
       <div className="space-y-2">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-2">
+          <div key={`tl-${i}`} className="flex items-center gap-2">
             <Skeleton className="h-3 w-16" />
             <div className="flex gap-1">
               {Array.from({ length: 7 }).map((_, j) => (
-                <Skeleton key={j} className="h-6 w-6 rounded-full" />
+                <Skeleton
+                  key={`tl-${i}-${j}`}
+                  className="h-6 w-6 rounded-full"
+                />
               ))}
             </div>
           </div>

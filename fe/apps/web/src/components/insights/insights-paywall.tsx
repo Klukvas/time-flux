@@ -24,7 +24,7 @@ export function InsightsPaywall() {
         >
           <div className="space-y-6">
             {/* Average Mood */}
-            <div className="rounded-lg border border-edge bg-surface-card p-6">
+            <div className="rounded-lg border border-edge bg-surface-elevated p-6">
               <p className="text-sm font-medium text-content-secondary">
                 {t('insights.average_mood')}
               </p>
@@ -37,7 +37,7 @@ export function InsightsPaywall() {
             </div>
 
             {/* Mood Distribution */}
-            <div className="rounded-lg border border-edge bg-surface-card p-6">
+            <div className="rounded-lg border border-edge bg-surface-elevated p-6">
               <h2 className="mb-4 text-sm font-medium text-content-secondary">
                 {t('insights.mood_distribution')}
               </h2>
@@ -76,7 +76,7 @@ export function InsightsPaywall() {
 
             {/* Categories */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-edge bg-surface-card p-6">
+              <div className="rounded-lg border border-edge bg-surface-elevated p-6">
                 <p className="text-sm font-medium text-success">
                   {t('insights.best_category')}
                 </p>
@@ -85,7 +85,7 @@ export function InsightsPaywall() {
                   8.1 {t('insights.out_of')}
                 </p>
               </div>
-              <div className="rounded-lg border border-edge bg-surface-card p-6">
+              <div className="rounded-lg border border-edge bg-surface-elevated p-6">
                 <p className="text-sm font-medium text-danger">
                   {t('insights.worst_category')}
                 </p>
@@ -99,7 +99,7 @@ export function InsightsPaywall() {
             </div>
 
             {/* Trend placeholder */}
-            <div className="rounded-lg border border-edge bg-surface-card p-6">
+            <div className="rounded-lg border border-edge bg-surface-elevated p-6">
               <h2 className="mb-4 text-sm font-medium text-content-secondary">
                 {t('insights.trend_last_30_days')}
               </h2>
@@ -118,7 +118,7 @@ export function InsightsPaywall() {
 
         {/* Centered upgrade overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="max-w-sm rounded-2xl border border-edge bg-surface-card p-8 text-center shadow-2xl">
+          <div className="max-w-sm rounded-2xl border border-edge bg-surface-elevated p-8 text-center shadow-2xl">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-indigo-500/20">
               <svg
                 className="h-7 w-7 text-violet-500"

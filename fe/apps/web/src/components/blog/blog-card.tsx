@@ -12,7 +12,7 @@ export function BlogCard({ post }: BlogCardProps) {
   return (
     <Link
       href={`/blog/${slug}`}
-      className="group block rounded-xl border border-edge bg-surface-card p-6 transition-all hover:border-accent/40 hover:shadow-md"
+      className="group block rounded-xl border border-edge bg-surface-elevated p-6 transition-all hover:border-accent/40 hover:shadow-md"
     >
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <LanguageBadge language={frontmatter.language} />

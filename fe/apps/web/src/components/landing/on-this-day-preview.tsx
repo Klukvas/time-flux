@@ -8,7 +8,7 @@ export function OnThisDayPreview() {
   return (
     <section className="px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-2xl">
-        <div className="overflow-hidden rounded-2xl border border-edge bg-surface-card shadow-lg">
+        <div className="overflow-hidden rounded-2xl border border-edge bg-surface-elevated shadow-lg">
           {/* Header */}
           <div className="border-b border-edge px-6 py-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-accent">

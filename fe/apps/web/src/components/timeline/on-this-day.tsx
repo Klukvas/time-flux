@@ -77,7 +77,7 @@ function MemoryCard({
       className={`group w-full rounded-xl border p-4 text-left transition-all hover:shadow-md ${
         selected
           ? 'border-accent bg-accent/5 ring-2 ring-accent/20'
-          : 'border-edge bg-surface-card hover:border-accent/30'
+          : 'border-edge bg-surface-elevated hover:border-accent/30'
       }`}
     >
       {/* Interval label */}

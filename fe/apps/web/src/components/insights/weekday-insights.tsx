@@ -31,7 +31,7 @@ function InsightCard({
       className={`rounded-lg border p-4 ${
         variant === 'warning'
           ? 'border-warning/30 bg-warning/5'
-          : 'border-edge bg-surface-card'
+          : 'border-edge bg-surface-elevated'
       }`}
     >
       <div className="flex items-start gap-3">
@@ -70,7 +70,7 @@ export function WeekdayInsightsSection({
   if (!hasAnyInsight) return null;
 
   return (
-    <div className="rounded-lg border border-edge bg-surface-card p-6">
+    <div className="rounded-lg border border-edge bg-surface-elevated p-6">
       <h2 className="mb-4 text-sm font-medium text-content-secondary">
         {t('insights.weekday_patterns')}
       </h2>

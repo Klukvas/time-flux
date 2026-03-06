@@ -144,7 +144,7 @@ export function PeriodFormModal({
             onChange={(e) => setComment(e.target.value)}
             maxLength={MAX_COMMENT_LENGTH}
             rows={3}
-            className="block w-full rounded-lg border border-edge bg-surface-card px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
+            className="block w-full rounded-lg border border-edge bg-surface-elevated px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
             placeholder={t('periods.form.comment_placeholder')}
           />
           {errors.comment && (

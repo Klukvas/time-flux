@@ -81,7 +81,7 @@ export function UsageSection() {
   ];
 
   return (
-    <div className="rounded-xl border border-edge bg-surface-card p-6">
+    <div className="rounded-xl border border-edge bg-surface-elevated p-6">
       <h2 className="mb-4 text-lg font-semibold text-content">
         {t('subscription.usage_title')}
       </h2>

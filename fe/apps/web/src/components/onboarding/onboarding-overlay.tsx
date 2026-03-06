@@ -145,7 +145,7 @@ export function OnboardingOverlay({
 
       {/* Floating card */}
       <div className="pointer-events-auto relative z-50 mx-4 w-full max-w-sm animate-fade-in">
-        <div className="rounded-2xl bg-surface-card p-6 shadow-2xl border border-edge">
+        <div className="rounded-2xl bg-surface-elevated p-6 shadow-2xl border border-edge">
           {/* Step dots */}
           <div className="mb-4 flex justify-center gap-1.5">
             {ALL_STEPS.map((_, i) => (

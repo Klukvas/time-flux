@@ -34,7 +34,7 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         {/* Appearance Section */}
-        <div className="rounded-xl border border-edge bg-surface-card p-6">
+        <div className="rounded-xl border border-edge bg-surface-elevated p-6">
           <h2 className="mb-4 text-lg font-semibold text-content">
             {t('settings.appearance')}
           </h2>
@@ -78,7 +78,7 @@ export default function SettingsPage() {
         <UsageSection />
 
         {/* Account Section */}
-        <div className="rounded-xl border border-edge bg-surface-card p-6">
+        <div className="rounded-xl border border-edge bg-surface-elevated p-6">
           <h2 className="mb-4 text-lg font-semibold text-content">
             {t('settings.account')}
           </h2>

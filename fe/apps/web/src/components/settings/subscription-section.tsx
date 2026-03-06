@@ -108,7 +108,7 @@ export function SubscriptionSection() {
     : null;
 
   return (
-    <div className="rounded-xl border border-edge bg-surface-card p-6">
+    <div className="rounded-xl border border-edge bg-surface-elevated p-6">
       <h2 className="mb-4 text-lg font-semibold text-content">
         {t('subscription.title')}
       </h2>
@@ -262,7 +262,7 @@ function SuccessModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-sm animate-in fade-in zoom-in-95 rounded-2xl bg-surface-card p-8 text-center shadow-2xl">
+      <div className="w-full max-w-sm animate-in fade-in zoom-in-95 rounded-2xl bg-surface-elevated p-8 text-center shadow-2xl">
         {/* Celebration icon */}
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-3xl shadow-lg shadow-violet-500/25">
           🎉

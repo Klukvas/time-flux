@@ -133,11 +133,11 @@ export function PlacesAutocomplete({
         value={input}
         onChange={(e) => handleInputChange(e.target.value)}
         placeholder={t('day_form.search_location')}
-        className="block w-full rounded-lg border border-edge bg-surface-card px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
+        className="block w-full rounded-lg border border-edge bg-surface-elevated px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
         disabled={disabled}
       />
       {open && suggestions.length > 0 && (
-        <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-edge bg-surface-card shadow-lg">
+        <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-edge bg-surface-elevated shadow-lg">
           {suggestions.map((s) => (
             <li
               key={s.placeId}

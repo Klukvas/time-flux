@@ -22,7 +22,7 @@ function resolveTheme(preference: ThemePreference): ResolvedTheme {
 }
 
 function applyTheme(resolved: ResolvedTheme) {
-  document.documentElement.setAttribute('data-theme', resolved);
+  document.documentElement.classList.toggle('dark', resolved === 'dark');
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({

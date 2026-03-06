@@ -76,7 +76,7 @@ export function CategorySelect({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className={`flex w-full items-center justify-between rounded-lg border bg-surface-card shadow-sm transition-colors ${paddingClass} ${textClass} ${
+        className={`flex w-full items-center justify-between rounded-lg border bg-surface-elevated shadow-sm transition-colors ${paddingClass} ${textClass} ${
           open
             ? 'border-accent ring-2 ring-accent'
             : error
@@ -105,7 +105,7 @@ export function CategorySelect({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-edge bg-surface-card py-1 shadow-lg">
+        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-edge bg-surface-elevated py-1 shadow-lg">
           {categories.length === 0 ? (
             <div
               className={`${paddingClass} text-content-tertiary ${textClass}`}

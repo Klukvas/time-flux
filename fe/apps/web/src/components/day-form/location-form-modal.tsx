@@ -224,7 +224,7 @@ export function LocationFormModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={MAX_LOCATION_NAME_LENGTH}
-                className="block w-full rounded-lg border border-edge bg-surface-card px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
+                className="block w-full rounded-lg border border-edge bg-surface-elevated px-3 py-2 text-sm text-content shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
                 disabled={saving || geocoding}
               />
               <p className="mt-1 text-xs text-content-tertiary">

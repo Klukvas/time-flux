@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import { ApiProvider } from '@/lib/api-provider';
 import { I18nProvider } from '@/lib/i18n-provider';
@@ -9,6 +10,12 @@ import {
   OrganizationJsonLd,
 } from '@/components/seo/json-ld';
 import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin', 'cyrillic'],
+  variable: '--font-sans',
+  display: 'swap',
+});
 
 const baseUrl = getBaseUrl();
 
@@ -68,7 +75,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body>
         <ThemeProvider>
           <I18nProvider>

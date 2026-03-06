@@ -85,7 +85,7 @@ function TimelineMock({ badge }: { badge: string }) {
   ];
 
   return (
-    <div className="landing-float rounded-2xl border border-edge bg-surface-card p-5 shadow-2xl shadow-black/5 sm:p-6">
+    <div className="landing-float rounded-2xl border border-edge bg-surface-elevated p-5 shadow-2xl shadow-black/5 sm:p-6">
       {/* Chapter bars */}
       <div className="space-y-2.5">
         {chapters.map((ch) => (

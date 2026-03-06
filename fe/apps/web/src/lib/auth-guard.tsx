@@ -12,7 +12,7 @@ function AuthSkeleton() {
     <div className="flex min-h-dvh">
       {/* Static sidebar skeleton — desktop only */}
       <div className="hidden md:block">
-        <aside className="sticky top-0 flex h-dvh w-64 flex-col border-r border-edge bg-surface-card">
+        <aside className="sticky top-0 flex h-dvh w-64 flex-col border-r border-edge bg-surface-elevated">
           <div className="flex h-16 items-center border-b border-edge px-6">
             <Skeleton className="h-6 w-24" />
           </div>
@@ -30,7 +30,7 @@ function AuthSkeleton() {
       {/* Main content skeleton */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Mobile header skeleton */}
-        <header className="sticky top-0 z-30 flex md:hidden h-14 shrink-0 items-center justify-between border-b border-edge bg-surface-card px-4">
+        <header className="sticky top-0 z-30 flex md:hidden h-14 shrink-0 items-center justify-between border-b border-edge bg-surface-elevated px-4">
           <Skeleton className="h-6 w-6 rounded" />
           <Skeleton className="h-6 w-24" />
           <div className="w-10" />

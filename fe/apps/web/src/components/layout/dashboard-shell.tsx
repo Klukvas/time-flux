@@ -33,7 +33,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Main content area — document-level scrolling */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Mobile top header — sticky so it stays visible on scroll */}
-        <header className="sticky top-0 z-30 flex md:hidden h-14 shrink-0 items-center justify-between border-b border-edge bg-surface-card px-4">
+        <header className="sticky top-0 z-30 flex md:hidden h-14 shrink-0 items-center justify-between border-b border-edge bg-surface-elevated px-4">
           <button
             onClick={() => setMobileOpen(true)}
             className="rounded-lg p-2 text-content-secondary hover:bg-surface-secondary"

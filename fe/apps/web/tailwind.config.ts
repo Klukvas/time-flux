@@ -2,6 +2,7 @@ import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -17,36 +18,62 @@ const config: Config = {
           800: '#1e40af',
           900: '#1e3a8a',
         },
-        // Semantic theme tokens — driven by CSS variables set on <html>
+        // Semantic theme tokens — driven by CSS variables
         surface: {
           DEFAULT: 'var(--color-bg)',
           secondary: 'var(--color-bg-secondary)',
-          card: 'var(--color-bg-card)',
+          elevated: 'var(--color-bg-elevated)',
         },
         content: {
           DEFAULT: 'var(--color-text)',
           secondary: 'var(--color-text-secondary)',
           tertiary: 'var(--color-text-tertiary)',
+          inverse: 'var(--color-text-inverse)',
         },
         edge: {
           DEFAULT: 'var(--color-border)',
+          hover: 'var(--color-border-hover)',
           light: 'var(--color-border-light)',
         },
         accent: {
           DEFAULT: 'var(--color-accent)',
           hover: 'var(--color-accent-hover)',
+          light: 'var(--color-accent-light)',
           text: 'var(--color-accent-text)',
         },
         danger: {
           DEFAULT: 'var(--color-danger)',
           hover: 'var(--color-danger-hover)',
+          light: 'var(--color-danger-light)',
         },
         success: {
           DEFAULT: 'var(--color-success)',
+          hover: 'var(--color-success-hover)',
+          light: 'var(--color-success-light)',
+        },
+        warning: {
+          DEFAULT: 'var(--color-warning)',
+          hover: 'var(--color-warning-hover)',
+          light: 'var(--color-warning-light)',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)'],
+      },
+      borderRadius: {
+        sm: 'calc(var(--radius) - 4px)',
+        md: 'calc(var(--radius) - 2px)',
+        lg: 'var(--radius)',
+        xl: 'calc(var(--radius) + 4px)',
+      },
+      boxShadow: {
+        xs: 'var(--shadow-xs)',
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+      },
+      ringColor: {
+        theme: 'var(--color-ring)',
       },
       keyframes: {
         'fade-in': {
