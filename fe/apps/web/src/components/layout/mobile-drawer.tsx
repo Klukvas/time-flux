@@ -58,7 +58,7 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
 
       {/* Drawer panel */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-surface-card border-r border-edge transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-surface-elevated border-r border-edge transform transition-transform duration-300 ease-in-out ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         role="dialog"
@@ -190,7 +190,11 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
                       : 'bg-surface-secondary text-content-tertiary'
                 }`}
               >
-                {tier}
+                {tier === 'PREMIUM'
+                  ? t('subscription.premium_plan')
+                  : tier === 'PRO'
+                    ? t('subscription.pro_plan')
+                    : t('subscription.free_plan')}
               </span>
             </div>
             <button

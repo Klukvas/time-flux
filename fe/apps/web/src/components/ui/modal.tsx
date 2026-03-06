@@ -1,6 +1,14 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  cn,
+} from '@klukvas/flux-b2c-ui';
+import { useTranslation } from '@timeflux/hooks';
 
 interface ModalProps {
   open: boolean;
@@ -23,58 +31,38 @@ export function Modal({
   children,
   size = 'md',
 }: ModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (open) document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
-  }, [open, onClose]);
-
-  if (!open) return null;
+  const { t } = useTranslation();
 
   return (
-    <div
-      ref={overlayRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)] p-4"
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-    >
-      <div
-        className={`w-full ${sizeClasses[size]} rounded-xl bg-surface-card p-4 shadow-xl sm:p-6 max-h-[90dvh] overflow-y-auto`}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 id="modal-title" className="text-lg font-semibold text-content">
-            {title}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="rounded-lg p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className={cn(sizeClasses[size])}>
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle>{title}</DialogTitle>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t('common.close')}
+              className="rounded-lg p-1 text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text-secondary)]"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </DialogHeader>
         {children}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

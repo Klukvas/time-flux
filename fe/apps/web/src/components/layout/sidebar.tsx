@@ -139,7 +139,7 @@ export function Sidebar({ highlightedItem }: SidebarProps) {
         </Link>
         {highlighted && !collapsed && (
           <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 z-20 whitespace-nowrap">
-            <div className="rounded-lg bg-surface-card border border-accent/30 px-3 py-1.5 text-xs text-accent shadow-lg">
+            <div className="rounded-lg bg-surface-elevated border border-accent/30 px-3 py-1.5 text-xs text-accent shadow-lg">
               {t(
                 `onboarding.highlight_${item.itemKey === 'day-states' ? 'moods' : item.itemKey}`,
               )}
@@ -152,7 +152,7 @@ export function Sidebar({ highlightedItem }: SidebarProps) {
 
   return (
     <aside
-      className={`sticky top-0 flex h-dvh flex-col border-r border-edge bg-surface-card transition-[width] duration-200 ease-in-out ${
+      className={`sticky top-0 flex h-dvh flex-col border-r border-edge bg-surface-elevated transition-[width] duration-200 ease-in-out ${
         collapsed ? 'w-16' : 'w-64'
       }`}
     >
@@ -263,7 +263,11 @@ export function Sidebar({ highlightedItem }: SidebarProps) {
                       : 'bg-surface-secondary text-content-tertiary'
                 }`}
               >
-                {tier}
+                {tier === 'PREMIUM'
+                  ? t('subscription.premium_plan')
+                  : tier === 'PRO'
+                    ? t('subscription.pro_plan')
+                    : t('subscription.free_plan')}
               </span>
             </div>
           )}
