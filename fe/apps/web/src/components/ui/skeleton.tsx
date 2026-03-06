@@ -115,9 +115,8 @@ export function CategoriesSkeleton() {
 export function ChaptersSkeleton() {
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6">
         <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-9 w-32 rounded-lg" />
       </div>
       <div className="space-y-4">
         {Array.from({ length: 4 }).map((_, i) => (

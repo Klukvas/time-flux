@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { extractApiError } from '@timeflux/api';
@@ -522,42 +523,54 @@ export function DayPage({ date }: DayPageProps) {
           <h3 className="mb-2 text-sm font-medium text-content-secondary">
             {t('day_form.mood')}
           </h3>
-          <div className="flex flex-wrap gap-2">
-            {dayStates?.map((ds) => (
-              <button
-                key={ds.id}
-                type="button"
-                onClick={() => handleSelectMood(ds.id)}
-                disabled={isPending || futureDisabled}
-                className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                  selectedDayStateId === ds.id
-                    ? 'border-transparent text-white'
-                    : 'border-edge text-content hover:bg-surface-secondary'
-                }`}
-                style={
-                  selectedDayStateId === ds.id
-                    ? { backgroundColor: ds.color }
-                    : undefined
-                }
+          {dayStates && dayStates.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {dayStates.map((ds) => (
+                <button
+                  key={ds.id}
+                  type="button"
+                  onClick={() => handleSelectMood(ds.id)}
+                  disabled={isPending || futureDisabled}
+                  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    selectedDayStateId === ds.id
+                      ? 'border-transparent text-white'
+                      : 'border-edge text-content hover:bg-surface-secondary'
+                  }`}
+                  style={
+                    selectedDayStateId === ds.id
+                      ? { backgroundColor: ds.color }
+                      : undefined
+                  }
+                >
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: ds.color }}
+                  />
+                  {ds.name}
+                </button>
+              ))}
+              {selectedDayStateId && (
+                <button
+                  type="button"
+                  onClick={handleClearMood}
+                  disabled={isPending || futureDisabled}
+                  className="rounded-full border border-dashed border-edge px-3 py-1.5 text-sm text-content-secondary hover:bg-surface-secondary"
+                >
+                  {t('common.clear')}
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-content-tertiary">
+              {t('day_form.no_moods')}{' '}
+              <Link
+                href="/day-states"
+                className="font-medium text-accent hover:text-accent-hover"
               >
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: ds.color }}
-                />
-                {ds.name}
-              </button>
-            ))}
-            {selectedDayStateId && (
-              <button
-                type="button"
-                onClick={handleClearMood}
-                disabled={isPending || futureDisabled}
-                className="rounded-full border border-dashed border-edge px-3 py-1.5 text-sm text-content-secondary hover:bg-surface-secondary"
-              >
-                {t('common.clear')}
-              </button>
-            )}
-          </div>
+                {t('day_form.create_moods')}
+              </Link>
+            </p>
+          )}
         </div>
 
         {/* Media Section — Carousel + Upload */}
@@ -744,9 +757,12 @@ export function DayPage({ date }: DayPageProps) {
           </div>
         </div>
 
-        {/* Save */}
+        {/* Actions */}
         {!futureDisabled && (
-          <div className="flex justify-end border-t border-edge pt-4">
+          <div className="flex justify-end gap-3 border-t border-edge pt-4">
+            <Button variant="secondary" onClick={handleBack}>
+              {t('common.cancel')}
+            </Button>
             <Button onClick={handleSave} loading={upsertDay.isPending}>
               {t('common.save')}
             </Button>

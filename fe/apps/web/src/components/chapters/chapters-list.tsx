@@ -63,14 +63,16 @@ export function ChaptersList() {
         <h1 className="text-2xl font-bold text-content">
           {t('chapters.title')}
         </h1>
-        <Button
-          onClick={() => {
-            setEditingGroup(null);
-            setFormOpen(true);
-          }}
-        >
-          + {t('chapters.create')}
-        </Button>
+        {sorted.length > 0 && (
+          <Button
+            onClick={() => {
+              setEditingGroup(null);
+              setFormOpen(true);
+            }}
+          >
+            + {t('chapters.create')}
+          </Button>
+        )}
       </div>
 
       {sorted.length === 0 ? (

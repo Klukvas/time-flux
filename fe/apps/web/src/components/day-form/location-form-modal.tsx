@@ -8,7 +8,7 @@ import {
   useMap,
   type MapMouseEvent,
 } from '@vis.gl/react-google-maps';
-import { useTranslation } from '@timeflux/hooks';
+import { useTranslation, useTheme } from '@timeflux/hooks';
 import { MAX_LOCATION_NAME_LENGTH } from '@timeflux/constants';
 import { reverseGeocode } from '@timeflux/utils';
 import { Modal } from '@/components/ui/modal';
@@ -55,6 +55,7 @@ export function LocationFormModal({
   initialLng,
 }: LocationFormModalProps) {
   const { t } = useTranslation();
+  const { resolvedTheme } = useTheme();
 
   const hasInitialCoords = initialLat != null && initialLng != null;
   const initialCenter = hasInitialCoords
@@ -97,13 +98,14 @@ export function LocationFormModal({
     setError('');
     setGeocoding(true);
 
-    const result = await reverseGeocode(lat, lng, API_KEY);
-    if (result) {
-      setName(result.locationName);
-    } else {
-      setName(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+    try {
+      const result = await reverseGeocode(lat, lng, API_KEY);
+      setName(
+        result ? result.locationName : `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+      );
+    } finally {
+      setGeocoding(false);
     }
-    setGeocoding(false);
   }, []);
 
   const handleUseCurrentLocation = useCallback(() => {
@@ -179,6 +181,7 @@ export function LocationFormModal({
               defaultCenter={initialCenter}
               defaultZoom={initialZoom}
               mapId={MAP_ID}
+              colorScheme={resolvedTheme === 'dark' ? 'DARK' : 'LIGHT'}
               gestureHandling="greedy"
               disableDefaultUI
               zoomControl
@@ -216,10 +219,14 @@ export function LocationFormModal({
           {/* Selected location — editable name + coords */}
           {markerPosition && (
             <div>
-              <label className="mb-1 block text-sm font-medium text-content-secondary">
+              <label
+                htmlFor="location-name-input"
+                className="mb-1 block text-sm font-medium text-content-secondary"
+              >
                 {t('day_form.location_name')}
               </label>
               <input
+                id="location-name-input"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}

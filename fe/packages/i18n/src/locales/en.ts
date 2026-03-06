@@ -362,6 +362,8 @@ const en: TranslationDictionary = {
     next_day: 'Next day',
     future_read_only: 'Future date — read only',
     media_hint: 'Drop photos or videos here, or click to browse',
+    no_moods: 'No moods created yet.',
+    create_moods: 'Create moods',
   },
 
   confirm_delete: {

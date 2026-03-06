@@ -362,6 +362,8 @@ const uk: TranslationDictionary = {
     next_day: 'Наступний день',
     future_read_only: 'Майбутня дата — лише перегляд',
     media_hint: 'Перетягніть фото чи відео сюди, або натисніть для вибору',
+    no_moods: 'Настрої ще не створені.',
+    create_moods: 'Створити настрої',
   },
 
   confirm_delete: {

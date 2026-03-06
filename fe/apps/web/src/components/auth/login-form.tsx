@@ -103,7 +103,7 @@ export function LoginForm({
 
   return (
     <Modal open={open} onClose={onClose} title={t('auth.login.title')}>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <Input
           id="email"
           label={t('auth.email.label')}
