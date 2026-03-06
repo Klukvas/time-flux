@@ -10,7 +10,10 @@ describe('AnalyticsController', () => {
   let service: {
     getMoodOverview: jest.Mock;
   };
-  let subscriptionsService: { assertFeatureAccess: jest.Mock };
+  let subscriptionsService: {
+    getAnalyticsAccessLevel: jest.Mock;
+    getTier: jest.Mock;
+  };
 
   const mockUser: JwtPayload = {
     sub: 'user-1',
@@ -24,7 +27,8 @@ describe('AnalyticsController', () => {
     };
 
     subscriptionsService = {
-      assertFeatureAccess: jest.fn(),
+      getAnalyticsAccessLevel: jest.fn().mockResolvedValue(true),
+      getTier: jest.fn().mockResolvedValue('PRO'),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -39,19 +43,24 @@ describe('AnalyticsController', () => {
   });
 
   describe('getMoodOverview', () => {
-    it('should delegate to analyticsService.getMoodOverview with user.sub', async () => {
-      const expected = {
-        distribution: [],
-        categoryStats: [],
-        thirtyDayTrend: [],
-        weekdayInsights: [],
-      };
+    it('should call getMoodOverview with fullAccess=true for PRO', async () => {
+      const expected = { distribution: [], categoryStats: [] };
       service.getMoodOverview.mockResolvedValue(expected);
 
       const result = await controller.getMoodOverview(mockUser);
 
-      expect(service.getMoodOverview).toHaveBeenCalledWith('user-1', 'UTC');
+      expect(subscriptionsService.getAnalyticsAccessLevel).toHaveBeenCalledWith('user-1');
+      expect(service.getMoodOverview).toHaveBeenCalledWith('user-1', 'UTC', true);
       expect(result).toEqual(expected);
+    });
+
+    it('should call getMoodOverview with fullAccess=false for basic access', async () => {
+      subscriptionsService.getAnalyticsAccessLevel.mockResolvedValue('basic');
+      service.getMoodOverview.mockResolvedValue({ distribution: [] });
+
+      await controller.getMoodOverview(mockUser);
+
+      expect(service.getMoodOverview).toHaveBeenCalledWith('user-1', 'UTC', false);
     });
 
     it('should pass through the service result unchanged', async () => {
@@ -63,15 +72,6 @@ describe('AnalyticsController', () => {
       expect(result).toBe(serviceResult);
     });
 
-    it('should only pass user.sub and user.timezone, not the full user object', async () => {
-      service.getMoodOverview.mockResolvedValue({});
-
-      await controller.getMoodOverview(mockUser);
-
-      expect(service.getMoodOverview).toHaveBeenCalledWith('user-1', 'UTC');
-      expect(service.getMoodOverview).not.toHaveBeenCalledWith(mockUser);
-    });
-
     it('should propagate service errors', async () => {
       service.getMoodOverview.mockRejectedValue(new Error('Analytics failed'));
 
@@ -80,21 +80,9 @@ describe('AnalyticsController', () => {
       );
     });
 
-    it('should check feature access before calling service', async () => {
-      service.getMoodOverview.mockResolvedValue({});
-
-      await controller.getMoodOverview(mockUser);
-
-      expect(subscriptionsService.assertFeatureAccess).toHaveBeenCalledWith(
-        'user-1',
-        'analytics',
-      );
-    });
-
-    it('should throw FeatureLockedError for FREE users', async () => {
-      subscriptionsService.assertFeatureAccess.mockRejectedValue(
-        new FeatureLockedError({ feature: 'analytics', tier: 'FREE' }),
-      );
+    it('should throw FeatureLockedError when access is false', async () => {
+      subscriptionsService.getAnalyticsAccessLevel.mockResolvedValue(false);
+      subscriptionsService.getTier.mockResolvedValue('FREE');
 
       await expect(controller.getMoodOverview(mockUser)).rejects.toThrow(
         FeatureLockedError,

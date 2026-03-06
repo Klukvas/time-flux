@@ -96,7 +96,7 @@ describe('SubscriptionsService', () => {
       expect(repo.upsertFree).toHaveBeenCalledWith(USER_ID);
       expect(result.tier).toBe('FREE');
       expect(result.limits.media).toBe(50);
-      expect(result.limits.analytics).toBe(false);
+      expect(result.limits.analytics).toBe('basic');
     });
 
     it('should return correct limits for PREMIUM tier', async () => {
@@ -188,15 +188,37 @@ describe('SubscriptionsService', () => {
     });
   });
 
+  // ─── getAnalyticsAccessLevel ─────────────────────────────
+
+  describe('getAnalyticsAccessLevel', () => {
+    it('should return "basic" for FREE tier', async () => {
+      repo.findByUserId.mockResolvedValue(makeSub());
+
+      expect(await service.getAnalyticsAccessLevel(USER_ID)).toBe('basic');
+    });
+
+    it('should return true for PRO tier', async () => {
+      repo.findByUserId.mockResolvedValue(makeSub({ tier: 'PRO' }));
+
+      expect(await service.getAnalyticsAccessLevel(USER_ID)).toBe(true);
+    });
+
+    it('should return true for PREMIUM tier', async () => {
+      repo.findByUserId.mockResolvedValue(makeSub({ tier: 'PREMIUM' }));
+
+      expect(await service.getAnalyticsAccessLevel(USER_ID)).toBe(true);
+    });
+  });
+
   // ─── assertFeatureAccess ──────────────────────────────────
 
   describe('assertFeatureAccess', () => {
-    it('should throw FeatureLockedError for analytics on FREE', async () => {
+    it('should allow analytics (basic) on FREE — no longer locked', async () => {
       repo.findByUserId.mockResolvedValue(makeSub());
 
       await expect(
         service.assertFeatureAccess(USER_ID, 'analytics'),
-      ).rejects.toThrow(FeatureLockedError);
+      ).resolves.toBeUndefined();
     });
 
     it('should allow analytics for PRO', async () => {
