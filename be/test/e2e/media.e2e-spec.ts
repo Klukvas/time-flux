@@ -224,7 +224,7 @@ describe('Media E2E', () => {
       const { periodId } = await createPeriodForUser(
         user,
         '2024-01-01',
-        '2025-12-31',
+        '2099-12-31',
       );
 
       const dto = validMediaDto(user.userId);
@@ -254,7 +254,7 @@ describe('Media E2E', () => {
       const { periodId } = await createPeriodForUser(
         user,
         '2024-01-01',
-        '2025-12-31',
+        '2099-12-31',
       );
 
       const dto = { ...validMediaDto(user.userId), periodId };
@@ -389,7 +389,7 @@ describe('Media E2E', () => {
         ),
         user,
       )
-        .send({ startDate: '2024-01-01', endDate: '2025-12-31' })
+        .send({ startDate: '2024-01-01', endDate: '2099-12-31' })
         .expect(201);
 
       const periodId = periodRes.body.periods[0].id;
@@ -444,7 +444,7 @@ describe('Media E2E', () => {
         ),
         userA,
       )
-        .send({ startDate: '2024-01-01', endDate: '2025-12-31' })
+        .send({ startDate: '2024-01-01', endDate: '2099-12-31' })
         .expect(201);
 
       const periodId = periodRes.body.periods[0].id;

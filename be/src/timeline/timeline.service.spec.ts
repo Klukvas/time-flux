@@ -277,6 +277,7 @@ describe('TimelineService', () => {
         contentType: 'image/jpeg',
         size: 204800,
         createdAt: '2025-03-15T10:00:00.000Z',
+        periodId: null,
       });
     });
 
