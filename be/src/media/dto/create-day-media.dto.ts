@@ -1,8 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsIn,
   IsInt,
+  IsOptional,
   IsString,
+  IsUUID,
   Matches,
   Max,
   MaxLength,
@@ -49,4 +51,9 @@ export class CreateDayMediaDto {
   @Min(1)
   @Max(MAX_FILE_SIZE)
   size: number;
+
+  @ApiPropertyOptional({ description: 'Period UUID to tag this media to' })
+  @IsOptional()
+  @IsUUID()
+  periodId?: string;
 }

@@ -8,6 +8,7 @@ interface MediaRecord {
   contentType: string;
   size: number;
   createdAt: Date;
+  periodId?: string | null;
 }
 
 export async function formatMedia(
@@ -31,5 +32,6 @@ export async function formatMedia(
     contentType: media.contentType,
     size: media.size,
     createdAt: media.createdAt.toISOString(),
+    periodId: media.periodId ?? null,
   };
 }

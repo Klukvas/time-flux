@@ -1417,6 +1417,54 @@
       }
     },
     "/api/v1/media/{id}": {
+      "patch": {
+        "operationId": "MediaController_updateMedia",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Media item UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDayMediaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DayMediaResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Media not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update media period association",
+        "tags": [
+          "Media"
+        ]
+      },
       "delete": {
         "operationId": "MediaController_deleteMedia",
         "parameters": [
@@ -2359,6 +2407,10 @@
           },
           "createdAt": {
             "type": "string"
+          },
+          "periodId": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -2608,6 +2660,10 @@
           },
           "createdAt": {
             "type": "string"
+          },
+          "periodId": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -3018,6 +3074,10 @@
             "type": "number",
             "example": 1024000,
             "description": "File size in bytes"
+          },
+          "periodId": {
+            "type": "string",
+            "description": "Period UUID to tag this media to"
           }
         },
         "required": [
@@ -3025,6 +3085,19 @@
           "fileName",
           "contentType",
           "size"
+        ]
+      },
+      "UpdateDayMediaDto": {
+        "type": "object",
+        "properties": {
+          "periodId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Period UUID to tag this media to, or null to untag"
+          }
+        },
+        "required": [
+          "periodId"
         ]
       },
       "IntervalDto": {

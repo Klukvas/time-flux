@@ -60,6 +60,7 @@ describe('Media E2E', () => {
       expect(res.body.contentType).toBe('image/jpeg');
       expect(res.body.size).toBe(102400);
       expect(res.body).toHaveProperty('createdAt');
+      expect(res.body.periodId).toBeNull();
     });
 
     it('should return 400 FUTURE_DATE for a far-future date', async () => {
@@ -181,6 +182,283 @@ describe('Media E2E', () => {
       const day = dayRes.body.find((d: any) => d.date === TODAY);
       expect(day).toBeDefined();
       expect(day.mainMediaId).toBe(mediaRes.body.id);
+    });
+  });
+
+  describe('PATCH /api/v1/media/:id (period association)', () => {
+    /** Helper: create category + event group + period, return period ID. */
+    async function createPeriodForUser(
+      user: TestUser,
+      startDate: string,
+      endDate?: string,
+    ) {
+      const catRes = await auth(
+        apiRequest(app).post('/api/v1/categories'),
+        user,
+      )
+        .send({ name: 'Test', color: '#FF0000' })
+        .expect(201);
+
+      const groupRes = await auth(
+        apiRequest(app).post('/api/v1/event-groups'),
+        user,
+      )
+        .send({ categoryId: catRes.body.id, title: 'Test Chapter' })
+        .expect(201);
+
+      const periodRes = await auth(
+        apiRequest(app).post(
+          `/api/v1/event-groups/${groupRes.body.id}/periods`,
+        ),
+        user,
+      )
+        .send({ startDate, ...(endDate ? { endDate } : {}) })
+        .expect(201);
+
+      const period = periodRes.body.periods[0];
+      return { groupId: groupRes.body.id, periodId: period.id };
+    }
+
+    it('should update media period association', async () => {
+      const user = await registerTestUser(app);
+      const { periodId } = await createPeriodForUser(
+        user,
+        '2024-01-01',
+        '2025-12-31',
+      );
+
+      const dto = validMediaDto(user.userId);
+      const mediaRes = await auth(
+        apiRequest(app).post(`/api/v1/days/${TODAY}/media`),
+        user,
+      )
+        .send(dto)
+        .expect(201);
+
+      // Initially no period
+      expect(mediaRes.body.periodId).toBeNull();
+
+      // Set period
+      const patchRes = await auth(
+        apiRequest(app).patch(`/api/v1/media/${mediaRes.body.id}`),
+        user,
+      )
+        .send({ periodId })
+        .expect(200);
+
+      expect(patchRes.body.periodId).toBe(periodId);
+    });
+
+    it('should untag media by setting periodId to null', async () => {
+      const user = await registerTestUser(app);
+      const { periodId } = await createPeriodForUser(
+        user,
+        '2024-01-01',
+        '2025-12-31',
+      );
+
+      const dto = { ...validMediaDto(user.userId), periodId };
+      const mediaRes = await auth(
+        apiRequest(app).post(`/api/v1/days/${TODAY}/media`),
+        user,
+      )
+        .send(dto)
+        .expect(201);
+
+      expect(mediaRes.body.periodId).toBe(periodId);
+
+      // Untag
+      const patchRes = await auth(
+        apiRequest(app).patch(`/api/v1/media/${mediaRes.body.id}`),
+        user,
+      )
+        .send({ periodId: null })
+        .expect(200);
+
+      expect(patchRes.body.periodId).toBeNull();
+    });
+
+    it('should return 404 for non-existent period', async () => {
+      const user = await registerTestUser(app);
+      const dto = validMediaDto(user.userId);
+      const mediaRes = await auth(
+        apiRequest(app).post(`/api/v1/days/${TODAY}/media`),
+        user,
+      )
+        .send(dto)
+        .expect(201);
+
+      const fakeId = '00000000-0000-4000-a000-000000000000';
+      const res = await auth(
+        apiRequest(app).patch(`/api/v1/media/${mediaRes.body.id}`),
+        user,
+      )
+        .send({ periodId: fakeId })
+        .expect(404);
+
+      expect(res.body.error_code).toBe('EVENT_PERIOD_NOT_FOUND');
+    });
+
+    it('should return 400 VALIDATION_ERROR when period does not cover the day', async () => {
+      const user = await registerTestUser(app);
+      // Period covers only 2020
+      const { periodId } = await createPeriodForUser(
+        user,
+        '2020-01-01',
+        '2020-12-31',
+      );
+
+      const dto = validMediaDto(user.userId);
+      const mediaRes = await auth(
+        apiRequest(app).post(`/api/v1/days/${TODAY}/media`),
+        user,
+      )
+        .send(dto)
+        .expect(201);
+
+      const res = await auth(
+        apiRequest(app).patch(`/api/v1/media/${mediaRes.body.id}`),
+        user,
+      )
+        .send({ periodId })
+        .expect(400);
+
+      expect(res.body.error_code).toBe('VALIDATION_ERROR');
+    });
+
+    it('should return 404 MEDIA_NOT_FOUND for random media UUID', async () => {
+      const user = await registerTestUser(app);
+      const fakeId = '00000000-0000-4000-a000-000000000000';
+
+      const res = await auth(
+        apiRequest(app).patch(`/api/v1/media/${fakeId}`),
+        user,
+      )
+        .send({ periodId: null })
+        .expect(404);
+
+      expect(res.body.error_code).toBe('MEDIA_NOT_FOUND');
+    });
+
+    it('should return 404 when user A tries to patch user B media (IDOR)', async () => {
+      const userA = await registerTestUser(app);
+      const userB = await registerTestUser(app);
+
+      // User A creates media
+      const dto = validMediaDto(userA.userId);
+      const mediaRes = await auth(
+        apiRequest(app).post(`/api/v1/days/${TODAY}/media`),
+        userA,
+      )
+        .send(dto)
+        .expect(201);
+
+      // User B tries to patch it
+      const res = await auth(
+        apiRequest(app).patch(`/api/v1/media/${mediaRes.body.id}`),
+        userB,
+      )
+        .send({ periodId: null })
+        .expect(404);
+
+      expect(res.body.error_code).toBe('MEDIA_NOT_FOUND');
+    });
+  });
+
+  describe('POST /api/v1/days/:date/media with periodId', () => {
+    it('should create media with periodId when provided', async () => {
+      const user = await registerTestUser(app);
+
+      const catRes = await auth(
+        apiRequest(app).post('/api/v1/categories'),
+        user,
+      )
+        .send({ name: 'Test', color: '#FF0000' })
+        .expect(201);
+
+      const groupRes = await auth(
+        apiRequest(app).post('/api/v1/event-groups'),
+        user,
+      )
+        .send({ categoryId: catRes.body.id, title: 'Chapter' })
+        .expect(201);
+
+      const periodRes = await auth(
+        apiRequest(app).post(
+          `/api/v1/event-groups/${groupRes.body.id}/periods`,
+        ),
+        user,
+      )
+        .send({ startDate: '2024-01-01', endDate: '2025-12-31' })
+        .expect(201);
+
+      const periodId = periodRes.body.periods[0].id;
+
+      const dto = { ...validMediaDto(user.userId), periodId };
+      const res = await auth(
+        apiRequest(app).post(`/api/v1/days/${TODAY}/media`),
+        user,
+      )
+        .send(dto)
+        .expect(201);
+
+      expect(res.body.periodId).toBe(periodId);
+    });
+
+    it('should create media without periodId (backward compat)', async () => {
+      const user = await registerTestUser(app);
+      const dto = validMediaDto(user.userId);
+
+      const res = await auth(
+        apiRequest(app).post(`/api/v1/days/${TODAY}/media`),
+        user,
+      )
+        .send(dto)
+        .expect(201);
+
+      expect(res.body.periodId).toBeNull();
+    });
+
+    it('should return 404 when using another user periodId (IDOR)', async () => {
+      const userA = await registerTestUser(app);
+      const userB = await registerTestUser(app);
+
+      // User A creates a period
+      const catRes = await auth(
+        apiRequest(app).post('/api/v1/categories'),
+        userA,
+      )
+        .send({ name: 'Test', color: '#FF0000' })
+        .expect(201);
+
+      const groupRes = await auth(
+        apiRequest(app).post('/api/v1/event-groups'),
+        userA,
+      )
+        .send({ categoryId: catRes.body.id, title: 'Chapter' })
+        .expect(201);
+
+      const periodRes = await auth(
+        apiRequest(app).post(
+          `/api/v1/event-groups/${groupRes.body.id}/periods`,
+        ),
+        userA,
+      )
+        .send({ startDate: '2024-01-01', endDate: '2025-12-31' })
+        .expect(201);
+
+      const periodId = periodRes.body.periods[0].id;
+
+      // User B tries to create media with User A's periodId
+      const dto = { ...validMediaDto(userB.userId), periodId };
+      const res = await auth(
+        apiRequest(app).post(`/api/v1/days/${TODAY}/media`),
+        userB,
+      )
+        .send(dto)
+        .expect(404);
+
+      expect(res.body.error_code).toBe('EVENT_PERIOD_NOT_FOUND');
     });
   });
 

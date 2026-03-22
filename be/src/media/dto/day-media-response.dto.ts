@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class DayMediaResponseDto {
   @ApiProperty()
@@ -26,4 +26,7 @@ export class DayMediaResponseDto {
 
   @ApiProperty()
   createdAt: string;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  periodId: string | null;
 }

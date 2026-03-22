@@ -16,8 +16,16 @@ export class MediaRepository {
     fileName: string;
     contentType: string;
     size: number;
+    periodId?: string;
   }) {
     return this.prisma.dayMedia.create({ data });
+  }
+
+  async updatePeriodId(id: string, periodId: string | null) {
+    return this.prisma.dayMedia.update({
+      where: { id },
+      data: { periodId },
+    });
   }
 
   async findByDayAndUser(dayId: string, userId: string) {

@@ -63,6 +63,7 @@ export function generateFileName(originalName: string): string {
   return `${id}.${ext}`;
 }
 
+/* v8 ignore start — browser-only DOM API, not testable in Node/happy-dom */
 /** Extract the first frame of a video as a data URL. Returns null on failure. */
 export function extractVideoThumbnail(
   videoUrl: string,
@@ -134,6 +135,7 @@ export function extractVideoThumbnail(
     video.src = videoUrl;
   });
 }
+/* v8 ignore stop */
 
 /** Upload/display item for UI tracking. */
 export interface MediaItem {
@@ -150,4 +152,6 @@ export interface MediaItem {
   fileName?: string;
   /** Extracted video thumbnail data URL (for video-only days). */
   thumbnailUrl?: string;
+  /** Period ID this media is tagged to. */
+  periodId?: string | null;
 }

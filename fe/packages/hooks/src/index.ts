@@ -17,7 +17,12 @@ export {
   useUpdateDayState,
 } from './use-day-states';
 export { useDays, useUpdateDayLocation, useUpsertDay } from './use-days';
-export { useCreateDayMedia, useDayMedia, useDeleteDayMedia } from './use-media';
+export {
+  useCreateDayMedia,
+  useDayMedia,
+  useDeleteDayMedia,
+  useUpdateDayMediaPeriod,
+} from './use-media';
 export {
   useClosePeriod,
   useCreateEventGroup,

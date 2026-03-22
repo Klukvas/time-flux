@@ -15,6 +15,7 @@ export class DaysRepository {
         contentType: true,
         size: true,
         createdAt: true,
+        periodId: true,
       },
       orderBy: { createdAt: 'asc' as const },
     },

@@ -45,6 +45,7 @@ import { DayCircle } from '@/components/ui/day-circle';
 import { CalendarPopover } from '@/components/ui/calendar-popover';
 import { ChapterSelector } from '@/components/ui/chapter-selector';
 import { LocationFormModal } from './location-form-modal';
+import { MediaPeriodAssign } from './media-period-assign';
 import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
 import { DateTime } from 'luxon';
@@ -62,6 +63,7 @@ function toMediaItem(m: DayMedia): MediaItem {
     uploading: false,
     persisted: true,
     fileName: m.fileName,
+    periodId: m.periodId ?? null,
   };
 }
 
@@ -133,6 +135,15 @@ export function DayPage({ date }: DayPageProps) {
     () => new Set(overlappingPeriods.map((p) => p.id)),
     [overlappingPeriods],
   );
+
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
+
+  // Reset period selection when the selected period is no longer active
+  useEffect(() => {
+    if (selectedPeriodId !== null && !activePeriodIds.has(selectedPeriodId)) {
+      setSelectedPeriodId(null);
+    }
+  }, [activePeriodIds, selectedPeriodId]);
 
   const [videoThumbnails, setVideoThumbnails] = useState<
     Record<string, string>
@@ -220,6 +231,7 @@ export function DayPage({ date }: DayPageProps) {
               contentType: item.file!
                 .type as CreateDayMediaRequest['contentType'],
               size: item.file!.size,
+              ...(selectedPeriodId ? { periodId: selectedPeriodId } : {}),
             },
           });
 
@@ -246,7 +258,7 @@ export function DayPage({ date }: DayPageProps) {
         }
       }
     },
-    [upload, createDayMedia, date],
+    [upload, createDayMedia, date, selectedPeriodId],
   );
 
   const handleRemoveMedia = useCallback(
@@ -573,6 +585,56 @@ export function DayPage({ date }: DayPageProps) {
           )}
         </div>
 
+        {/* Period selector for new uploads */}
+        {overlappingPeriods.length >= 1 && !futureDisabled && (
+          <div>
+            <h3 className="mb-2 text-sm font-medium text-content-secondary">
+              {t('day_form.tag_to_period')}
+            </h3>
+            <div
+              className="flex flex-wrap gap-1.5"
+              role="group"
+              aria-label={t('day_form.tag_to_period')}
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedPeriodId(null)}
+                aria-pressed={selectedPeriodId === null}
+                className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                  selectedPeriodId === null
+                    ? 'border-accent bg-accent/10 font-medium text-accent'
+                    : 'border-edge text-content-secondary hover:bg-surface-secondary'
+                }`}
+              >
+                {t('day_form.all_periods')}
+              </button>
+              {overlappingPeriods.map((period) => (
+                <button
+                  key={period.id}
+                  type="button"
+                  onClick={() => setSelectedPeriodId(period.id)}
+                  aria-pressed={selectedPeriodId === period.id}
+                  className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                    selectedPeriodId === period.id
+                      ? 'border-transparent font-medium text-white'
+                      : 'border-edge text-content-secondary hover:bg-surface-secondary'
+                  }`}
+                  style={
+                    selectedPeriodId === period.id
+                      ? { backgroundColor: period.category.color }
+                      : {
+                          borderLeftWidth: 3,
+                          borderLeftColor: period.category.color,
+                        }
+                  }
+                >
+                  {period.eventGroup.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Media Section — Carousel + Upload */}
         <div>
           <h3 className="mb-2 text-sm font-medium text-content-secondary">
@@ -590,6 +652,15 @@ export function DayPage({ date }: DayPageProps) {
                 disabled={isPending || futureDisabled}
               />
             </div>
+          )}
+
+          {/* Per-media chapter assignment */}
+          {!futureDisabled && (
+            <MediaPeriodAssign
+              media={existingMedia ?? []}
+              periods={overlappingPeriods}
+              date={date}
+            />
           )}
 
           {/* Upload dropzone (always visible for adding more) */}

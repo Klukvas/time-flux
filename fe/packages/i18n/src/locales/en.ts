@@ -362,6 +362,11 @@ const en: TranslationDictionary = {
     next_day: 'Next day',
     future_read_only: 'Future date — read only',
     media_hint: 'Drop photos or videos here, or click to browse',
+    tag_to_period: 'Tag new uploads to a period',
+    all_periods: 'No period',
+    media_chapters: 'Photo chapters',
+    media_chapters_info:
+      'Assign photos to specific chapters so they appear in the right place when you browse your chapters later.',
     no_moods: 'No moods created yet.',
     create_moods: 'Create moods',
   },

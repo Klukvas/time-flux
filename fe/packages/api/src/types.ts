@@ -71,6 +71,7 @@ export type Day = Schemas['DayResponseDto'];
 export type UpsertDayRequest = Schemas['UpsertDayDto'];
 export type UpdateDayLocationRequest = Schemas['UpdateDayLocationDto'];
 export type CreateDayMediaRequest = Schemas['CreateDayMediaDto'];
+export type UpdateDayMediaRequest = Schemas['UpdateDayMediaDto'];
 
 // ─── Timeline ────────────────────────────────────────────────
 

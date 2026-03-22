@@ -533,13 +533,21 @@ export class EventGroupsService {
           totalMoodDays > 0 ? Math.round((m.count / totalMoodDays) * 100) : 0,
       }));
 
-    // Collect all media items, then batch-fetch presigned URLs in parallel
+    // Collect media items with period-aware filtering:
+    // - Untagged media (periodId === null) → include (backward compatible)
+    // - Tagged to this group's period → include
+    // - Tagged to another group's period → skip
+    const groupPeriodIds = new Set(group.periods.map((p: any) => p.id));
     const allMediaItems: any[] = [];
     for (const day of allDays) {
-      if (day.media) {
-        for (const m of day.media) {
+      if (!day.media) continue;
+      for (const m of day.media) {
+        if (m.periodId === null || m.periodId === undefined) {
+          allMediaItems.push(m);
+        } else if (groupPeriodIds.has(m.periodId)) {
           allMediaItems.push(m);
         }
+        // Tagged to another group's period — skip
       }
     }
     const totalMedia = allMediaItems.length;
@@ -562,6 +570,7 @@ export class EventGroupsService {
           contentType: m.contentType,
           size: m.size,
           createdAt: m.createdAt.toISOString(),
+          periodId: m.periodId ?? null,
         };
       }),
     );

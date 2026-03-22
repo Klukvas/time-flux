@@ -1,5 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { EventGroupResponseDto, EventPeriodResponseDto } from './event-group-response.dto.js';
+import {
+  EventGroupResponseDto,
+  EventPeriodResponseDto,
+} from './event-group-response.dto.js';
 import { MoodDistributionItemDto } from '../../analytics/dto/mood-overview.dto.js';
 
 class MoodStatDto {
@@ -37,6 +40,9 @@ class EventGroupDetailsMediaDto {
 
   @ApiProperty()
   createdAt: string;
+
+  @ApiPropertyOptional({ type: String, nullable: true })
+  periodId: string | null;
 }
 
 class PeriodDensityDto {

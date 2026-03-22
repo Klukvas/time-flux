@@ -506,7 +506,8 @@ export interface paths {
         delete: operations["MediaController_deleteMedia"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Update media period association */
+        patch: operations["MediaController_updateMedia"];
         trace?: never;
     };
     "/api/v1/memories/on-this-day": {
@@ -659,8 +660,8 @@ export interface components {
             categories: number;
             /** @example 5 */
             dayStates: number;
-            /** @example false */
-            analytics: boolean;
+            /** @example basic */
+            analytics: boolean | "basic";
             /** @example false */
             memories: boolean;
         };
@@ -856,6 +857,7 @@ export interface components {
             contentType: string;
             size: number;
             createdAt: string;
+            periodId?: string | null;
         };
         MoodDistributionItemDto: {
             moodId: string;
@@ -931,6 +933,7 @@ export interface components {
             contentType: string;
             size: number;
             createdAt: string;
+            periodId?: string | null;
         };
         DayResponseDto: {
             id: string;
@@ -1092,6 +1095,12 @@ export interface components {
              * @example 1024000
              */
             size: number;
+            /** @description Period UUID to tag this media to */
+            periodId?: string;
+        };
+        UpdateDayMediaDto: {
+            /** @description Period UUID to tag this media to, or null to untag */
+            periodId: string | null;
         };
         IntervalDto: {
             /** @enum {string} */
@@ -2280,6 +2289,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Media not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MediaController_updateMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Media item UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDayMediaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayMediaResponseDto"];
+                };
             };
             /** @description Media not found */
             404: {

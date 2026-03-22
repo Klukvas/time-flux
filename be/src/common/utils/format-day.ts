@@ -9,6 +9,7 @@ interface DayMediaRecord {
   contentType: string;
   size: number;
   createdAt: Date;
+  periodId?: string | null;
 }
 
 interface DayRecord {

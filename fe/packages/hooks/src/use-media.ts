@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CreateDayMediaRequest } from '@timeflux/api';
+import type {
+  CreateDayMediaRequest,
+  UpdateDayMediaRequest,
+} from '@timeflux/api';
 import { QUERY_KEYS } from '@timeflux/constants';
 import { useApi } from './api-context';
 
@@ -28,6 +31,27 @@ export function useCreateDayMedia() {
       qc.invalidateQueries({ queryKey: ['days'] });
       qc.invalidateQueries({ queryKey: ['timeline'] });
       qc.invalidateQueries({ queryKey: ['memories'] });
+    },
+  });
+}
+
+export function useUpdateDayMediaPeriod() {
+  const api = useApi();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      date: string;
+      data: UpdateDayMediaRequest;
+    }) => api.media.updatePeriod(id, data),
+    onSuccess: (_result, { date }) => {
+      qc.invalidateQueries({ queryKey: QUERY_KEYS.dayMedia(date) });
+      qc.invalidateQueries({ queryKey: ['days'] });
+      qc.invalidateQueries({ queryKey: ['event-groups'] });
+      qc.invalidateQueries({ queryKey: ['timeline'] });
     },
   });
 }

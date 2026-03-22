@@ -112,6 +112,7 @@ model EventPeriod {
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   eventGroup EventGroup @relation(fields: [eventGroupId], references: [id], onDelete: Cascade)
+  media      DayMedia[]
 
   @@index([eventGroupId])
   @@index([eventGroupId, startDate])
@@ -154,13 +155,17 @@ model DayMedia {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  day         Day      @relation("DayMedia", fields: [dayId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mainForDay  Day?     @relation("MainMedia")
+  periodId    String?  @map("period_id")
+
+  day         Day          @relation("DayMedia", fields: [dayId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mainForDay  Day?         @relation("MainMedia")
+  period      EventPeriod? @relation(fields: [periodId], references: [id], onDelete: SetNull)
 
   @@index([dayId])
   @@index([userId])
   @@index([dayId, userId])
+  @@index([periodId])
   @@map("day_media")
 }
 

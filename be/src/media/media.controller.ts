@@ -6,6 +6,8 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -18,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { MediaService } from './media.service.js';
 import { CreateDayMediaDto } from './dto/create-day-media.dto.js';
+import { UpdateDayMediaDto } from './dto/update-day-media.dto.js';
 import { DayMediaResponseDto } from './dto/day-media-response.dto.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import {
@@ -64,6 +67,19 @@ export class MediaController {
     return this.mediaService.getMediaForDay(user.sub, date);
   }
 
+  @Patch('media/:id')
+  @ApiOperation({ summary: 'Update media period association' })
+  @ApiParam({ name: 'id', description: 'Media item UUID' })
+  @ApiResponse({ status: 200, type: DayMediaResponseDto })
+  @ApiResponse({ status: 404, description: 'Media not found' })
+  async updateMedia(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateDayMediaDto,
+  ): Promise<DayMediaResponseDto> {
+    return this.mediaService.updateMediaPeriod(user.sub, id, dto.periodId);
+  }
+
   @Delete('media/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a media item' })
@@ -72,7 +88,7 @@ export class MediaController {
   @ApiResponse({ status: 404, description: 'Media not found' })
   async deleteMedia(
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
     return this.mediaService.deleteMedia(user.sub, id);
   }

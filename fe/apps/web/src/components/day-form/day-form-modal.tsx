@@ -45,6 +45,7 @@ function toMediaItem(m: DayMedia): MediaItem {
     uploading: false,
     persisted: true,
     fileName: m.fileName,
+    periodId: m.periodId ?? null,
   };
 }
 
@@ -76,6 +77,7 @@ export function DayFormModal({
   );
   const [comment, setComment] = useState('');
   const [localMediaItems, setLocalMediaItems] = useState<MediaItem[]>([]);
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
 
   // Periods overlapping this day (flatten from all groups)
   const overlappingPeriods = useMemo(() => {
@@ -92,6 +94,16 @@ export function DayFormModal({
     return getPeriodsForDate(allPeriods, date);
   }, [allGroups, date]);
 
+  // Clear selectedPeriodId when the selected period is no longer available
+  useEffect(() => {
+    if (
+      selectedPeriodId !== null &&
+      !overlappingPeriods.some((p) => p.id === selectedPeriodId)
+    ) {
+      setSelectedPeriodId(null);
+    }
+  }, [overlappingPeriods, selectedPeriodId]);
+
   // Merge persisted media from backend with local uploads
   const allMediaItems = useMemo(() => {
     const persisted = (existingMedia ?? []).map(toMediaItem);
@@ -105,6 +117,7 @@ export function DayFormModal({
       setSelectedMainMediaId(currentMainMediaId ?? null);
       setComment('');
       setLocalMediaItems([]);
+      setSelectedPeriodId(null);
     }
   }, [open, currentDayStateId, currentMainMediaId]);
 
@@ -148,6 +161,7 @@ export function DayFormModal({
               contentType: item.file!
                 .type as CreateDayMediaRequest['contentType'],
               size: item.file!.size,
+              ...(selectedPeriodId ? { periodId: selectedPeriodId } : {}),
             },
           });
 
@@ -170,7 +184,7 @@ export function DayFormModal({
         }
       }
     },
-    [upload, createDayMedia, date, selectedMainMediaId],
+    [upload, createDayMedia, date, selectedMainMediaId, selectedPeriodId],
   );
 
   const handleRemoveMedia = useCallback(
@@ -347,6 +361,58 @@ export function DayFormModal({
             ) : null;
           })()}
         </div>
+
+        {/* Period selector for new uploads (shown when periods overlap the day) */}
+        {overlappingPeriods.length >= 1 && (
+          <div>
+            <h3 className="mb-2 text-sm font-medium text-content-secondary">
+              {t('day_form.tag_to_period')}
+            </h3>
+            <div
+              className="flex flex-wrap gap-1.5"
+              role="group"
+              aria-label={t('day_form.tag_to_period')}
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedPeriodId(null)}
+                disabled={isPending}
+                aria-pressed={selectedPeriodId === null}
+                className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                  selectedPeriodId === null
+                    ? 'border-accent bg-accent/10 font-medium text-accent'
+                    : 'border-edge text-content-secondary hover:bg-surface-secondary'
+                }`}
+              >
+                {t('day_form.all_periods')}
+              </button>
+              {overlappingPeriods.map((period) => (
+                <button
+                  key={period.id}
+                  type="button"
+                  onClick={() => setSelectedPeriodId(period.id)}
+                  disabled={isPending}
+                  aria-pressed={selectedPeriodId === period.id}
+                  className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                    selectedPeriodId === period.id
+                      ? 'border-transparent font-medium text-white'
+                      : 'border-edge text-content-secondary hover:bg-surface-secondary'
+                  }`}
+                  style={
+                    selectedPeriodId === period.id
+                      ? { backgroundColor: period.category.color }
+                      : {
+                          borderLeftWidth: 3,
+                          borderLeftColor: period.category.color,
+                        }
+                  }
+                >
+                  {period.eventGroup.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Media Upload */}
         <div>

@@ -5,9 +5,12 @@ import { MediaService } from './media.service.js';
 import { MediaRepository } from './media.repository.js';
 import { S3Service } from '../s3/s3.service.js';
 import {
+  EventPeriodNotFoundError,
+  ForbiddenError,
   FutureDateError,
   MediaNotFoundError,
   QuotaExceededError,
+  ValidationError,
 } from '../common/errors/app.error.js';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -20,7 +23,8 @@ describe('MediaService', () => {
   let prismaMock: {
     $transaction: jest.Mock;
     dayMedia: { count: jest.Mock };
-    day: { upsert: jest.Mock };
+    day: { upsert: jest.Mock; findUnique: jest.Mock };
+    eventPeriod: { findFirst: jest.Mock };
   };
 
   const userId = 'user-1';
@@ -54,7 +58,9 @@ describe('MediaService', () => {
       dayMedia: { count: jest.fn().mockResolvedValue(0) },
       day: {
         upsert: jest.fn().mockResolvedValue(mockDay),
+        findUnique: jest.fn().mockResolvedValue(mockDay),
       },
+      eventPeriod: { findFirst: jest.fn() },
     };
 
     // Default transaction: runs the callback with a tx that mimics prisma
@@ -120,24 +126,34 @@ describe('MediaService', () => {
     it('should reject dates more than 1 day in the future', async () => {
       // Set a date far in the future
       await expect(
-        service.addMedia(userId, '2099-12-31', {
-          s3Key: 'uploads/user-1/file.jpg',
-          fileName: 'file.jpg',
-          contentType: 'image/jpeg',
-          size: 1024,
-        }, timezone),
+        service.addMedia(
+          userId,
+          '2099-12-31',
+          {
+            s3Key: 'uploads/user-1/file.jpg',
+            fileName: 'file.jpg',
+            contentType: 'image/jpeg',
+            size: 1024,
+          },
+          timezone,
+        ),
       ).rejects.toThrow(FutureDateError);
     });
 
     it('should allow today date', async () => {
       const today = new Date().toISOString().split('T')[0];
 
-      const result = await service.addMedia(userId, today, {
-        s3Key: `uploads/${userId}/file.jpg`,
-        fileName: 'file.jpg',
-        contentType: 'image/jpeg',
-        size: 1024,
-      }, timezone);
+      const result = await service.addMedia(
+        userId,
+        today,
+        {
+          s3Key: `uploads/${userId}/file.jpg`,
+          fileName: 'file.jpg',
+          contentType: 'image/jpeg',
+          size: 1024,
+        },
+        timezone,
+      );
 
       expect(result).toHaveProperty('id');
     });
@@ -154,18 +170,25 @@ describe('MediaService', () => {
             create: jest.fn().mockResolvedValue(mockMedia),
           },
           day: {
-            upsert: jest.fn().mockResolvedValue({ ...mockDay, mainMediaId: null }),
+            upsert: jest
+              .fn()
+              .mockResolvedValue({ ...mockDay, mainMediaId: null }),
           },
         };
         return cb(tx);
       });
 
-      await service.addMedia(userId, '2024-01-15', {
-        s3Key: `uploads/${userId}/photo.jpg`,
-        fileName: 'photo.jpg',
-        contentType: 'image/jpeg',
-        size: 1024,
-      }, timezone);
+      await service.addMedia(
+        userId,
+        '2024-01-15',
+        {
+          s3Key: `uploads/${userId}/photo.jpg`,
+          fileName: 'photo.jpg',
+          contentType: 'image/jpeg',
+          size: 1024,
+        },
+        timezone,
+      );
 
       expect(mediaRepo.setMainMedia).toHaveBeenCalledWith('day-1', 'media-1');
     });
@@ -178,18 +201,25 @@ describe('MediaService', () => {
             create: jest.fn().mockResolvedValue(mockMedia),
           },
           day: {
-            upsert: jest.fn().mockResolvedValue({ ...mockDay, mainMediaId: 'existing-cover' }),
+            upsert: jest
+              .fn()
+              .mockResolvedValue({ ...mockDay, mainMediaId: 'existing-cover' }),
           },
         };
         return cb(tx);
       });
 
-      await service.addMedia(userId, '2024-01-15', {
-        s3Key: `uploads/${userId}/photo.jpg`,
-        fileName: 'photo.jpg',
-        contentType: 'image/jpeg',
-        size: 1024,
-      }, timezone);
+      await service.addMedia(
+        userId,
+        '2024-01-15',
+        {
+          s3Key: `uploads/${userId}/photo.jpg`,
+          fileName: 'photo.jpg',
+          contentType: 'image/jpeg',
+          size: 1024,
+        },
+        timezone,
+      );
 
       expect(mediaRepo.setMainMedia).not.toHaveBeenCalled();
     });
@@ -199,21 +229,30 @@ describe('MediaService', () => {
         const tx = {
           dayMedia: {
             count: jest.fn().mockResolvedValue(0),
-            create: jest.fn().mockResolvedValue({ ...mockMedia, contentType: 'video/mp4' }),
+            create: jest
+              .fn()
+              .mockResolvedValue({ ...mockMedia, contentType: 'video/mp4' }),
           },
           day: {
-            upsert: jest.fn().mockResolvedValue({ ...mockDay, mainMediaId: null }),
+            upsert: jest
+              .fn()
+              .mockResolvedValue({ ...mockDay, mainMediaId: null }),
           },
         };
         return cb(tx);
       });
 
-      await service.addMedia(userId, '2024-01-15', {
-        s3Key: `uploads/${userId}/video.mp4`,
-        fileName: 'video.mp4',
-        contentType: 'video/mp4',
-        size: 10000000,
-      }, timezone);
+      await service.addMedia(
+        userId,
+        '2024-01-15',
+        {
+          s3Key: `uploads/${userId}/video.mp4`,
+          fileName: 'video.mp4',
+          contentType: 'video/mp4',
+          size: 10000000,
+        },
+        timezone,
+      );
 
       expect(mediaRepo.setMainMedia).not.toHaveBeenCalled();
     });
@@ -238,20 +277,29 @@ describe('MediaService', () => {
         return cb(tx);
       });
 
-      await service.addMedia(userId, '2024-01-15', {
-        s3Key: `uploads/${userId}/file.jpg`,
-        fileName: 'file.jpg',
-        contentType: 'image/jpeg',
-        size: 1024,
-      }, timezone);
+      await service.addMedia(
+        userId,
+        '2024-01-15',
+        {
+          s3Key: `uploads/${userId}/file.jpg`,
+          fileName: 'file.jpg',
+          contentType: 'image/jpeg',
+          size: 1024,
+        },
+        timezone,
+      );
 
       expect(capturedTx.day.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { userId_date: { userId, date: new Date('2024-01-15T00:00:00Z') } },
+          where: {
+            userId_date: { userId, date: new Date('2024-01-15T00:00:00Z') },
+          },
         }),
       );
       expect(capturedTx.dayMedia.create).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.objectContaining({ dayId: 'day-1' }) }),
+        expect.objectContaining({
+          data: expect.objectContaining({ dayId: 'day-1' }),
+        }),
       );
     });
   });
@@ -354,12 +402,17 @@ describe('MediaService', () => {
       });
 
       await expect(
-        service.addMedia(userId, '2024-01-15', {
-          s3Key: `uploads/${userId}/file.jpg`,
-          fileName: 'file.jpg',
-          contentType: 'image/jpeg',
-          size: 1024,
-        }, timezone),
+        service.addMedia(
+          userId,
+          '2024-01-15',
+          {
+            s3Key: `uploads/${userId}/file.jpg`,
+            fileName: 'file.jpg',
+            contentType: 'image/jpeg',
+            size: 1024,
+          },
+          timezone,
+        ),
       ).rejects.toThrow(QuotaExceededError);
     });
   });
@@ -368,15 +421,334 @@ describe('MediaService', () => {
 
   describe('addMedia — timezone-aware validation', () => {
     it('should use provided timezone for future date check', async () => {
-      // A date that is always in the future regardless of timezone
       await expect(
-        service.addMedia(userId, '2099-01-01', {
+        service.addMedia(
+          userId,
+          '2099-01-01',
+          {
+            s3Key: `uploads/${userId}/file.jpg`,
+            fileName: 'file.jpg',
+            contentType: 'image/jpeg',
+            size: 1024,
+          },
+          'Pacific/Auckland',
+        ),
+      ).rejects.toThrow(FutureDateError);
+    });
+  });
+
+  // ─── S3 KEY IDOR PREVENTION ──────────────────────────────
+
+  describe('addMedia — s3Key IDOR', () => {
+    it('should reject s3Key belonging to another user', async () => {
+      await expect(
+        service.addMedia(
+          userId,
+          '2024-01-15',
+          {
+            s3Key: 'uploads/other-user/file.jpg',
+            fileName: 'file.jpg',
+            contentType: 'image/jpeg',
+            size: 1024,
+          },
+          timezone,
+        ),
+      ).rejects.toThrow(ForbiddenError);
+    });
+  });
+
+  // ─── PERIOD VALIDATION ──────────────────────────────────
+
+  describe('addMedia — period validation', () => {
+    it('should pass periodId through to created media', async () => {
+      const mockPeriod = {
+        id: 'period-1',
+        startDate: new Date('2024-01-01T00:00:00Z'),
+        endDate: new Date('2024-12-31T00:00:00Z'),
+      };
+
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          dayMedia: {
+            count: jest.fn().mockResolvedValue(0),
+            create: jest
+              .fn()
+              .mockResolvedValue({ ...mockMedia, periodId: 'period-1' }),
+          },
+          day: {
+            upsert: jest.fn().mockResolvedValue(mockDay),
+          },
+          eventPeriod: {
+            findFirst: jest.fn().mockResolvedValue(mockPeriod),
+          },
+        };
+        return cb(tx);
+      });
+
+      const result = await service.addMedia(
+        userId,
+        '2024-01-15',
+        {
           s3Key: `uploads/${userId}/file.jpg`,
           fileName: 'file.jpg',
           contentType: 'image/jpeg',
           size: 1024,
-        }, 'Pacific/Auckland'),
-      ).rejects.toThrow(FutureDateError);
+          periodId: 'period-1',
+        },
+        timezone,
+      );
+
+      expect(result).toHaveProperty('periodId', 'period-1');
+    });
+
+    it('should throw EventPeriodNotFoundError for non-existent period', async () => {
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          dayMedia: {
+            count: jest.fn().mockResolvedValue(0),
+            create: jest.fn(),
+          },
+          day: { upsert: jest.fn().mockResolvedValue(mockDay) },
+          eventPeriod: { findFirst: jest.fn().mockResolvedValue(null) },
+        };
+        return cb(tx);
+      });
+
+      await expect(
+        service.addMedia(
+          userId,
+          '2024-01-15',
+          {
+            s3Key: `uploads/${userId}/file.jpg`,
+            fileName: 'file.jpg',
+            contentType: 'image/jpeg',
+            size: 1024,
+            periodId: 'nonexistent',
+          },
+          timezone,
+        ),
+      ).rejects.toThrow(EventPeriodNotFoundError);
+    });
+
+    it('should throw ValidationError when period does not cover the day', async () => {
+      const mockPeriod = {
+        id: 'period-1',
+        startDate: new Date('2020-01-01T00:00:00Z'),
+        endDate: new Date('2020-12-31T00:00:00Z'),
+      };
+
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          dayMedia: {
+            count: jest.fn().mockResolvedValue(0),
+            create: jest.fn(),
+          },
+          day: { upsert: jest.fn().mockResolvedValue(mockDay) },
+          eventPeriod: { findFirst: jest.fn().mockResolvedValue(mockPeriod) },
+        };
+        return cb(tx);
+      });
+
+      await expect(
+        service.addMedia(
+          userId,
+          '2024-01-15',
+          {
+            s3Key: `uploads/${userId}/file.jpg`,
+            fileName: 'file.jpg',
+            contentType: 'image/jpeg',
+            size: 1024,
+            periodId: 'period-1',
+          },
+          timezone,
+        ),
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('should allow open-ended period (no endDate)', async () => {
+      const mockPeriod = {
+        id: 'period-1',
+        startDate: new Date('2024-01-01T00:00:00Z'),
+        endDate: null,
+      };
+
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          dayMedia: {
+            count: jest.fn().mockResolvedValue(0),
+            create: jest
+              .fn()
+              .mockResolvedValue({ ...mockMedia, periodId: 'period-1' }),
+          },
+          day: { upsert: jest.fn().mockResolvedValue(mockDay) },
+          eventPeriod: { findFirst: jest.fn().mockResolvedValue(mockPeriod) },
+        };
+        return cb(tx);
+      });
+
+      const result = await service.addMedia(
+        userId,
+        '2024-01-15',
+        {
+          s3Key: `uploads/${userId}/file.jpg`,
+          fileName: 'file.jpg',
+          contentType: 'image/jpeg',
+          size: 1024,
+          periodId: 'period-1',
+        },
+        timezone,
+      );
+
+      expect(result).toHaveProperty('periodId', 'period-1');
+    });
+
+    it('should create media without periodId (backward compat)', async () => {
+      const result = await service.addMedia(
+        userId,
+        '2024-01-15',
+        {
+          s3Key: `uploads/${userId}/file.jpg`,
+          fileName: 'file.jpg',
+          contentType: 'image/jpeg',
+          size: 1024,
+        },
+        timezone,
+      );
+
+      expect(result).toHaveProperty('periodId', null);
+    });
+  });
+
+  // ─── UPDATE MEDIA PERIOD ────────────────────────────────
+
+  describe('updateMediaPeriod', () => {
+    it('should throw MediaNotFoundError for non-existent media', async () => {
+      mediaRepo.findByIdAndUser.mockResolvedValue(null);
+
+      await expect(
+        service.updateMediaPeriod(userId, 'nonexistent', 'period-1'),
+      ).rejects.toThrow(MediaNotFoundError);
+    });
+
+    it('should set periodId on media', async () => {
+      const mockPeriod = {
+        id: 'period-1',
+        startDate: new Date('2024-01-01T00:00:00Z'),
+        endDate: new Date('2024-12-31T00:00:00Z'),
+      };
+
+      mediaRepo.findByIdAndUser.mockResolvedValue(mockMedia as any);
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          day: { findUnique: jest.fn().mockResolvedValue(mockDay) },
+          eventPeriod: { findFirst: jest.fn().mockResolvedValue(mockPeriod) },
+          dayMedia: {
+            update: jest
+              .fn()
+              .mockResolvedValue({ ...mockMedia, periodId: 'period-1' }),
+          },
+        };
+        return cb(tx);
+      });
+
+      const result = await service.updateMediaPeriod(
+        userId,
+        'media-1',
+        'period-1',
+      );
+
+      expect(result).toHaveProperty('periodId', 'period-1');
+    });
+
+    it('should unset periodId when null', async () => {
+      mediaRepo.findByIdAndUser.mockResolvedValue({
+        ...mockMedia,
+        periodId: 'period-1',
+      } as any);
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          day: { findUnique: jest.fn() },
+          eventPeriod: { findFirst: jest.fn() },
+          dayMedia: {
+            update: jest
+              .fn()
+              .mockResolvedValue({ ...mockMedia, periodId: null }),
+          },
+        };
+        return cb(tx);
+      });
+
+      const result = await service.updateMediaPeriod(userId, 'media-1', null);
+
+      expect(result).toHaveProperty('periodId', null);
+    });
+
+    it('should throw MediaNotFoundError when day record is missing', async () => {
+      mediaRepo.findByIdAndUser.mockResolvedValue(mockMedia as any);
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          day: { findUnique: jest.fn().mockResolvedValue(null) },
+          eventPeriod: { findFirst: jest.fn() },
+          dayMedia: { update: jest.fn() },
+        };
+        return cb(tx);
+      });
+
+      await expect(
+        service.updateMediaPeriod(userId, 'media-1', 'period-1'),
+      ).rejects.toThrow(MediaNotFoundError);
+    });
+
+    it('should throw EventPeriodNotFoundError for non-existent period', async () => {
+      mediaRepo.findByIdAndUser.mockResolvedValue(mockMedia as any);
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          day: { findUnique: jest.fn().mockResolvedValue(mockDay) },
+          eventPeriod: { findFirst: jest.fn().mockResolvedValue(null) },
+          dayMedia: { update: jest.fn() },
+        };
+        return cb(tx);
+      });
+
+      await expect(
+        service.updateMediaPeriod(userId, 'media-1', 'nonexistent'),
+      ).rejects.toThrow(EventPeriodNotFoundError);
+    });
+
+    it('should throw ValidationError when period does not cover the day', async () => {
+      const mockPeriod = {
+        id: 'period-1',
+        startDate: new Date('2020-01-01T00:00:00Z'),
+        endDate: new Date('2020-06-30T00:00:00Z'),
+      };
+
+      mediaRepo.findByIdAndUser.mockResolvedValue(mockMedia as any);
+      prismaMock.$transaction.mockImplementation(async (cb: any) => {
+        const tx = {
+          day: { findUnique: jest.fn().mockResolvedValue(mockDay) },
+          eventPeriod: { findFirst: jest.fn().mockResolvedValue(mockPeriod) },
+          dayMedia: { update: jest.fn() },
+        };
+        return cb(tx);
+      });
+
+      await expect(
+        service.updateMediaPeriod(userId, 'media-1', 'period-1'),
+      ).rejects.toThrow(ValidationError);
+    });
+  });
+
+  // ─── DELETE — S3 FAILURE HANDLING ───────────────────────
+
+  describe('deleteMedia — S3 failure resilience', () => {
+    it('should not throw when S3 delete fails (best-effort)', async () => {
+      mediaRepo.findByIdAndUser.mockResolvedValue(mockMedia as any);
+      s3Service.deleteObject.mockRejectedValue(new Error('S3 down'));
+
+      await expect(
+        service.deleteMedia(userId, 'media-1'),
+      ).resolves.toBeUndefined();
+      expect(mediaRepo.deleteById).toHaveBeenCalledWith('media-1');
     });
   });
 });
