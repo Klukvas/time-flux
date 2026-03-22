@@ -11,6 +11,16 @@
     "mobile:start": "npm run start -w apps/mobile",
     "mobile:ios": "npm run ios -w apps/mobile",
     "mobile:android": "npm run android -w apps/mobile",
-    "generate:api": "npm run generate:types -w packages/api"
+    "generate:api": "npm run generate:types -w packages/api",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.0",
+    "happy-dom": "^20.8.4",
+    "vitest": "^4.1.0"
   }
 }
