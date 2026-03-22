@@ -81,7 +81,9 @@ function MemoryCard({
       }`}
     >
       {/* Interval label */}
-      <p className="text-xs font-medium text-accent mb-3">{label}</p>
+      <p className="font-mono uppercase tracking-wider text-[10px] font-medium text-accent mb-3">
+        {label}
+      </p>
 
       <div className="flex items-center gap-3">
         {/* Mood circle */}

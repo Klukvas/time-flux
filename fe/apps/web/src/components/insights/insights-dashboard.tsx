@@ -42,7 +42,7 @@ export function InsightsDashboard() {
   if (data.totalDaysWithMood === 0) {
     return (
       <div>
-        <h1 className="mb-6 text-2xl font-bold text-content">
+        <h1 className="mb-6 text-2xl font-extrabold text-content">
           {t('insights.title')}
         </h1>
         <div className="rounded-lg border border-edge bg-surface-elevated p-8 text-center">
@@ -56,14 +56,14 @@ export function InsightsDashboard() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-content">
+      <h1 className="mb-6 text-2xl font-extrabold text-content">
         {t('insights.title')}
       </h1>
 
       <div className="space-y-6">
         {/* Average Mood — FREE */}
         <div className="rounded-lg border border-edge bg-surface-elevated p-6">
-          <p className="text-sm font-medium text-content-secondary">
+          <p className="text-sm font-medium font-mono text-content-secondary">
             {t('insights.average_mood')}
           </p>
           <div className="mt-2 flex items-baseline gap-2">
@@ -82,7 +82,7 @@ export function InsightsDashboard() {
         {/* Mood Distribution — FREE */}
         {data.moodDistribution.length > 0 && (
           <div className="rounded-lg border border-edge bg-surface-elevated p-6">
-            <h2 className="mb-4 text-sm font-medium text-content-secondary">
+            <h2 className="mb-4 text-sm font-medium font-mono text-content-secondary">
               {t('insights.mood_distribution')}
             </h2>
             <div className="space-y-3">
@@ -123,10 +123,10 @@ export function InsightsDashboard() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {data.bestCategory && (
                 <div className="rounded-lg border border-edge bg-surface-elevated p-6">
-                  <p className="text-sm font-medium text-success">
+                  <p className="text-sm font-medium font-mono text-success">
                     {t('insights.best_category')}
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-content">
+                  <p className="mt-2 text-lg font-bold text-content">
                     {data.bestCategory.name}
                   </p>
                   <p className="mt-1 text-sm text-content-tertiary">
@@ -137,10 +137,10 @@ export function InsightsDashboard() {
               )}
               {data.worstCategory && (
                 <div className="rounded-lg border border-edge bg-surface-elevated p-6">
-                  <p className="text-sm font-medium text-danger">
+                  <p className="text-sm font-medium font-mono text-danger">
                     {t('insights.worst_category')}
                   </p>
-                  <p className="mt-2 text-lg font-semibold text-content">
+                  <p className="mt-2 text-lg font-bold text-content">
                     {data.worstCategory.name}
                   </p>
                   <p className="mt-1 text-sm text-content-tertiary">
@@ -161,7 +161,7 @@ export function InsightsDashboard() {
         ) : (
           data.trendLast30Days.length > 1 && (
             <div className="rounded-lg border border-edge bg-surface-elevated p-6">
-              <h2 className="mb-4 text-sm font-medium text-content-secondary">
+              <h2 className="mb-4 text-sm font-medium font-mono text-content-secondary">
                 {t('insights.trend_last_30_days')}
               </h2>
               <MoodTrendChart data={data.trendLast30Days} />
@@ -190,7 +190,7 @@ function CategoryMock({ t }: { t: (key: string) => string }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div className="rounded-lg border border-edge bg-surface-elevated p-6">
-        <p className="text-sm font-medium text-success">
+        <p className="text-sm font-medium font-mono text-success">
           {t('insights.best_category')}
         </p>
         <p className="mt-2 text-lg font-semibold text-content">Work</p>
@@ -199,7 +199,7 @@ function CategoryMock({ t }: { t: (key: string) => string }) {
         </p>
       </div>
       <div className="rounded-lg border border-edge bg-surface-elevated p-6">
-        <p className="text-sm font-medium text-danger">
+        <p className="text-sm font-medium font-mono text-danger">
           {t('insights.worst_category')}
         </p>
         <p className="mt-2 text-lg font-semibold text-content">Health</p>
@@ -214,7 +214,7 @@ function CategoryMock({ t }: { t: (key: string) => string }) {
 function TrendMock({ t }: { t: (key: string) => string }) {
   return (
     <div className="rounded-lg border border-edge bg-surface-elevated p-6">
-      <h2 className="mb-4 text-sm font-medium text-content-secondary">
+      <h2 className="mb-4 text-sm font-medium font-mono text-content-secondary">
         {t('insights.trend_last_30_days')}
       </h2>
       <div className="flex h-[180px] items-end gap-1">
@@ -233,7 +233,7 @@ function TrendMock({ t }: { t: (key: string) => string }) {
 function WeekdayMock({ t }: { t: (key: string) => string }) {
   return (
     <div className="rounded-lg border border-edge bg-surface-elevated p-6">
-      <h2 className="mb-4 text-sm font-medium text-content-secondary">
+      <h2 className="mb-4 text-sm font-medium font-mono text-content-secondary">
         {t('insights.weekday_patterns')}
       </h2>
       <div className="grid grid-cols-2 gap-4">

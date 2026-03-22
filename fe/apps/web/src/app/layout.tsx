@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { DM_Sans, DM_Mono } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import { ApiProvider } from '@/lib/api-provider';
 import { I18nProvider } from '@/lib/i18n-provider';
@@ -11,9 +11,16 @@ import {
 } from '@/components/seo/json-ld';
 import './globals.css';
 
-const inter = Inter({
-  subsets: ['latin', 'cyrillic'],
+const dmSans = DM_Sans({
+  subsets: ['latin', 'latin-ext'],
   variable: '--font-sans',
+  display: 'swap',
+});
+
+const dmMono = DM_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
   display: 'swap',
 });
 
@@ -66,7 +73,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  themeColor: SEO.themeColor,
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#080C14' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+  ],
 };
 
 export default function RootLayout({
@@ -75,7 +85,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={inter.variable}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${dmSans.variable} ${dmMono.variable}`}
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{

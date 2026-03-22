@@ -296,7 +296,9 @@ function HorizontalTimeline({
   // Generate locale-aware weekday labels from a known Monday (2024-01-01 is a Monday)
   const dayLabels = Array.from({ length: 7 }, (_, i) => {
     const date = DateTime.fromISO('2024-01-01').plus({ days: i });
-    return (language ? date.reconfigure({ locale: language }) : date).toFormat('ccc');
+    return (language ? date.reconfigure({ locale: language }) : date).toFormat(
+      'ccc',
+    );
   });
 
   return (
@@ -307,7 +309,7 @@ function HorizontalTimeline({
           {dayLabels.map((label, i) => (
             <div
               key={i}
-              className="text-center text-xs font-medium text-content-tertiary"
+              className="text-center text-xs font-medium font-mono text-content-tertiary"
             >
               <span className="hidden sm:inline">{label}</span>
               <span className="sm:hidden">{label[0]}</span>
@@ -336,7 +338,7 @@ function HorizontalTimeline({
                     {week.periods.map((wp, idx) => (
                       <div
                         key={wp.period.id}
-                        className="absolute rounded-full truncate px-2 text-xs font-medium"
+                        className="absolute rounded-full truncate px-2 text-xs font-medium font-mono"
                         style={{
                           left: `${((wp.startCol + colOffset) / 7) * 100}%`,
                           width: `${(wp.span / 7) * 100}%`,
@@ -409,7 +411,7 @@ function HorizontalTimeline({
 
                 {/* Week date range label */}
                 <div
-                  className={`mt-1 text-right text-xs text-content-tertiary ${week.days.length < 7 ? 'mt-5' : ''}`}
+                  className={`mt-1 text-right text-xs font-mono text-content-tertiary ${week.days.length < 7 ? 'mt-5' : ''}`}
                 >
                   {formatDate(week.weekStart, 'MMM d', language)} —{' '}
                   {formatDate(week.weekEnd, 'MMM d', language)}
@@ -471,7 +473,7 @@ function WeekMode({
                   isToday(day.date) ? 'ring-2 ring-accent' : ''
                 } bg-surface-elevated`}
               >
-                <p className="text-xs font-medium text-content-secondary">
+                <p className="text-xs font-medium font-mono text-content-secondary">
                   {formatDayShort(day.date, language)}
                 </p>
                 <p className="text-xl font-bold text-content md:text-2xl">
@@ -493,7 +495,7 @@ function WeekMode({
                     {day.periods.slice(0, 3).map((period) => (
                       <div
                         key={period.id}
-                        className="rounded-md px-2 py-0.5 text-xs font-medium truncate"
+                        className="rounded-md px-2 py-0.5 text-xs font-medium font-mono truncate"
                         style={{
                           backgroundColor: hexToRgba(
                             period.category.color,

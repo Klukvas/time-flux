@@ -11,8 +11,8 @@ interface PricingCardsProps {
 
 const PRICES: Record<SubscriptionTier, string> = {
   FREE: '',
-  PRO: '$4.99',
-  PREMIUM: '$9.99',
+  PRO: '$6',
+  PREMIUM: '$12',
 };
 
 const TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'PREMIUM'];
@@ -80,7 +80,7 @@ export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
             key={tier}
             className={`relative flex flex-col rounded-2xl border-2 p-6 transition-shadow ${
               isPopular
-                ? 'border-violet-500 shadow-lg shadow-violet-500/10'
+                ? 'border-accent shadow-lg shadow-accent/20'
                 : isCurrent
                   ? 'border-accent'
                   : 'border-edge'
@@ -89,7 +89,7 @@ export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
             {/* Popular badge */}
             {isPopular && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white">
+                <span className="rounded-full bg-accent text-accent-text font-mono text-[10px] uppercase tracking-wider px-3 py-1">
                   {t('subscription.popular')}
                 </span>
               </div>
