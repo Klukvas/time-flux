@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import * as Sentry from '@sentry/nestjs';
 import { AppError } from '../errors/app.error.js';
 
 @Catch()
@@ -38,7 +39,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         `${request.method} ${request.url} → ${status}: ${exception.message}`,
       );
 
-      if (status === HttpStatus.BAD_REQUEST && typeof exceptionResponse === 'object') {
+      if (
+        status === HttpStatus.BAD_REQUEST &&
+        typeof exceptionResponse === 'object'
+      ) {
         const resp = exceptionResponse as Record<string, unknown>;
         response.status(status).json({
           error_code: 'VALIDATION_ERROR',
@@ -63,7 +67,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return;
     }
 
-    // Unhandled exceptions — log the full error
+    // Unhandled exceptions — log and report to Sentry
+    Sentry.captureException(exception);
     this.logger.error(
       `${request.method} ${request.url} → 500 Unhandled Exception`,
       exception instanceof Error ? exception.stack : String(exception),

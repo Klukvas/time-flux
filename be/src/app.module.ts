@@ -17,11 +17,13 @@ import { RecommendationsModule } from './recommendations/recommendations.module.
 import { AnalyticsModule } from './analytics/analytics.module.js';
 import { HealthModule } from './health/health.module.js';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
+import { SentryModule } from '@sentry/nestjs/setup';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot({
       throttlers: [{ name: 'default', ttl: 60000, limit: 100 }],

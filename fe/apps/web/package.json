@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@paddle/paddle-js": "^1.6.2",
     "@radix-ui/react-dialog": "^1.1.6",
+    "@sentry/nextjs": "^10.45.0",
+    "@tanstack/react-query": "^5.62.0",
     "@timeflux/api": "*",
     "@timeflux/constants": "*",
     "@timeflux/domain": "*",
@@ -17,8 +20,6 @@
     "@timeflux/i18n": "*",
     "@timeflux/theme": "*",
     "@timeflux/utils": "*",
-    "@paddle/paddle-js": "^1.6.2",
-    "@tanstack/react-query": "^5.62.0",
     "@vis.gl/react-google-maps": "^1.7.1",
     "axios": "^1.7.9",
     "embla-carousel-react": "^8.6.0",

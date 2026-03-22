@@ -46,7 +46,8 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https:",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://maps.googleapis.com https://*.paddle.com " +
+              "worker-src 'self' blob:",
+              "connect-src 'self' https://*.ingest.de.sentry.io https://maps.googleapis.com https://*.paddle.com https://*.your-objectstorage.com " +
                 (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'),
               'frame-src https://cdn.paddle.com https://sandbox-buy.paddle.com https://buy.paddle.com',
             ].join('; '),
@@ -57,4 +58,13 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+const { withSentryConfig } = require('@sentry/nextjs');
+
+module.exports = withSentryConfig(nextConfig, {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+});
