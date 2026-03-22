@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Logo } from '@/components/ui/logo';
 
 interface BlogLayoutProps {
   children: React.ReactNode;
@@ -10,8 +11,8 @@ export function BlogLayout({ children }: BlogLayoutProps) {
       <header className="sticky top-0 z-50 border-b border-edge/50 bg-surface/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-xl font-bold text-accent">
-              TimeFlux
+            <Link href="/">
+              <Logo variant="horizontal" />
             </Link>
             <span className="text-content-tertiary">/</span>
             <Link

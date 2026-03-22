@@ -8,6 +8,7 @@ import type { Language } from '@timeflux/i18n';
 import { SUPPORTED_LANGUAGES } from '@timeflux/i18n';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSidebarStore } from '@/stores/sidebar-store';
+import { Logo } from '@/components/ui/logo';
 import { NAV_ITEMS, THEME_OPTIONS } from './sidebar';
 import type { NavItemKey } from './sidebar';
 
@@ -58,7 +59,7 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
 
       {/* Drawer panel */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-surface-elevated border-r border-edge transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-surface-elevated border-r border-edge transform transition-transform duration-300 ease-in-out platform-grid-bg ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         role="dialog"
@@ -66,7 +67,7 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
       >
         {/* Header */}
         <div className="flex h-14 items-center justify-between border-b border-edge px-4">
-          <h1 className="text-xl font-bold text-accent">TimeFlux</h1>
+          <Logo variant="horizontal" />
           <button
             onClick={() => setMobileOpen(false)}
             className="rounded-lg p-1.5 text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors"
@@ -102,7 +103,7 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
                   active
                     ? 'bg-accent/10 text-accent'
                     : 'text-content-secondary hover:bg-surface-secondary hover:text-content'
-                } ${highlighted ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface-card' : ''}`}
+                } ${highlighted ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface-elevated' : ''}`}
               >
                 <svg
                   className="h-5 w-5 shrink-0"
@@ -182,11 +183,11 @@ export function MobileDrawer({ highlightedItem }: MobileDrawerProps) {
                 {user?.email}
               </span>
               <span
-                className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none ${
+                className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold font-mono leading-none ${
                   tier === 'PREMIUM'
-                    ? 'bg-amber-100 text-amber-700'
+                    ? 'bg-amber-500/10 text-amber-400'
                     : tier === 'PRO'
-                      ? 'bg-violet-100 text-violet-700'
+                      ? 'bg-sky-500/10 text-sky-400'
                       : 'bg-surface-secondary text-content-tertiary'
                 }`}
               >

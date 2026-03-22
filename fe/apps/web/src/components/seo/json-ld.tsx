@@ -43,7 +43,7 @@ export function OrganizationJsonLd() {
         '@type': 'Organization',
         name: SEO.siteName,
         url: baseUrl,
-        logo: `${baseUrl}/icon.png`,
+        logo: `${baseUrl}/apple-icon`,
       }}
     />
   );

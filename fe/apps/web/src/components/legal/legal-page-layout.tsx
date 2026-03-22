@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslation } from '@timeflux/hooks';
+import { Logo } from '@/components/ui/logo';
 import { useLanguageStore } from '@/stores/language-store';
 import { useThemeStore } from '@/stores/theme-store';
 import type { ThemePreference } from '@timeflux/theme';
@@ -28,8 +29,8 @@ export function LegalPageLayout({ children }: LegalPageLayoutProps) {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-edge/50 bg-surface/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link href="/" className="text-xl font-bold text-accent">
-            TimeFlux
+          <Link href="/">
+            <Logo variant="horizontal" />
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-3">

@@ -16,7 +16,7 @@ export const SEO = {
     'daily mood log',
     'life organizer',
   ] as string[],
-  themeColor: '#6366f1',
+  themeColor: '#080C14',
   locale: 'en_US',
   type: 'website' as const,
   twitterHandle: '@timeflux_app',

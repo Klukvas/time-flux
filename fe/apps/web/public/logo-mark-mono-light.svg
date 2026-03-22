@@ -1,0 +1,23 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background — light -->
+  <rect width="120" height="120" rx="26" fill="#F1F5F9"/>
+
+  <!-- Layers -->
+  <rect x="26" y="24"  width="76" height="12" rx="6" fill="#0F172A" fill-opacity="0.10" stroke="#0F172A" stroke-width="0.9" stroke-opacity="0.2"/>
+  <rect x="26" y="42"  width="58" height="12" rx="6" fill="#0F172A" fill-opacity="0.10" stroke="#0F172A" stroke-width="0.9" stroke-opacity="0.2"/>
+  <rect x="26" y="60"  width="68" height="12" rx="6" fill="#0F172A" fill-opacity="0.10" stroke="#0F172A" stroke-width="0.9" stroke-opacity="0.2"/>
+  <rect x="26" y="78"  width="44" height="12" rx="6" fill="#0F172A" fill-opacity="0.10" stroke="#0F172A" stroke-width="0.9" stroke-opacity="0.2"/>
+  <rect x="26" y="96"  width="54" height="12" rx="6" fill="#0F172A" fill-opacity="0.10" stroke="#0F172A" stroke-width="0.9" stroke-opacity="0.2"/>
+
+  <!-- Cursor line -->
+  <line x1="76" y1="14" x2="76" y2="114" stroke="#0F172A" stroke-width="1.8" stroke-opacity="0.5" stroke-linecap="round"/>
+  <polygon points="72,15 80,15 76,10" fill="#0F172A" fill-opacity="0.5"/>
+
+  <!-- Intersection dots -->
+  <circle cx="76" cy="30"  r="4"   fill="#0F172A" fill-opacity="0.7"/>
+  <circle cx="76" cy="30"  r="7.5" fill="#0F172A" fill-opacity="0.07"/>
+  <circle cx="76" cy="48"  r="4"   fill="#0F172A" fill-opacity="0.7"/>
+  <circle cx="76" cy="66"  r="4"   fill="#0F172A" fill-opacity="0.7"/>
+  <circle cx="76" cy="84"  r="4"   fill="#0F172A" fill-opacity="0.7"/>
+  <circle cx="76" cy="102" r="4"   fill="#0F172A" fill-opacity="0.7"/>
+</svg>

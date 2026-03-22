@@ -1,17 +1,27 @@
 'use client';
 
-import { useOnboarding, STEP_SIDEBAR_HIGHLIGHT } from '@timeflux/hooks';
+import {
+  useOnboarding,
+  STEP_SIDEBAR_HIGHLIGHT,
+  useDayStates,
+  useCategories,
+} from '@timeflux/hooks';
 import { Sidebar } from './sidebar';
 import type { NavItemKey } from './sidebar';
 import { MobileDrawer } from './mobile-drawer';
 import { OnboardingOverlay } from '@/components/onboarding/onboarding-overlay';
 import { useSidebarStore } from '@/stores/sidebar-store';
+import { Logo } from '@/components/ui/logo';
 
 /**
  * Dashboard shell orchestrates the sidebar, onboarding overlay, and main content.
  * The onboarding flow drives sidebar highlighting for navigation steps.
  */
 export function DashboardShell({ children }: { children: React.ReactNode }) {
+  // Prefetch frequently-used data so modals/forms have it instantly
+  useDayStates();
+  useCategories();
+
   const onboarding = useOnboarding();
   const setMobileOpen = useSidebarStore((s) => s.setMobileOpen);
 
@@ -31,9 +41,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <MobileDrawer highlightedItem={highlightedItem} />
 
       {/* Main content area — document-level scrolling */}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0 platform-grid-bg">
         {/* Mobile top header — sticky so it stays visible on scroll */}
-        <header className="sticky top-0 z-30 flex md:hidden h-14 shrink-0 items-center justify-between border-b border-edge bg-surface-elevated px-4">
+        <header
+          className="sticky top-0 z-30 flex md:hidden h-14 shrink-0 items-center justify-between border-b border-edge bg-surface/80 px-4"
+          style={{ backdropFilter: 'blur(12px)' }}
+        >
           <button
             onClick={() => setMobileOpen(true)}
             className="rounded-lg p-2 text-content-secondary hover:bg-surface-secondary"
@@ -53,7 +66,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               />
             </svg>
           </button>
-          <h1 className="text-lg font-bold text-accent">TimeFlux</h1>
+          <Logo variant="mark" />
           <div className="w-10" />
         </header>
 

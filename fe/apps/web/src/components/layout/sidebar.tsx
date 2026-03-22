@@ -8,6 +8,7 @@ import type { ThemePreference } from '@timeflux/theme';
 import type { Language } from '@timeflux/i18n';
 import { SUPPORTED_LANGUAGES } from '@timeflux/i18n';
 import { useAuthStore } from '@/stores/auth-store';
+import { Logo } from '@/components/ui/logo';
 import { useSidebarStore } from '@/stores/sidebar-store';
 
 /** Nav item key used for onboarding highlights. */
@@ -120,7 +121,7 @@ export function Sidebar({ highlightedItem }: SidebarProps) {
             active
               ? 'bg-accent/10 text-accent'
               : 'text-content-secondary hover:bg-surface-secondary hover:text-content'
-          } ${highlighted ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface-card z-10 relative' : ''}`}
+          } ${highlighted ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface-elevated z-10 relative' : ''}`}
         >
           <svg
             className="h-5 w-5 shrink-0"
@@ -152,7 +153,7 @@ export function Sidebar({ highlightedItem }: SidebarProps) {
 
   return (
     <aside
-      className={`sticky top-0 flex h-dvh flex-col border-r border-edge bg-surface-elevated transition-[width] duration-200 ease-in-out ${
+      className={`sticky top-0 flex h-dvh flex-col border-r border-edge bg-surface-elevated transition-[width] duration-200 ease-in-out platform-grid-bg ${
         collapsed ? 'w-16' : 'w-64'
       }`}
     >
@@ -160,9 +161,7 @@ export function Sidebar({ highlightedItem }: SidebarProps) {
       <div
         className={`flex h-16 items-center border-b border-edge ${collapsed ? 'justify-center px-2' : 'justify-between px-6'}`}
       >
-        {!collapsed && (
-          <h1 className="text-xl font-bold text-accent">TimeFlux</h1>
-        )}
+        {!collapsed ? <Logo variant="horizontal" /> : <Logo variant="mark" />}
         <button
           onClick={toggleCollapsed}
           title={collapsed ? t('nav.expand') : t('nav.collapse')}
@@ -255,11 +254,11 @@ export function Sidebar({ highlightedItem }: SidebarProps) {
                 {user?.email}
               </span>
               <span
-                className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none ${
+                className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold font-mono leading-none ${
                   tier === 'PREMIUM'
-                    ? 'bg-amber-100 text-amber-700'
+                    ? 'bg-amber-500/10 text-amber-400'
                     : tier === 'PRO'
-                      ? 'bg-violet-100 text-violet-700'
+                      ? 'bg-sky-500/10 text-sky-400'
                       : 'bg-surface-secondary text-content-tertiary'
                 }`}
               >
