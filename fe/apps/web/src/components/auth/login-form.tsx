@@ -44,18 +44,12 @@ export function LoginForm({
     e.preventDefault();
     setFormError('');
     const emailResult = validateEmail(email);
-    const passwordResult = validatePassword(password);
-    if (!emailResult.valid || !passwordResult.valid) {
+    if (!emailResult.valid || !password) {
       setErrors({
         email: emailResult.errorCode
           ? t(`validation.email.${emailResult.errorCode}`)
           : undefined,
-        password: passwordResult.errorCode
-          ? t(`validation.password.${passwordResult.errorCode}`, {
-              min: MIN_PASSWORD_LENGTH,
-              max: MAX_PASSWORD_LENGTH,
-            })
-          : undefined,
+        password: !password ? t('validation.password.required') : undefined,
       });
       return;
     }
