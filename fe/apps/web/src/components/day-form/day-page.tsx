@@ -29,6 +29,7 @@ import {
   addDays,
   extractVideoThumbnail,
   formatDate,
+  getStartDate,
   hexToRgba,
   isBeyondTomorrow,
   isImageType,
@@ -48,7 +49,6 @@ import { LocationFormModal } from './location-form-modal';
 import { MediaPeriodAssign } from './media-period-assign';
 import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
-import { DateTime } from 'luxon';
 
 interface DayPageProps {
   date: string;
@@ -73,14 +73,10 @@ export function DayPage({ date }: DayPageProps) {
   const timelineMode = useViewStore((s) => s.timelineMode);
   const user = useAuthStore((s) => s.user);
 
-  const startDate = useMemo(() => {
-    if (user?.birthDate) return user.birthDate;
-    if (!user?.createdAt) return undefined;
-    return (
-      DateTime.fromISO(user.createdAt).setZone(user.timezone).toISODate() ??
-      undefined
-    );
-  }, [user?.birthDate, user?.createdAt, user?.timezone]);
+  const startDate = useMemo(
+    () => getStartDate(user),
+    [user?.birthDate, user?.createdAt, user?.timezone],
+  );
 
   // Redirect to start date if navigating before it
   useEffect(() => {

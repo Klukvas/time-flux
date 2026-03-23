@@ -16,6 +16,7 @@ import {
   formatDate,
   formatDayNumber,
   formatDayShort,
+  getStartDate,
   hexToRgba,
   isBeyondTomorrow,
   isImageType,
@@ -32,21 +33,6 @@ import { OnThisDaySection } from '@/components/timeline/on-this-day';
 import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
 import type { TimelineMode } from '@/stores/view-store';
-
-/** Derive start date (YYYY-MM-DD): birthDate if set, otherwise registration date. */
-function getStartDate(
-  user: {
-    birthDate?: string | null;
-    createdAt?: string;
-    timezone?: string;
-  } | null,
-): string | undefined {
-  if (!user) return undefined;
-  const tz = user.timezone ?? 'UTC';
-  if (user.birthDate) return user.birthDate;
-  if (!user.createdAt) return undefined;
-  return DateTime.fromISO(user.createdAt).setZone(tz).toISODate() ?? undefined;
-}
 
 export function TimelineView() {
   const router = useRouter();
@@ -300,7 +286,8 @@ function HorizontalMode({
           <div className="mt-6 flex justify-center">
             <button
               onClick={() => setLoadedYears((y) => y + 1)}
-              className="rounded-lg border border-edge px-4 py-2 text-sm font-medium text-content transition-colors hover:bg-surface-secondary"
+              disabled={isLoading}
+              className="rounded-lg border border-edge px-4 py-2 text-sm font-medium text-content transition-colors hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-default"
             >
               {t('timeline.load_earlier')}
             </button>

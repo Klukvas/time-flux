@@ -11,6 +11,7 @@ export {
   formatRelative,
   getMonthEnd,
   getMonthStart,
+  getStartDate,
   getWeekStart,
   getYearMonth,
   isBeyondTomorrow,

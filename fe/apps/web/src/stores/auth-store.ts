@@ -53,7 +53,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (token && userStr) {
       try {
         const raw = JSON.parse(userStr);
-        const user: AuthUser = { ...raw, birthDate: raw.birthDate ?? null };
+        const rawBirthDate = raw.birthDate;
+        const birthDate =
+          typeof rawBirthDate === 'string' &&
+          /^\d{4}-\d{2}-\d{2}$/.test(rawBirthDate)
+            ? rawBirthDate
+            : null;
+        const user: AuthUser = { ...raw, birthDate };
         set({ token, refreshToken, user });
       } catch {
         localStorage.removeItem(TOKEN_KEY);

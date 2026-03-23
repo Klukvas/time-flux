@@ -133,6 +133,7 @@ export class SubscriptionsService {
     // Optimistically set canceledAt — webhook will confirm
     const canceledAt = new Date();
     await this.repo.updateByUserId(userId, { canceledAt });
+    this.invalidateTierCache(userId);
 
     return {
       message: 'Subscription will be canceled at the end of the billing period',

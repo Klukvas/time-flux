@@ -98,9 +98,12 @@ describe('UsersService', () => {
     });
 
     it('should reject future birth date', async () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const futureDate = tomorrow.toISOString().split('T')[0];
+      const now = new Date();
+      const futureDate = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1),
+      )
+        .toISOString()
+        .split('T')[0];
 
       await expect(
         service.updateProfile('user-1', { birthDate: futureDate }),
@@ -108,9 +111,16 @@ describe('UsersService', () => {
     });
 
     it('should reject user under 13 years old', async () => {
-      const tooYoung = new Date();
-      tooYoung.setFullYear(tooYoung.getFullYear() - 12);
-      const youngDate = tooYoung.toISOString().split('T')[0];
+      const now = new Date();
+      const youngDate = new Date(
+        Date.UTC(
+          now.getUTCFullYear() - 12,
+          now.getUTCMonth(),
+          now.getUTCDate(),
+        ),
+      )
+        .toISOString()
+        .split('T')[0];
 
       await expect(
         service.updateProfile('user-1', { birthDate: youngDate }),
@@ -124,9 +134,16 @@ describe('UsersService', () => {
     });
 
     it('should accept exactly 13 years old today', async () => {
-      const exactly13 = new Date();
-      exactly13.setFullYear(exactly13.getFullYear() - 13);
-      const dateStr = exactly13.toISOString().split('T')[0];
+      const now = new Date();
+      const dateStr = new Date(
+        Date.UTC(
+          now.getUTCFullYear() - 13,
+          now.getUTCMonth(),
+          now.getUTCDate(),
+        ),
+      )
+        .toISOString()
+        .split('T')[0];
 
       const updatedUser = {
         ...mockUser,

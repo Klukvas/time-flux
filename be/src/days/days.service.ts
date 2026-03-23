@@ -43,20 +43,29 @@ export class DaysService {
     }
   }
 
-  private async assertNotBeforeBirthDate(userId: string, dateStr: string) {
+  private assertNotBeforeBirthDate(
+    dateStr: string,
+    birthDate: Date | null | undefined,
+  ) {
+    if (!birthDate) return;
+    const birthDateDt = DateTime.fromJSDate(birthDate, { zone: 'utc' }).startOf(
+      'day',
+    );
+    const target = DateTime.fromISO(dateStr, { zone: 'utc' }).startOf('day');
+    if (target < birthDateDt) {
+      throw new DateBeforeStartError({
+        date: dateStr,
+        birthDate: birthDateDt.toISODate()!,
+      });
+    }
+  }
+
+  private async getUserBirthDate(userId: string): Promise<Date | null> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { birthDate: true },
     });
-    if (user?.birthDate) {
-      const birthDateStr = user.birthDate.toISOString().split('T')[0];
-      if (dateStr < birthDateStr) {
-        throw new DateBeforeStartError({
-          date: dateStr,
-          birthDate: birthDateStr,
-        });
-      }
-    }
+    return user?.birthDate ?? null;
   }
 
   async upsert(
@@ -70,7 +79,8 @@ export class DaysService {
     );
 
     this.assertNotTooFarInFuture(dateStr, timezone);
-    await this.assertNotBeforeBirthDate(userId, dateStr);
+    const birthDate = await this.getUserBirthDate(userId);
+    this.assertNotBeforeBirthDate(dateStr, birthDate);
 
     const date = parseISODateToUTC(dateStr);
 
@@ -117,7 +127,8 @@ export class DaysService {
     );
 
     this.assertNotTooFarInFuture(dateStr, timezone);
-    await this.assertNotBeforeBirthDate(userId, dateStr);
+    const birthDate = await this.getUserBirthDate(userId);
+    this.assertNotBeforeBirthDate(dateStr, birthDate);
 
     const date = parseISODateToUTC(dateStr);
 

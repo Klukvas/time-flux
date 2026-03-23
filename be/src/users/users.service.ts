@@ -21,11 +21,10 @@ export class UsersService {
     this.logger.log(`updateProfile userId=${userId}`);
 
     if (dto.birthDate !== undefined) {
-      // Validate input first, then check tier access
+      await this.subscriptionsService.assertFeatureAccess(userId, 'birthDate');
+
       const birthDate =
         dto.birthDate === null ? null : this.validateBirthDate(dto.birthDate);
-
-      await this.subscriptionsService.assertFeatureAccess(userId, 'birthDate');
 
       const user = await this.usersRepository.updateBirthDate(
         userId,

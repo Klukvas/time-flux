@@ -117,3 +117,18 @@ export function formatMonthLabel(isoDate: string, locale?: string): string {
   const dt = DateTime.fromISO(isoDate);
   return (locale ? dt.reconfigure({ locale }) : dt).toFormat('LLLL yyyy');
 }
+
+/** Derive the user's timeline start date (YYYY-MM-DD): birthDate if set, otherwise createdAt in their timezone. */
+export function getStartDate(
+  user: {
+    birthDate?: string | null;
+    createdAt?: string;
+    timezone?: string;
+  } | null,
+): string | undefined {
+  if (!user) return undefined;
+  if (user.birthDate) return user.birthDate;
+  if (!user.createdAt) return undefined;
+  const tz = user.timezone ?? 'UTC';
+  return DateTime.fromISO(user.createdAt).setZone(tz).toISODate() ?? undefined;
+}

@@ -22,9 +22,6 @@ function computeMaxDate(): string {
   return d.toISOString().split('T')[0];
 }
 
-const MIN_DATE = computeMinDate();
-const MAX_DATE = computeMaxDate();
-
 export function BirthDateSection() {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
@@ -33,6 +30,9 @@ export function BirthDateSection() {
 
   const isPaid = user?.tier === 'PRO' || user?.tier === 'PREMIUM';
   const currentBirthDate = user?.birthDate ?? null;
+
+  const minDate = computeMinDate();
+  const maxDate = computeMaxDate();
 
   const [inputValue, setInputValue] = useState(currentBirthDate ?? '');
   const [isDirty, setIsDirty] = useState(false);
@@ -58,8 +58,8 @@ export function BirthDateSection() {
     if (
       !ISO_DATE_RE.test(inputValue) ||
       isNaN(new Date(inputValue).getTime()) ||
-      inputValue < MIN_DATE ||
-      inputValue > MAX_DATE
+      inputValue < minDate ||
+      inputValue > maxDate
     ) {
       toast.error(t('settings.birth_date_invalid'));
       return;
@@ -118,8 +118,8 @@ export function BirthDateSection() {
                 id="birth-date-input"
                 type="date"
                 value={inputValue}
-                min={MIN_DATE}
-                max={MAX_DATE}
+                min={minDate}
+                max={maxDate}
                 onChange={(e) => handleChange(e.target.value)}
                 className="rounded-lg border border-edge bg-surface-elevated px-3 py-2 text-base sm:text-sm text-content"
               />

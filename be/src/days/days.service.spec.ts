@@ -13,6 +13,7 @@ import { S3Service } from '../s3/s3.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   DayStateNotFoundError,
+  DateBeforeStartError,
   FutureDateError,
   InvalidDateRangeError,
   MediaNotFoundError,
@@ -156,6 +157,21 @@ describe('DaysService', () => {
           'UTC',
         ),
       ).rejects.toThrow(FutureDateError);
+    });
+
+    it('should reject date before user birthDate', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({
+        birthDate: new Date('2000-06-15T00:00:00Z'),
+      });
+
+      await expect(
+        service.updateLocation(
+          USER_ID,
+          '2000-01-01',
+          { locationName: 'Old Place' },
+          'UTC',
+        ),
+      ).rejects.toThrow(DateBeforeStartError);
     });
 
     it('should upsert day if it does not exist (passes to repo)', async () => {
@@ -343,6 +359,47 @@ describe('DaysService', () => {
           'UTC',
         ),
       ).rejects.toThrow(MediaNotFoundError);
+    });
+
+    it('should reject date before user birthDate', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({
+        birthDate: new Date('2000-06-15T00:00:00Z'),
+      });
+
+      await expect(
+        service.upsert(USER_ID, '2000-01-01', {}, 'UTC'),
+      ).rejects.toThrow(DateBeforeStartError);
+    });
+
+    it('should allow date on user birthDate', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({
+        birthDate: new Date('2000-06-15T00:00:00Z'),
+      });
+      daysRepo.upsert.mockResolvedValue({
+        ...mockDay,
+        date: new Date('2000-06-15T00:00:00Z'),
+      });
+
+      const result = await service.upsert(USER_ID, '2000-06-15', {}, 'UTC');
+      expect(result.date).toBe('2000-06-15');
+    });
+
+    it('should allow date after user birthDate', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({
+        birthDate: new Date('2000-06-15T00:00:00Z'),
+      });
+      daysRepo.upsert.mockResolvedValue(mockDay);
+
+      const result = await service.upsert(USER_ID, DATE_STR, {}, 'UTC');
+      expect(result.date).toBe('2025-01-15');
+    });
+
+    it('should skip birthDate check when user has no birthDate', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ birthDate: null });
+      daysRepo.upsert.mockResolvedValue(mockDay);
+
+      const result = await service.upsert(USER_ID, DATE_STR, {}, 'UTC');
+      expect(result.date).toBe('2025-01-15');
     });
 
     it('should format media with presigned URLs in response', async () => {
