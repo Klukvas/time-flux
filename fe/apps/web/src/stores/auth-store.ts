@@ -6,6 +6,7 @@ interface AuthState {
   refreshToken: string | null;
   user: AuthUser | null;
   setAuth: (token: string, refreshToken: string, user: AuthUser) => void;
+  setUser: (user: AuthUser) => void;
   setTokens: (token: string, refreshToken: string) => void;
   logout: () => void;
   hydrate: () => void;
@@ -27,6 +28,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ token, refreshToken, user });
   },
 
+  setUser: (user) => {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    set({ user });
+  },
+
   setTokens: (token, refreshToken) => {
     localStorage.setItem(TOKEN_KEY, token);
     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
@@ -46,7 +52,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     const userStr = localStorage.getItem(USER_KEY);
     if (token && userStr) {
       try {
-        const user = JSON.parse(userStr) as AuthUser;
+        const raw = JSON.parse(userStr);
+        const user: AuthUser = { ...raw, birthDate: raw.birthDate ?? null };
         set({ token, refreshToken, user });
       } catch {
         localStorage.removeItem(TOKEN_KEY);

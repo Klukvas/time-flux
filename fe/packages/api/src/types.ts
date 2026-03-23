@@ -102,6 +102,13 @@ export type MemoriesContextResponse = DayContextResponse | WeekContextResponse;
 export type Recommendation = Schemas['RecommendationDto'];
 export type RecommendationsResponse = Schemas['RecommendationsResponseDto'];
 
+// ─── Users (Profile) ────────────────────────────────────
+
+/** TODO: Replace with Schemas['UpdateProfileDto'] after OpenAPI spec regeneration. */
+export interface UpdateProfileRequest {
+  birthDate?: string | null;
+}
+
 // ─── Subscription ───────────────────────────────────────────
 
 export type SubscriptionLimits = Schemas['SubscriptionLimitsDto'];

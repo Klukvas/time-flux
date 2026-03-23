@@ -50,3 +50,4 @@ export {
 } from './use-recommendations';
 export { useMoodOverview } from './use-analytics';
 export { useSubscription, useCancelSubscription } from './use-subscriptions';
+export { useUpdateProfile } from './use-users';

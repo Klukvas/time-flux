@@ -4,2454 +4,2478 @@
  */
 
 export interface paths {
-    "/api/v1/auth/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register a new user */
-        post: operations["AuthController_register"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/api/v1/auth/register': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login with email and password */
-        post: operations["AuthController_login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Register a new user */
+    post: operations['AuthController_register'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/auth/login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/auth/google": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Initiate Google OAuth login
-         * @description Redirects the user to Google consent screen. After authorization, Google redirects back to /api/v1/auth/google/callback.
-         */
-        get: operations["AuthController_googleAuth"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Login with email and password */
+    post: operations['AuthController_login'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/auth/google': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/auth/google/exchange": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Exchange one-time OAuth code for tokens */
-        post: operations["AuthController_googleExchange"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Initiate Google OAuth login
+     * @description Redirects the user to Google consent screen. After authorization, Google redirects back to /api/v1/auth/google/callback.
+     */
+    get: operations['AuthController_googleAuth'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/auth/google/exchange': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/auth/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Refresh access token using a refresh token */
-        post: operations["AuthController_refresh"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Exchange one-time OAuth code for tokens */
+    post: operations['AuthController_googleExchange'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/auth/refresh': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/auth/logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Logout — revoke refresh token */
-        post: operations["AuthController_logout"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Refresh access token using a refresh token */
+    post: operations['AuthController_refresh'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/auth/logout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/auth/onboarding": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Mark onboarding as completed */
-        patch: operations["AuthController_completeOnboarding"];
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Logout — revoke refresh token */
+    post: operations['AuthController_logout'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/auth/onboarding': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/subscriptions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get current subscription with tier limits */
-        get: operations["SubscriptionsController_getSubscription"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Mark onboarding as completed */
+    patch: operations['AuthController_completeOnboarding'];
+    trace?: never;
+  };
+  '/api/v1/subscriptions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/subscriptions/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Cancel current subscription */
-        post: operations["SubscriptionsController_cancelSubscription"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get current subscription with tier limits */
+    get: operations['SubscriptionsController_getSubscription'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/subscriptions/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/categories": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all categories for the current user */
-        get: operations["CategoriesController_findAll"];
-        put?: never;
-        /** Create a new category */
-        post: operations["CategoriesController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Cancel current subscription */
+    post: operations['SubscriptionsController_cancelSubscription'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/categories': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/categories/from-recommendation": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create a category from a recommendation */
-        post: operations["CategoriesController_createFromRecommendation"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get all categories for the current user */
+    get: operations['CategoriesController_findAll'];
+    put?: never;
+    /** Create a new category */
+    post: operations['CategoriesController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/categories/from-recommendation': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/categories/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a category */
-        delete: operations["CategoriesController_delete"];
-        options?: never;
-        head?: never;
-        /** Update a category */
-        patch: operations["CategoriesController_update"];
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Create a category from a recommendation */
+    post: operations['CategoriesController_createFromRecommendation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/categories/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/day-states": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all day states for the current user */
-        get: operations["DayStatesController_findAll"];
-        put?: never;
-        /** Create a new day state */
-        post: operations["DayStatesController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a category */
+    delete: operations['CategoriesController_delete'];
+    options?: never;
+    head?: never;
+    /** Update a category */
+    patch: operations['CategoriesController_update'];
+    trace?: never;
+  };
+  '/api/v1/day-states': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/day-states/from-recommendation": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create a day state from a recommendation */
-        post: operations["DayStatesController_createFromRecommendation"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get all day states for the current user */
+    get: operations['DayStatesController_findAll'];
+    put?: never;
+    /** Create a new day state */
+    post: operations['DayStatesController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/day-states/from-recommendation': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/day-states/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a day state */
-        delete: operations["DayStatesController_delete"];
-        options?: never;
-        head?: never;
-        /** Update a day state */
-        patch: operations["DayStatesController_update"];
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Create a day state from a recommendation */
+    post: operations['DayStatesController_createFromRecommendation'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/day-states/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/event-groups": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List event groups */
-        get: operations["EventGroupsController_findAll"];
-        put?: never;
-        /** Create event group */
-        post: operations["EventGroupsController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a day state */
+    delete: operations['DayStatesController_delete'];
+    options?: never;
+    head?: never;
+    /** Update a day state */
+    patch: operations['DayStatesController_update'];
+    trace?: never;
+  };
+  '/api/v1/event-groups': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/event-groups/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get event group by ID */
-        get: operations["EventGroupsController_findOne"];
-        put?: never;
-        post?: never;
-        /** Delete event group */
-        delete: operations["EventGroupsController_remove"];
-        options?: never;
-        head?: never;
-        /** Update event group */
-        patch: operations["EventGroupsController_update"];
-        trace?: never;
+    /** List event groups */
+    get: operations['EventGroupsController_findAll'];
+    put?: never;
+    /** Create event group */
+    post: operations['EventGroupsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/event-groups/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/event-groups/{id}/periods": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create period for event group */
-        post: operations["EventGroupsController_createPeriod"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get event group by ID */
+    get: operations['EventGroupsController_findOne'];
+    put?: never;
+    post?: never;
+    /** Delete event group */
+    delete: operations['EventGroupsController_remove'];
+    options?: never;
+    head?: never;
+    /** Update event group */
+    patch: operations['EventGroupsController_update'];
+    trace?: never;
+  };
+  '/api/v1/event-groups/{id}/periods': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/event-groups/{id}/details": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get event group details with analytics */
-        get: operations["EventGroupsController_getDetails"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Create period for event group */
+    post: operations['EventGroupsController_createPeriod'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/event-groups/{id}/details': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/periods/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete event period */
-        delete: operations["EventPeriodsController_remove"];
-        options?: never;
-        head?: never;
-        /** Update event period */
-        patch: operations["EventPeriodsController_update"];
-        trace?: never;
+    /** Get event group details with analytics */
+    get: operations['EventGroupsController_getDetails'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/periods/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/periods/{id}/close": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Close an active event period */
-        post: operations["EventPeriodsController_close"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete event period */
+    delete: operations['EventPeriodsController_remove'];
+    options?: never;
+    head?: never;
+    /** Update event period */
+    patch: operations['EventPeriodsController_update'];
+    trace?: never;
+  };
+  '/api/v1/periods/{id}/close': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/days/{date}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Set or update the day state for a specific date */
-        put: operations["DaysController_upsert"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Close an active event period */
+    post: operations['EventPeriodsController_close'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/days/{date}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/days/{date}/location": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update or clear the location for a specific date */
-        patch: operations["DaysController_updateLocation"];
-        trace?: never;
+    get?: never;
+    /** Set or update the day state for a specific date */
+    put: operations['DaysController_upsert'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/days/{date}/location': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/days": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get days with their states for a date range */
-        get: operations["DaysController_findAll"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Update or clear the location for a specific date */
+    patch: operations['DaysController_updateLocation'];
+    trace?: never;
+  };
+  '/api/v1/days': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/uploads/presigned-url": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Generate a presigned URL for direct S3 upload (Hetzner S3-compatible) */
-        post: operations["S3Controller_getPresignedUrl"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get days with their states for a date range */
+    get: operations['DaysController_findAll'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/uploads/presigned-url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/timeline": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get vertical timeline (events + days for a date range) */
-        get: operations["TimelineController_getTimeline"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Generate a presigned URL for direct S3 upload (Hetzner S3-compatible) */
+    post: operations['S3Controller_getPresignedUrl'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/timeline': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/timeline/week": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get week view (7 days with events for a specific week) */
-        get: operations["TimelineController_getWeekTimeline"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get vertical timeline (events + days for a date range) */
+    get: operations['TimelineController_getTimeline'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/timeline/week': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/days/{date}/media": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List media for a specific day */
-        get: operations["MediaController_getMediaForDay"];
-        put?: never;
-        /** Attach uploaded media to a day */
-        post: operations["MediaController_addMedia"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get week view (7 days with events for a specific week) */
+    get: operations['TimelineController_getWeekTimeline'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/days/{date}/media': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/media/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a media item */
-        delete: operations["MediaController_deleteMedia"];
-        options?: never;
-        head?: never;
-        /** Update media period association */
-        patch: operations["MediaController_updateMedia"];
-        trace?: never;
+    /** List media for a specific day */
+    get: operations['MediaController_getMediaForDay'];
+    put?: never;
+    /** Attach uploaded media to a day */
+    post: operations['MediaController_addMedia'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/media/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/memories/on-this-day": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get "On This Day" memories
-         * @description Returns memories from 1 month, 6 months, and 1 year ago for the given date (defaults to today).
-         */
-        get: operations["MemoriesController_getOnThisDay"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a media item */
+    delete: operations['MediaController_deleteMedia'];
+    options?: never;
+    head?: never;
+    /** Update media period association */
+    patch: operations['MediaController_updateMedia'];
+    trace?: never;
+  };
+  '/api/v1/memories/on-this-day': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/memories/context": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get context-based memories for a selected date
-         * @description Returns memories relative to the selected date. Day mode returns memories from 1 month, 6 months, and 1 year ago. Week mode returns weekly summaries for the same intervals.
-         */
-        get: operations["MemoriesController_getContext"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get "On This Day" memories
+     * @description Returns memories from 1 month, 6 months, and 1 year ago for the given date (defaults to today).
+     */
+    get: operations['MemoriesController_getOnThisDay'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/memories/context': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/recommendations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get recommended categories and moods */
-        get: operations["RecommendationsController_getRecommendations"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get context-based memories for a selected date
+     * @description Returns memories relative to the selected date. Day mode returns memories from 1 month, 6 months, and 1 year ago. Week mode returns weekly summaries for the same intervals.
+     */
+    get: operations['MemoriesController_getContext'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/recommendations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/analytics/mood-overview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get global mood analytics overview with weekday behavioral insights */
-        get: operations["AnalyticsController_getMoodOverview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get recommended categories and moods */
+    get: operations['RecommendationsController_getRecommendations'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/analytics/mood-overview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Health check */
-        get: operations["HealthController_check"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get global mood analytics overview with weekday behavioral insights */
+    get: operations['AnalyticsController_getMoodOverview'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /** Health check */
+    get: operations['HealthController_check'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        RegisterDto: {
-            /** @example user@example.com */
-            email: string;
-            /**
-             * @description Min 8 chars, 1 uppercase, 1 lowercase, 1 number
-             * @example SecurePass1
-             */
-            password: string;
-            /**
-             * @default UTC
-             * @example Europe/Berlin
-             */
-            timezone: string;
-        };
-        AuthUserDto: {
-            id: string;
-            email: string;
-            avatarUrl?: string | null;
-            timezone: string;
-            onboardingCompleted: boolean;
-            /**
-             * @example FREE
-             * @enum {string}
-             */
-            tier: "FREE" | "PRO" | "PREMIUM";
-            createdAt: string;
-        };
-        AuthResponseDto: {
-            access_token: string;
-            refresh_token: string;
-            user: components["schemas"]["AuthUserDto"];
-        };
-        LoginDto: {
-            /** @example user@example.com */
-            email: string;
-            /** @example securePassword123 */
-            password: string;
-        };
-        GoogleExchangeDto: {
-            /** @description One-time OAuth exchange code */
-            code: string;
-        };
-        RefreshTokenDto: {
-            /** @description Refresh token received during login/register */
-            refresh_token: string;
-        };
-        SubscriptionLimitsDto: {
-            /** @example 50 */
-            media: number;
-            /** @example 5 */
-            chapters: number;
-            /** @example 5 */
-            categories: number;
-            /** @example 5 */
-            dayStates: number;
-            /** @example basic */
-            analytics: boolean | "basic";
-            /** @example false */
-            memories: boolean;
-        };
-        SubscriptionUsageDto: {
-            /** @example 12 */
-            media: number;
-            /** @example 3 */
-            chapters: number;
-            /** @example 4 */
-            categories: number;
-            /** @example 5 */
-            dayStates: number;
-        };
-        SubscriptionResponseDto: {
-            /** @example uuid-123 */
-            id: string;
-            /** @example uuid-456 */
-            userId: string;
-            /**
-             * @example FREE
-             * @enum {string}
-             */
-            tier: "FREE" | "PRO" | "PREMIUM";
-            /**
-             * @example ACTIVE
-             * @enum {string}
-             */
-            status: "ACTIVE" | "TRIALING" | "PAST_DUE" | "CANCELED" | "PAUSED";
-            /** @example cus_01abc123 */
-            paddleCustomerId?: string | null;
-            /** @example sub_01abc123 */
-            paddleSubscriptionId?: string | null;
-            /** @example 2026-03-26T00:00:00.000Z */
-            currentPeriodEnd?: string | null;
-            /** @example null */
-            canceledAt?: string | null;
-            /** @example 2026-03-01T00:00:00.000Z */
-            createdAt: string;
-            /** @example 2026-03-01T00:00:00.000Z */
-            updatedAt: string;
-            limits: components["schemas"]["SubscriptionLimitsDto"];
-            usage: components["schemas"]["SubscriptionUsageDto"];
-        };
-        CancelResponseDto: {
-            /** @example Subscription will be canceled at the end of the billing period */
-            message: string;
-            /** @example 2026-03-26T00:00:00.000Z */
-            canceledAt?: string | null;
-        };
-        CategoryResponseDto: {
-            id: string;
-            name: string;
-            color: string;
-            isSystem: boolean;
-            order: number;
-        };
-        CreateCategoryDto: {
-            /** @example Work */
-            name: string;
-            /**
-             * @description Hex color code
-             * @example #FF5733
-             */
-            color: string;
-            /**
-             * @description Display order
-             * @example 0
-             */
-            order?: number;
-        };
-        CreateCategoryFromRecommendationDto: {
-            /**
-             * @description Recommendation key
-             * @example work
-             */
-            key: string;
-            /**
-             * @description Translated display name
-             * @example Work
-             */
-            name: string;
-        };
-        UpdateCategoryDto: {
-            /** @example Work */
-            name?: string;
-            /** @example #FF5733 */
-            color?: string;
-            /** @example 0 */
-            order?: number;
-        };
-        DayStateResponseDto: {
-            id: string;
-            name: string;
-            color: string;
-            isSystem: boolean;
-            order: number;
-            /** @description Mood intensity score (0-10) */
-            score: number;
-        };
-        CreateDayStateDto: {
-            /** @example Great */
-            name: string;
-            /**
-             * @description Hex color code
-             * @example #4CAF50
-             */
-            color: string;
-            /**
-             * @description Display order
-             * @example 0
-             */
-            order?: number;
-            /**
-             * @description Mood intensity score (0-10)
-             * @example 7
-             */
-            score: number;
-        };
-        CreateDayStateFromRecommendationDto: {
-            /**
-             * @description Recommendation key
-             * @example great
-             */
-            key: string;
-            /**
-             * @description Translated display name
-             * @example Great
-             */
-            name: string;
-        };
-        UpdateDayStateDto: {
-            /** @example Great */
-            name?: string;
-            /** @example #4CAF50 */
-            color?: string;
-            /** @example 0 */
-            order?: number;
-            /**
-             * @description Mood intensity score (0-10)
-             * @example 7
-             */
-            score?: number;
-        };
-        CreateEventGroupDto: {
-            categoryId: string;
-            title: string;
-            description?: string;
-        };
-        EventGroupCategoryDto: {
-            id: string;
-            name: string;
-            color: string;
-        };
-        EventPeriodResponseDto: {
-            id: string;
-            /** @example 2024-01-01 */
-            startDate: string;
-            /** @example 2024-01-31 */
-            endDate?: string | null;
-            comment?: string | null;
-            createdAt: string;
-        };
-        EventGroupResponseDto: {
-            id: string;
-            title: string;
-            description?: string | null;
-            category: components["schemas"]["EventGroupCategoryDto"];
-            periods: components["schemas"]["EventPeriodResponseDto"][];
-            createdAt: string;
-            updatedAt: string;
-        };
-        UpdateEventGroupDto: {
-            categoryId?: string;
-            title?: string;
-            description?: string;
-        };
-        CreateEventPeriodDto: {
-            startDate: string;
-            endDate?: string;
-            comment?: string;
-        };
-        MoodStatDto: {
-            dayStateName: string;
-            dayStateColor: string;
-            count: number;
-            percentage: number;
-        };
-        EventGroupDetailsMediaDto: {
-            id: string;
-            s3Key: string;
-            url: string | null;
-            fileName: string;
-            contentType: string;
-            size: number;
-            createdAt: string;
-            periodId?: string | null;
-        };
-        MoodDistributionItemDto: {
-            moodId: string;
-            moodName: string;
-            color: string;
-            count: number;
-            percentage: number;
-        };
-        PeriodDensityDto: {
-            /** @example 2024-01-01 */
-            start: string;
-            /** @example 2024-01-31 */
-            end: string;
-            activeDays: number;
-        };
-        ChapterAnalyticsDto: {
-            totalPeriods: number;
-            totalDays: number;
-            totalMedia: number;
-            averageMoodScore?: number | null;
-            moodDistribution: components["schemas"]["MoodDistributionItemDto"][];
-            density: components["schemas"]["PeriodDensityDto"][];
-        };
-        EventGroupDetailsResponseDto: {
-            id: string;
-            title: string;
-            description?: string | null;
-            category: components["schemas"]["EventGroupCategoryDto"];
-            periods: components["schemas"]["EventPeriodResponseDto"][];
-            createdAt: string;
-            updatedAt: string;
-            moodStats: components["schemas"]["MoodStatDto"][];
-            media: components["schemas"]["EventGroupDetailsMediaDto"][];
-            totalDays: number;
-            analytics: components["schemas"]["ChapterAnalyticsDto"];
-        };
-        UpdateEventPeriodDto: {
-            startDate?: string;
-            endDate?: string;
-            comment?: string;
-        };
-        CloseEventPeriodDto: {
-            endDate: string;
-        };
-        UpsertDayDto: {
-            /**
-             * @description Day state ID. Pass null to clear the day state.
-             * @example day-state-id
-             */
-            dayStateId?: string | null;
-            /**
-             * @description ID of the media item to use as the day cover. Pass null to clear.
-             * @example media-uuid
-             */
-            mainMediaId?: string | null;
-            /**
-             * @description Day comment (max 500 chars). Pass null to clear.
-             * @example Had a great day!
-             */
-            comment?: string | null;
-        };
-        DayStateSummaryDto: {
-            id: string;
-            name: string;
-            color: string;
-        };
-        DayMediaResponseDto: {
-            id: string;
-            s3Key: string;
-            /** @description Presigned URL for reading the media file (null if generation failed) */
-            url: string | null;
-            fileName: string;
-            contentType: string;
-            size: number;
-            createdAt: string;
-            periodId?: string | null;
-        };
-        DayResponseDto: {
-            id: string;
-            /** @example 2024-01-15 */
-            date: string;
-            dayState: components["schemas"]["DayStateSummaryDto"] | null;
-            /**
-             * @description ID of the cover media
-             * @example media-uuid
-             */
-            mainMediaId: string | null;
-            /**
-             * @description Location name
-             * @example Kyiv, Ukraine
-             */
-            locationName: string | null;
-            /**
-             * @description Latitude
-             * @example 50.4501
-             */
-            latitude: number | null;
-            /**
-             * @description Longitude
-             * @example 30.5234
-             */
-            longitude: number | null;
-            /**
-             * @description Day comment
-             * @example Had a great day!
-             */
-            comment: string | null;
-            media: components["schemas"]["DayMediaResponseDto"][];
-        };
-        UpdateDayLocationDto: {
-            /**
-             * @description Location name (max 120 chars). Pass null to clear.
-             * @example Kyiv, Ukraine
-             */
-            locationName?: string | null;
-            /**
-             * @description Latitude (-90 to 90). Pass null to clear.
-             * @example 50.4501
-             */
-            latitude?: number | null;
-            /**
-             * @description Longitude (-180 to 180). Pass null to clear.
-             * @example 30.5234
-             */
-            longitude?: number | null;
-        };
-        PresignedUrlRequestDto: {
-            /**
-             * @description File name for the upload
-             * @example photo.jpg
-             */
-            fileName: string;
-            /**
-             * @description MIME content type
-             * @example image/jpeg
-             * @enum {string}
-             */
-            contentType: "image/jpeg" | "image/png" | "image/webp" | "image/gif" | "image/heic" | "image/heif" | "video/mp4" | "video/webm" | "video/quicktime";
-            /**
-             * @description File size in bytes (required, max 50 MB)
-             * @example 1024000
-             */
-            size: number;
-        };
-        PresignedUrlResponseDto: {
-            /** @description Presigned URL for direct upload to S3 */
-            uploadUrl: string;
-            /** @description The object key in S3 */
-            key: string;
-        };
-        TimelineEventGroupDto: {
-            id: string;
-            title: string;
-        };
-        TimelineCategoryDto: {
-            id: string;
-            name: string;
-            color: string;
-        };
-        TimelinePeriodDto: {
-            id: string;
-            startDate: string;
-            endDate: string | null;
-            comment: string | null;
-            eventGroup: components["schemas"]["TimelineEventGroupDto"];
-            category: components["schemas"]["TimelineCategoryDto"];
-        };
-        TimelineDayStateDto: {
-            id: string;
-            name: string;
-            color: string;
-        };
-        TimelineMediaDto: {
-            id: string;
-            s3Key: string;
-            url: string | null;
-            fileName: string;
-            contentType: string;
-            size: number;
-            createdAt: string;
-        };
-        TimelineDayDto: {
-            /** @example 2024-01-15 */
-            date: string;
-            dayState: components["schemas"]["TimelineDayStateDto"] | null;
-            /**
-             * @description Cover media ID
-             * @example media-uuid
-             */
-            mainMediaId: string | null;
-            media: components["schemas"]["TimelineMediaDto"][];
-        };
-        TimelineResponseDto: {
-            /** @example 2024-01-01 */
-            from: string;
-            /** @example 2024-12-31 */
-            to: string;
-            periods: components["schemas"]["TimelinePeriodDto"][];
-            days: components["schemas"]["TimelineDayDto"][];
-        };
-        WeekTimelineResponseDto: {
-            /**
-             * @description Monday of the week
-             * @example 2024-06-10
-             */
-            weekStart: string;
-            /**
-             * @description Sunday of the week
-             * @example 2024-06-16
-             */
-            weekEnd: string;
-            periods: components["schemas"]["TimelinePeriodDto"][];
-            /** @description Exactly 7 days (Mon-Sun), with or without state */
-            days: components["schemas"]["TimelineDayDto"][];
-        };
-        CreateDayMediaDto: {
-            /**
-             * @description S3 object key
-             * @example uploads/user-id/uuid.jpg
-             */
-            s3Key: string;
-            /**
-             * @description Original file name
-             * @example photo.jpg
-             */
-            fileName: string;
-            /**
-             * @description MIME type
-             * @example image/jpeg
-             * @enum {string}
-             */
-            contentType: "image/jpeg" | "image/png" | "image/webp" | "image/gif" | "image/heic" | "image/heif" | "video/mp4" | "video/webm" | "video/quicktime";
-            /**
-             * @description File size in bytes
-             * @example 1024000
-             */
-            size: number;
-            /** @description Period UUID to tag this media to */
-            periodId?: string;
-        };
-        UpdateDayMediaDto: {
-            /** @description Period UUID to tag this media to, or null to untag */
-            periodId: string | null;
-        };
-        IntervalDto: {
-            /** @enum {string} */
-            type: "months" | "years";
-            /** @example 1 */
-            value: number;
-        };
-        MoodDto: {
-            /** @example uuid */
-            id: string;
-            /** @example Happy */
-            name: string;
-            /** @example #4CAF50 */
-            color: string;
-        };
-        DayMemoryDto: {
-            interval: components["schemas"]["IntervalDto"];
-            /** @example 2025-02-12 */
-            date: string;
-            mood?: components["schemas"]["MoodDto"] | null;
-            /** @example 3 */
-            mediaCount: number;
-        };
-        OnThisDayResponseDto: {
-            /** @example 2026-02-12 */
-            baseDate: string;
-            memories: components["schemas"]["DayMemoryDto"][];
-        };
-        DayContextResponseDto: {
-            /** @example day */
-            type: string;
-            /** @example 2026-02-12 */
-            baseDate: string;
-            memories: components["schemas"]["DayMemoryDto"][];
-        };
-        BaseWeekDto: {
-            /** @example 2026-02-09 */
-            start: string;
-            /** @example 2026-02-15 */
-            end: string;
-        };
-        WeekMemoryDto: {
-            interval: components["schemas"]["IntervalDto"];
-            /** @example 2025-02-10 */
-            weekStart: string;
-            /** @example 2025-02-16 */
-            weekEnd: string;
-            /** @example 4 */
-            activeDays: number;
-            /** @example 7 */
-            totalMedia: number;
-        };
-        WeekContextResponseDto: {
-            /** @example week */
-            type: string;
-            baseWeek: components["schemas"]["BaseWeekDto"];
-            memories: components["schemas"]["WeekMemoryDto"][];
-        };
-        RecommendationDto: {
-            /** @example work */
-            key: string;
-            /** @example #3B82F6 */
-            color: string;
-        };
-        RecommendationsResponseDto: {
-            categories: components["schemas"]["RecommendationDto"][];
-            moods: components["schemas"]["RecommendationDto"][];
-        };
-        CategoryMoodSummaryDto: {
-            categoryId: string;
-            name: string;
-            averageMoodScore: number;
-        };
-        TrendPointDto: {
-            date: string;
-            score: number;
-        };
-        WeekdayInsightDto: {
-            /** @description Day of week (0=Monday, 6=Sunday) */
-            weekday: number;
-            /** @description Average mood score for this weekday (0-10) */
-            averageScore: number;
-            /** @description Number of data points for this weekday */
-            sampleSize: number;
-        };
-        ActivityInsightDto: {
-            /** @description Day of week (0=Monday, 6=Sunday) */
-            weekday: number;
-            /** @description Average activity score for this weekday */
-            averageActivityScore: number;
-            /** @description Number of data points for this weekday */
-            sampleSize: number;
-        };
-        VolatilityInsightDto: {
-            /** @description Day of week (0=Monday, 6=Sunday) */
-            weekday: number;
-            /** @description Standard deviation of mood scores */
-            standardDeviation: number;
-            /** @description Number of data points for this weekday */
-            sampleSize: number;
-        };
-        RecoveryInsightDto: {
-            /** @description Day of week (0=Monday, 6=Sunday) */
-            weekday: number;
-            /** @description Rate of recovery events (0-1) */
-            recoveryRate: number;
-            /** @description Number of recovery events */
-            recoveryEvents: number;
-            /** @description Total occurrences of this weekday */
-            totalOccurrences: number;
-        };
-        BurnoutInsightDto: {
-            /** @description Whether a burnout pattern was detected */
-            detected: boolean;
-            /**
-             * @description Type of pattern detected
-             * @example work_stress_pattern
-             */
-            type?: string;
-            /** @description Confidence level (0-1) */
-            confidence?: number;
-        };
-        WeekdayInsightsDto: {
-            bestMoodDay?: components["schemas"]["WeekdayInsightDto"] | null;
-            worstMoodDay?: components["schemas"]["WeekdayInsightDto"] | null;
-            mostActiveDay?: components["schemas"]["ActivityInsightDto"] | null;
-            leastActiveDay?: components["schemas"]["ActivityInsightDto"] | null;
-            mostUnstableDay?: components["schemas"]["VolatilityInsightDto"] | null;
-            recoveryIndex?: components["schemas"]["RecoveryInsightDto"] | null;
-            burnoutPattern?: components["schemas"]["BurnoutInsightDto"] | null;
-        };
-        MoodOverviewResponseDto: {
-            totalDaysWithMood: number;
-            averageMoodScore: number;
-            moodDistribution: components["schemas"]["MoodDistributionItemDto"][];
-            bestCategory?: components["schemas"]["CategoryMoodSummaryDto"] | null;
-            worstCategory?: components["schemas"]["CategoryMoodSummaryDto"] | null;
-            trendLast30Days: components["schemas"]["TrendPointDto"][];
-            weekdayInsights?: components["schemas"]["WeekdayInsightsDto"] | null;
-        };
-        HealthResponseDto: {
-            /** @example ok */
-            status: string;
-            /** @example connected */
-            database: string;
-        };
+  schemas: {
+    RegisterDto: {
+      /** @example user@example.com */
+      email: string;
+      /**
+       * @description Min 8 chars, 1 uppercase, 1 lowercase, 1 number
+       * @example SecurePass1
+       */
+      password: string;
+      /**
+       * @default UTC
+       * @example Europe/Berlin
+       */
+      timezone: string;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    AuthUserDto: {
+      id: string;
+      email: string;
+      avatarUrl?: string | null;
+      timezone: string;
+      onboardingCompleted: boolean;
+      /**
+       * @example FREE
+       * @enum {string}
+       */
+      tier: 'FREE' | 'PRO' | 'PREMIUM';
+      /**
+       * @example 1990-05-15
+       */
+      birthDate: string | null;
+      createdAt: string;
+    };
+    AuthResponseDto: {
+      access_token: string;
+      refresh_token: string;
+      user: components['schemas']['AuthUserDto'];
+    };
+    LoginDto: {
+      /** @example user@example.com */
+      email: string;
+      /** @example securePassword123 */
+      password: string;
+    };
+    GoogleExchangeDto: {
+      /** @description One-time OAuth exchange code */
+      code: string;
+    };
+    RefreshTokenDto: {
+      /** @description Refresh token received during login/register */
+      refresh_token: string;
+    };
+    SubscriptionLimitsDto: {
+      /** @example 50 */
+      media: number;
+      /** @example 5 */
+      chapters: number;
+      /** @example 5 */
+      categories: number;
+      /** @example 5 */
+      dayStates: number;
+      /** @example basic */
+      analytics: boolean | 'basic';
+      /** @example false */
+      memories: boolean;
+    };
+    SubscriptionUsageDto: {
+      /** @example 12 */
+      media: number;
+      /** @example 3 */
+      chapters: number;
+      /** @example 4 */
+      categories: number;
+      /** @example 5 */
+      dayStates: number;
+    };
+    SubscriptionResponseDto: {
+      /** @example uuid-123 */
+      id: string;
+      /** @example uuid-456 */
+      userId: string;
+      /**
+       * @example FREE
+       * @enum {string}
+       */
+      tier: 'FREE' | 'PRO' | 'PREMIUM';
+      /**
+       * @example ACTIVE
+       * @enum {string}
+       */
+      status: 'ACTIVE' | 'TRIALING' | 'PAST_DUE' | 'CANCELED' | 'PAUSED';
+      /** @example cus_01abc123 */
+      paddleCustomerId?: string | null;
+      /** @example sub_01abc123 */
+      paddleSubscriptionId?: string | null;
+      /** @example 2026-03-26T00:00:00.000Z */
+      currentPeriodEnd?: string | null;
+      /** @example null */
+      canceledAt?: string | null;
+      /** @example 2026-03-01T00:00:00.000Z */
+      createdAt: string;
+      /** @example 2026-03-01T00:00:00.000Z */
+      updatedAt: string;
+      limits: components['schemas']['SubscriptionLimitsDto'];
+      usage: components['schemas']['SubscriptionUsageDto'];
+    };
+    CancelResponseDto: {
+      /** @example Subscription will be canceled at the end of the billing period */
+      message: string;
+      /** @example 2026-03-26T00:00:00.000Z */
+      canceledAt?: string | null;
+    };
+    CategoryResponseDto: {
+      id: string;
+      name: string;
+      color: string;
+      isSystem: boolean;
+      order: number;
+    };
+    CreateCategoryDto: {
+      /** @example Work */
+      name: string;
+      /**
+       * @description Hex color code
+       * @example #FF5733
+       */
+      color: string;
+      /**
+       * @description Display order
+       * @example 0
+       */
+      order?: number;
+    };
+    CreateCategoryFromRecommendationDto: {
+      /**
+       * @description Recommendation key
+       * @example work
+       */
+      key: string;
+      /**
+       * @description Translated display name
+       * @example Work
+       */
+      name: string;
+    };
+    UpdateCategoryDto: {
+      /** @example Work */
+      name?: string;
+      /** @example #FF5733 */
+      color?: string;
+      /** @example 0 */
+      order?: number;
+    };
+    DayStateResponseDto: {
+      id: string;
+      name: string;
+      color: string;
+      isSystem: boolean;
+      order: number;
+      /** @description Mood intensity score (0-10) */
+      score: number;
+    };
+    CreateDayStateDto: {
+      /** @example Great */
+      name: string;
+      /**
+       * @description Hex color code
+       * @example #4CAF50
+       */
+      color: string;
+      /**
+       * @description Display order
+       * @example 0
+       */
+      order?: number;
+      /**
+       * @description Mood intensity score (0-10)
+       * @example 7
+       */
+      score: number;
+    };
+    CreateDayStateFromRecommendationDto: {
+      /**
+       * @description Recommendation key
+       * @example great
+       */
+      key: string;
+      /**
+       * @description Translated display name
+       * @example Great
+       */
+      name: string;
+    };
+    UpdateDayStateDto: {
+      /** @example Great */
+      name?: string;
+      /** @example #4CAF50 */
+      color?: string;
+      /** @example 0 */
+      order?: number;
+      /**
+       * @description Mood intensity score (0-10)
+       * @example 7
+       */
+      score?: number;
+    };
+    CreateEventGroupDto: {
+      categoryId: string;
+      title: string;
+      description?: string;
+    };
+    EventGroupCategoryDto: {
+      id: string;
+      name: string;
+      color: string;
+    };
+    EventPeriodResponseDto: {
+      id: string;
+      /** @example 2024-01-01 */
+      startDate: string;
+      /** @example 2024-01-31 */
+      endDate?: string | null;
+      comment?: string | null;
+      createdAt: string;
+    };
+    EventGroupResponseDto: {
+      id: string;
+      title: string;
+      description?: string | null;
+      category: components['schemas']['EventGroupCategoryDto'];
+      periods: components['schemas']['EventPeriodResponseDto'][];
+      createdAt: string;
+      updatedAt: string;
+    };
+    UpdateEventGroupDto: {
+      categoryId?: string;
+      title?: string;
+      description?: string;
+    };
+    CreateEventPeriodDto: {
+      startDate: string;
+      endDate?: string;
+      comment?: string;
+    };
+    MoodStatDto: {
+      dayStateName: string;
+      dayStateColor: string;
+      count: number;
+      percentage: number;
+    };
+    EventGroupDetailsMediaDto: {
+      id: string;
+      s3Key: string;
+      url: string | null;
+      fileName: string;
+      contentType: string;
+      size: number;
+      createdAt: string;
+      periodId?: string | null;
+    };
+    MoodDistributionItemDto: {
+      moodId: string;
+      moodName: string;
+      color: string;
+      count: number;
+      percentage: number;
+    };
+    PeriodDensityDto: {
+      /** @example 2024-01-01 */
+      start: string;
+      /** @example 2024-01-31 */
+      end: string;
+      activeDays: number;
+    };
+    ChapterAnalyticsDto: {
+      totalPeriods: number;
+      totalDays: number;
+      totalMedia: number;
+      averageMoodScore?: number | null;
+      moodDistribution: components['schemas']['MoodDistributionItemDto'][];
+      density: components['schemas']['PeriodDensityDto'][];
+    };
+    EventGroupDetailsResponseDto: {
+      id: string;
+      title: string;
+      description?: string | null;
+      category: components['schemas']['EventGroupCategoryDto'];
+      periods: components['schemas']['EventPeriodResponseDto'][];
+      createdAt: string;
+      updatedAt: string;
+      moodStats: components['schemas']['MoodStatDto'][];
+      media: components['schemas']['EventGroupDetailsMediaDto'][];
+      totalDays: number;
+      analytics: components['schemas']['ChapterAnalyticsDto'];
+    };
+    UpdateEventPeriodDto: {
+      startDate?: string;
+      endDate?: string;
+      comment?: string;
+    };
+    CloseEventPeriodDto: {
+      endDate: string;
+    };
+    UpsertDayDto: {
+      /**
+       * @description Day state ID. Pass null to clear the day state.
+       * @example day-state-id
+       */
+      dayStateId?: string | null;
+      /**
+       * @description ID of the media item to use as the day cover. Pass null to clear.
+       * @example media-uuid
+       */
+      mainMediaId?: string | null;
+      /**
+       * @description Day comment (max 500 chars). Pass null to clear.
+       * @example Had a great day!
+       */
+      comment?: string | null;
+    };
+    DayStateSummaryDto: {
+      id: string;
+      name: string;
+      color: string;
+    };
+    DayMediaResponseDto: {
+      id: string;
+      s3Key: string;
+      /** @description Presigned URL for reading the media file (null if generation failed) */
+      url: string | null;
+      fileName: string;
+      contentType: string;
+      size: number;
+      createdAt: string;
+      periodId?: string | null;
+    };
+    DayResponseDto: {
+      id: string;
+      /** @example 2024-01-15 */
+      date: string;
+      dayState: components['schemas']['DayStateSummaryDto'] | null;
+      /**
+       * @description ID of the cover media
+       * @example media-uuid
+       */
+      mainMediaId: string | null;
+      /**
+       * @description Location name
+       * @example Kyiv, Ukraine
+       */
+      locationName: string | null;
+      /**
+       * @description Latitude
+       * @example 50.4501
+       */
+      latitude: number | null;
+      /**
+       * @description Longitude
+       * @example 30.5234
+       */
+      longitude: number | null;
+      /**
+       * @description Day comment
+       * @example Had a great day!
+       */
+      comment: string | null;
+      media: components['schemas']['DayMediaResponseDto'][];
+    };
+    UpdateDayLocationDto: {
+      /**
+       * @description Location name (max 120 chars). Pass null to clear.
+       * @example Kyiv, Ukraine
+       */
+      locationName?: string | null;
+      /**
+       * @description Latitude (-90 to 90). Pass null to clear.
+       * @example 50.4501
+       */
+      latitude?: number | null;
+      /**
+       * @description Longitude (-180 to 180). Pass null to clear.
+       * @example 30.5234
+       */
+      longitude?: number | null;
+    };
+    PresignedUrlRequestDto: {
+      /**
+       * @description File name for the upload
+       * @example photo.jpg
+       */
+      fileName: string;
+      /**
+       * @description MIME content type
+       * @example image/jpeg
+       * @enum {string}
+       */
+      contentType:
+        | 'image/jpeg'
+        | 'image/png'
+        | 'image/webp'
+        | 'image/gif'
+        | 'image/heic'
+        | 'image/heif'
+        | 'video/mp4'
+        | 'video/webm'
+        | 'video/quicktime';
+      /**
+       * @description File size in bytes (required, max 50 MB)
+       * @example 1024000
+       */
+      size: number;
+    };
+    PresignedUrlResponseDto: {
+      /** @description Presigned URL for direct upload to S3 */
+      uploadUrl: string;
+      /** @description The object key in S3 */
+      key: string;
+    };
+    TimelineEventGroupDto: {
+      id: string;
+      title: string;
+    };
+    TimelineCategoryDto: {
+      id: string;
+      name: string;
+      color: string;
+    };
+    TimelinePeriodDto: {
+      id: string;
+      startDate: string;
+      endDate: string | null;
+      comment: string | null;
+      eventGroup: components['schemas']['TimelineEventGroupDto'];
+      category: components['schemas']['TimelineCategoryDto'];
+    };
+    TimelineDayStateDto: {
+      id: string;
+      name: string;
+      color: string;
+    };
+    TimelineMediaDto: {
+      id: string;
+      s3Key: string;
+      url: string | null;
+      fileName: string;
+      contentType: string;
+      size: number;
+      createdAt: string;
+    };
+    TimelineDayDto: {
+      /** @example 2024-01-15 */
+      date: string;
+      dayState: components['schemas']['TimelineDayStateDto'] | null;
+      /**
+       * @description Cover media ID
+       * @example media-uuid
+       */
+      mainMediaId: string | null;
+      media: components['schemas']['TimelineMediaDto'][];
+    };
+    TimelineResponseDto: {
+      /** @example 2024-01-01 */
+      from: string;
+      /** @example 2024-12-31 */
+      to: string;
+      periods: components['schemas']['TimelinePeriodDto'][];
+      days: components['schemas']['TimelineDayDto'][];
+    };
+    WeekTimelineResponseDto: {
+      /**
+       * @description Monday of the week
+       * @example 2024-06-10
+       */
+      weekStart: string;
+      /**
+       * @description Sunday of the week
+       * @example 2024-06-16
+       */
+      weekEnd: string;
+      periods: components['schemas']['TimelinePeriodDto'][];
+      /** @description Exactly 7 days (Mon-Sun), with or without state */
+      days: components['schemas']['TimelineDayDto'][];
+    };
+    CreateDayMediaDto: {
+      /**
+       * @description S3 object key
+       * @example uploads/user-id/uuid.jpg
+       */
+      s3Key: string;
+      /**
+       * @description Original file name
+       * @example photo.jpg
+       */
+      fileName: string;
+      /**
+       * @description MIME type
+       * @example image/jpeg
+       * @enum {string}
+       */
+      contentType:
+        | 'image/jpeg'
+        | 'image/png'
+        | 'image/webp'
+        | 'image/gif'
+        | 'image/heic'
+        | 'image/heif'
+        | 'video/mp4'
+        | 'video/webm'
+        | 'video/quicktime';
+      /**
+       * @description File size in bytes
+       * @example 1024000
+       */
+      size: number;
+      /** @description Period UUID to tag this media to */
+      periodId?: string;
+    };
+    UpdateDayMediaDto: {
+      /** @description Period UUID to tag this media to, or null to untag */
+      periodId: string | null;
+    };
+    IntervalDto: {
+      /** @enum {string} */
+      type: 'months' | 'years';
+      /** @example 1 */
+      value: number;
+    };
+    MoodDto: {
+      /** @example uuid */
+      id: string;
+      /** @example Happy */
+      name: string;
+      /** @example #4CAF50 */
+      color: string;
+    };
+    DayMemoryDto: {
+      interval: components['schemas']['IntervalDto'];
+      /** @example 2025-02-12 */
+      date: string;
+      mood?: components['schemas']['MoodDto'] | null;
+      /** @example 3 */
+      mediaCount: number;
+    };
+    OnThisDayResponseDto: {
+      /** @example 2026-02-12 */
+      baseDate: string;
+      memories: components['schemas']['DayMemoryDto'][];
+    };
+    DayContextResponseDto: {
+      /** @example day */
+      type: string;
+      /** @example 2026-02-12 */
+      baseDate: string;
+      memories: components['schemas']['DayMemoryDto'][];
+    };
+    BaseWeekDto: {
+      /** @example 2026-02-09 */
+      start: string;
+      /** @example 2026-02-15 */
+      end: string;
+    };
+    WeekMemoryDto: {
+      interval: components['schemas']['IntervalDto'];
+      /** @example 2025-02-10 */
+      weekStart: string;
+      /** @example 2025-02-16 */
+      weekEnd: string;
+      /** @example 4 */
+      activeDays: number;
+      /** @example 7 */
+      totalMedia: number;
+    };
+    WeekContextResponseDto: {
+      /** @example week */
+      type: string;
+      baseWeek: components['schemas']['BaseWeekDto'];
+      memories: components['schemas']['WeekMemoryDto'][];
+    };
+    RecommendationDto: {
+      /** @example work */
+      key: string;
+      /** @example #3B82F6 */
+      color: string;
+    };
+    RecommendationsResponseDto: {
+      categories: components['schemas']['RecommendationDto'][];
+      moods: components['schemas']['RecommendationDto'][];
+    };
+    CategoryMoodSummaryDto: {
+      categoryId: string;
+      name: string;
+      averageMoodScore: number;
+    };
+    TrendPointDto: {
+      date: string;
+      score: number;
+    };
+    WeekdayInsightDto: {
+      /** @description Day of week (0=Monday, 6=Sunday) */
+      weekday: number;
+      /** @description Average mood score for this weekday (0-10) */
+      averageScore: number;
+      /** @description Number of data points for this weekday */
+      sampleSize: number;
+    };
+    ActivityInsightDto: {
+      /** @description Day of week (0=Monday, 6=Sunday) */
+      weekday: number;
+      /** @description Average activity score for this weekday */
+      averageActivityScore: number;
+      /** @description Number of data points for this weekday */
+      sampleSize: number;
+    };
+    VolatilityInsightDto: {
+      /** @description Day of week (0=Monday, 6=Sunday) */
+      weekday: number;
+      /** @description Standard deviation of mood scores */
+      standardDeviation: number;
+      /** @description Number of data points for this weekday */
+      sampleSize: number;
+    };
+    RecoveryInsightDto: {
+      /** @description Day of week (0=Monday, 6=Sunday) */
+      weekday: number;
+      /** @description Rate of recovery events (0-1) */
+      recoveryRate: number;
+      /** @description Number of recovery events */
+      recoveryEvents: number;
+      /** @description Total occurrences of this weekday */
+      totalOccurrences: number;
+    };
+    BurnoutInsightDto: {
+      /** @description Whether a burnout pattern was detected */
+      detected: boolean;
+      /**
+       * @description Type of pattern detected
+       * @example work_stress_pattern
+       */
+      type?: string;
+      /** @description Confidence level (0-1) */
+      confidence?: number;
+    };
+    WeekdayInsightsDto: {
+      bestMoodDay?: components['schemas']['WeekdayInsightDto'] | null;
+      worstMoodDay?: components['schemas']['WeekdayInsightDto'] | null;
+      mostActiveDay?: components['schemas']['ActivityInsightDto'] | null;
+      leastActiveDay?: components['schemas']['ActivityInsightDto'] | null;
+      mostUnstableDay?: components['schemas']['VolatilityInsightDto'] | null;
+      recoveryIndex?: components['schemas']['RecoveryInsightDto'] | null;
+      burnoutPattern?: components['schemas']['BurnoutInsightDto'] | null;
+    };
+    MoodOverviewResponseDto: {
+      totalDaysWithMood: number;
+      averageMoodScore: number;
+      moodDistribution: components['schemas']['MoodDistributionItemDto'][];
+      bestCategory?: components['schemas']['CategoryMoodSummaryDto'] | null;
+      worstCategory?: components['schemas']['CategoryMoodSummaryDto'] | null;
+      trendLast30Days: components['schemas']['TrendPointDto'][];
+      weekdayInsights?: components['schemas']['WeekdayInsightsDto'] | null;
+    };
+    HealthResponseDto: {
+      /** @example ok */
+      status: string;
+      /** @example connected */
+      database: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    AuthController_register: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterDto"];
-            };
-        };
-        responses: {
-            /** @description User registered successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
-                };
-            };
-            /** @description Validation error (e.g. email already taken) */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Too many requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  AuthController_register: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    AuthController_login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginDto"];
-            };
-        };
-        responses: {
-            /** @description Login successful */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
-                };
-            };
-            /** @description Invalid credentials */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Too many requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RegisterDto'];
+      };
     };
-    AuthController_googleAuth: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description User registered successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Redirects to Google OAuth consent screen */
-            302: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': components['schemas']['AuthResponseDto'];
         };
+      };
+      /** @description Validation error (e.g. email already taken) */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    AuthController_googleExchange: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GoogleExchangeDto"];
-            };
-        };
-        responses: {
-            /** @description Tokens returned */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
-                };
-            };
-            /** @description Invalid or expired code */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  AuthController_login: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    AuthController_refresh: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
-        };
-        responses: {
-            /** @description Tokens refreshed successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
-                };
-            };
-            /** @description Invalid or expired refresh token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginDto'];
+      };
     };
-    AuthController_logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Login successful */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefreshTokenDto"];
-            };
+        content: {
+          'application/json': components['schemas']['AuthResponseDto'];
         };
-        responses: {
-            /** @description Logged out successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+      };
+      /** @description Invalid credentials */
+      401: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    AuthController_completeOnboarding: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Onboarding marked as completed */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthUserDto"];
-                };
-            };
-        };
+  };
+  AuthController_googleAuth: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    SubscriptionsController_getSubscription: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Redirects to Google OAuth consent screen */
+      302: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubscriptionResponseDto"];
-                };
-            };
-        };
+        content?: never;
+      };
     };
-    SubscriptionsController_cancelSubscription: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CancelResponseDto"];
-                };
-            };
-        };
+  };
+  AuthController_googleExchange: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    CategoriesController_findAll: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CategoryResponseDto"][];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['GoogleExchangeDto'];
+      };
     };
-    CategoriesController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Tokens returned */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCategoryDto"];
-            };
+        content: {
+          'application/json': components['schemas']['AuthResponseDto'];
         };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CategoryResponseDto"];
-                };
-            };
-            /** @description Validation error */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+      };
+      /** @description Invalid or expired code */
+      401: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
     };
-    CategoriesController_createFromRecommendation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCategoryFromRecommendationDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CategoryResponseDto"];
-                };
-            };
-            /** @description Unknown recommendation key */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  AuthController_refresh: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    CategoriesController_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Category deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Category not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RefreshTokenDto'];
+      };
     };
-    CategoriesController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Tokens refreshed successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCategoryDto"];
-            };
+        content: {
+          'application/json': components['schemas']['AuthResponseDto'];
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CategoryResponseDto"];
-                };
-            };
-            /** @description Category not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+      };
+      /** @description Invalid or expired refresh token */
+      401: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
     };
-    DayStatesController_findAll: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayStateResponseDto"][];
-                };
-            };
-        };
+  };
+  AuthController_logout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    DayStatesController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateDayStateDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayStateResponseDto"];
-                };
-            };
-            /** @description Validation error */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RefreshTokenDto'];
+      };
     };
-    DayStatesController_createFromRecommendation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Logged out successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateDayStateFromRecommendationDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayStateResponseDto"];
-                };
-            };
-            /** @description Unknown recommendation key */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+        content?: never;
+      };
     };
-    DayStatesController_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Day state deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Day state not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  AuthController_completeOnboarding: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    DayStatesController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Onboarding marked as completed */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateDayStateDto"];
-            };
+        content: {
+          'application/json': components['schemas']['AuthUserDto'];
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayStateResponseDto"];
-                };
-            };
-            /** @description Day state not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+      };
     };
-    EventGroupsController_findAll: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of event groups */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventGroupResponseDto"][];
-                };
-            };
-        };
+  };
+  SubscriptionsController_getSubscription: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    EventGroupsController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateEventGroupDto"];
-            };
+        content: {
+          'application/json': components['schemas']['SubscriptionResponseDto'];
         };
-        responses: {
-            /** @description Event group created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventGroupResponseDto"];
-                };
-            };
-        };
+      };
     };
-    EventGroupsController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Event group UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Event group found */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventGroupResponseDto"];
-                };
-            };
-            /** @description Event group not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  SubscriptionsController_cancelSubscription: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    EventGroupsController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Event group UUID */
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Event group deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Event group not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': components['schemas']['CancelResponseDto'];
         };
+      };
     };
-    EventGroupsController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Event group UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateEventGroupDto"];
-            };
-        };
-        responses: {
-            /** @description Event group updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventGroupResponseDto"];
-                };
-            };
-            /** @description Event group not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  CategoriesController_findAll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    EventGroupsController_createPeriod: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Event group UUID */
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateEventPeriodDto"];
-            };
+        content: {
+          'application/json': components['schemas']['CategoryResponseDto'][];
         };
-        responses: {
-            /** @description Period created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventGroupResponseDto"];
-                };
-            };
-            /** @description Event group not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+      };
     };
-    EventGroupsController_getDetails: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Event group UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Event group details */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventGroupDetailsResponseDto"];
-                };
-            };
-            /** @description Event group not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  CategoriesController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    EventPeriodsController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Event period UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Period deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Period not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCategoryDto'];
+      };
     };
-    EventPeriodsController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Event period UUID */
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateEventPeriodDto"];
-            };
+        content: {
+          'application/json': components['schemas']['CategoryResponseDto'];
         };
-        responses: {
-            /** @description Period updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventGroupResponseDto"];
-                };
-            };
-            /** @description Period not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
     };
-    EventPeriodsController_close: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Event period UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CloseEventPeriodDto"];
-            };
-        };
-        responses: {
-            /** @description Period closed */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventGroupResponseDto"];
-                };
-            };
-            /** @description Period not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  CategoriesController_createFromRecommendation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    DaysController_upsert: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Date in YYYY-MM-DD format */
-                date: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpsertDayDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayResponseDto"];
-                };
-            };
-            /** @description Day state not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCategoryFromRecommendationDto'];
+      };
     };
-    DaysController_updateLocation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Date in YYYY-MM-DD format */
-                date: string;
-            };
-            cookie?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateDayLocationDto"];
-            };
+        content: {
+          'application/json': components['schemas']['CategoryResponseDto'];
         };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayResponseDto"];
-                };
-            };
-            /** @description Future date or invalid coordinates */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+      };
+      /** @description Unknown recommendation key */
+      400: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
     };
-    DaysController_findAll: {
-        parameters: {
-            query: {
-                /** @description Start of date range (YYYY-MM-DD) */
-                from: string;
-                /** @description End of date range (YYYY-MM-DD) */
-                to: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayResponseDto"][];
-                };
-            };
-        };
+  };
+  CategoriesController_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    S3Controller_getPresignedUrl: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Category deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PresignedUrlRequestDto"];
-            };
+        content?: never;
+      };
+      /** @description Category not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
         };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PresignedUrlResponseDto"];
-                };
-            };
-        };
+        content?: never;
+      };
     };
-    TimelineController_getTimeline: {
-        parameters: {
-            query?: {
-                /** @description Start of timeline range (defaults to 1 year ago) */
-                from?: string;
-                /** @description End of timeline range (defaults to today) */
-                to?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TimelineResponseDto"];
-                };
-            };
-        };
+  };
+  CategoriesController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    TimelineController_getWeekTimeline: {
-        parameters: {
-            query: {
-                /** @description Any date within the target week (YYYY-MM-DD) */
-                date: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WeekTimelineResponseDto"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateCategoryDto'];
+      };
     };
-    MediaController_getMediaForDay: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Date in YYYY-MM-DD format */
-                date: string;
-            };
-            cookie?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayMediaResponseDto"][];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['CategoryResponseDto'];
         };
+      };
+      /** @description Category not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    MediaController_addMedia: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Date in YYYY-MM-DD format */
-                date: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateDayMediaDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayMediaResponseDto"];
-                };
-            };
-        };
+  };
+  DayStatesController_findAll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    MediaController_deleteMedia: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Media item UUID */
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Media deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Media not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': components['schemas']['DayStateResponseDto'][];
         };
+      };
     };
-    MediaController_updateMedia: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Media item UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateDayMediaDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayMediaResponseDto"];
-                };
-            };
-            /** @description Media not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  DayStatesController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    MemoriesController_getOnThisDay: {
-        parameters: {
-            query?: {
-                /** @description Date in YYYY-MM-DD format. Defaults to today if not provided. */
-                date?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description On This Day memories */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OnThisDayResponseDto"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateDayStateDto'];
+      };
     };
-    MemoriesController_getContext: {
-        parameters: {
-            query: {
-                /** @description Memory context mode */
-                mode: "day" | "week";
-                /** @description Selected date in YYYY-MM-DD (ISO 8601) */
-                date: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Context-based memories (day or week mode) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DayContextResponseDto"] | components["schemas"]["WeekContextResponseDto"];
-                };
-            };
-            /** @description Invalid date or mode */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': components['schemas']['DayStateResponseDto'];
         };
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    RecommendationsController_getRecommendations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Returns recommendation lists */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecommendationsResponseDto"];
-                };
-            };
-        };
+  };
+  DayStatesController_createFromRecommendation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    AnalyticsController_getMoodOverview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Mood overview with distribution, category stats, 30-day trend, and weekday insights */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MoodOverviewResponseDto"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateDayStateFromRecommendationDto'];
+      };
     };
-    HealthController_check: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Service is healthy */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HealthResponseDto"];
-                };
-            };
-            /** @description Service is degraded */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': components['schemas']['DayStateResponseDto'];
         };
+      };
+      /** @description Unknown recommendation key */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
+  };
+  DayStatesController_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Day state deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Day state not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DayStatesController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateDayStateDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DayStateResponseDto'];
+        };
+      };
+      /** @description Day state not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EventGroupsController_findAll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of event groups */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventGroupResponseDto'][];
+        };
+      };
+    };
+  };
+  EventGroupsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateEventGroupDto'];
+      };
+    };
+    responses: {
+      /** @description Event group created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventGroupResponseDto'];
+        };
+      };
+    };
+  };
+  EventGroupsController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Event group UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Event group found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventGroupResponseDto'];
+        };
+      };
+      /** @description Event group not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EventGroupsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Event group UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Event group deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Event group not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EventGroupsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Event group UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEventGroupDto'];
+      };
+    };
+    responses: {
+      /** @description Event group updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventGroupResponseDto'];
+        };
+      };
+      /** @description Event group not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EventGroupsController_createPeriod: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Event group UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateEventPeriodDto'];
+      };
+    };
+    responses: {
+      /** @description Period created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventGroupResponseDto'];
+        };
+      };
+      /** @description Event group not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EventGroupsController_getDetails: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Event group UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Event group details */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventGroupDetailsResponseDto'];
+        };
+      };
+      /** @description Event group not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EventPeriodsController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Event period UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Period deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Period not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EventPeriodsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Event period UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEventPeriodDto'];
+      };
+    };
+    responses: {
+      /** @description Period updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventGroupResponseDto'];
+        };
+      };
+      /** @description Period not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EventPeriodsController_close: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Event period UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CloseEventPeriodDto'];
+      };
+    };
+    responses: {
+      /** @description Period closed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EventGroupResponseDto'];
+        };
+      };
+      /** @description Period not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DaysController_upsert: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Date in YYYY-MM-DD format */
+        date: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpsertDayDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DayResponseDto'];
+        };
+      };
+      /** @description Day state not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DaysController_updateLocation: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Date in YYYY-MM-DD format */
+        date: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateDayLocationDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DayResponseDto'];
+        };
+      };
+      /** @description Future date or invalid coordinates */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  DaysController_findAll: {
+    parameters: {
+      query: {
+        /** @description Start of date range (YYYY-MM-DD) */
+        from: string;
+        /** @description End of date range (YYYY-MM-DD) */
+        to: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DayResponseDto'][];
+        };
+      };
+    };
+  };
+  S3Controller_getPresignedUrl: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PresignedUrlRequestDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PresignedUrlResponseDto'];
+        };
+      };
+    };
+  };
+  TimelineController_getTimeline: {
+    parameters: {
+      query?: {
+        /** @description Start of timeline range (defaults to 1 year ago) */
+        from?: string;
+        /** @description End of timeline range (defaults to today) */
+        to?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['TimelineResponseDto'];
+        };
+      };
+    };
+  };
+  TimelineController_getWeekTimeline: {
+    parameters: {
+      query: {
+        /** @description Any date within the target week (YYYY-MM-DD) */
+        date: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WeekTimelineResponseDto'];
+        };
+      };
+    };
+  };
+  MediaController_getMediaForDay: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Date in YYYY-MM-DD format */
+        date: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DayMediaResponseDto'][];
+        };
+      };
+    };
+  };
+  MediaController_addMedia: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Date in YYYY-MM-DD format */
+        date: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateDayMediaDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DayMediaResponseDto'];
+        };
+      };
+    };
+  };
+  MediaController_deleteMedia: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Media item UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Media deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Media not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MediaController_updateMedia: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Media item UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateDayMediaDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DayMediaResponseDto'];
+        };
+      };
+      /** @description Media not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MemoriesController_getOnThisDay: {
+    parameters: {
+      query?: {
+        /** @description Date in YYYY-MM-DD format. Defaults to today if not provided. */
+        date?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description On This Day memories */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OnThisDayResponseDto'];
+        };
+      };
+    };
+  };
+  MemoriesController_getContext: {
+    parameters: {
+      query: {
+        /** @description Memory context mode */
+        mode: 'day' | 'week';
+        /** @description Selected date in YYYY-MM-DD (ISO 8601) */
+        date: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Context-based memories (day or week mode) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json':
+            | components['schemas']['DayContextResponseDto']
+            | components['schemas']['WeekContextResponseDto'];
+        };
+      };
+      /** @description Invalid date or mode */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RecommendationsController_getRecommendations: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Returns recommendation lists */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RecommendationsResponseDto'];
+        };
+      };
+    };
+  };
+  AnalyticsController_getMoodOverview: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Mood overview with distribution, category stats, 30-day trend, and weekday insights */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MoodOverviewResponseDto'];
+        };
+      };
+    };
+  };
+  HealthController_check: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Service is healthy */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HealthResponseDto'];
+        };
+      };
+      /** @description Service is degraded */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
 }

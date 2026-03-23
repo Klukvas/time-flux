@@ -38,6 +38,9 @@ vi.mock('./endpoints/analytics', () => ({
 vi.mock('./endpoints/subscriptions', () => ({
   createSubscriptionsApi: vi.fn(() => ({ get: vi.fn() })),
 }));
+vi.mock('./endpoints/users', () => ({
+  createUsersApi: vi.fn(() => ({ updateProfile: vi.fn() })),
+}));
 
 const EXPECTED_GROUPS = [
   'auth',
@@ -52,6 +55,7 @@ const EXPECTED_GROUPS = [
   'recommendations',
   'analytics',
   'subscriptions',
+  'users',
 ] as const;
 
 describe('createApi', () => {
@@ -98,9 +102,12 @@ describe('createApi', () => {
     const { createTimelineApi } = await import('./endpoints/timeline');
     const { createUploadsApi } = await import('./endpoints/uploads');
     const { createMemoriesApi } = await import('./endpoints/memories');
-    const { createRecommendationsApi } = await import('./endpoints/recommendations');
+    const { createRecommendationsApi } =
+      await import('./endpoints/recommendations');
     const { createAnalyticsApi } = await import('./endpoints/analytics');
-    const { createSubscriptionsApi } = await import('./endpoints/subscriptions');
+    const { createSubscriptionsApi } =
+      await import('./endpoints/subscriptions');
+    const { createUsersApi } = await import('./endpoints/users');
 
     createApi(mockClient);
 
@@ -116,6 +123,7 @@ describe('createApi', () => {
     expect(createRecommendationsApi).toHaveBeenCalledWith(mockClient);
     expect(createAnalyticsApi).toHaveBeenCalledWith(mockClient);
     expect(createSubscriptionsApi).toHaveBeenCalledWith(mockClient);
+    expect(createUsersApi).toHaveBeenCalledWith(mockClient);
   });
 
   it('creates a fresh api object on each call', () => {
