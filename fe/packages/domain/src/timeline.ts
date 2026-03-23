@@ -151,17 +151,17 @@ export function mapPeriodsToDays(
 }
 
 /** Group timeline data into horizontal week rows.
- *  When `registrationDate` is provided, the first week starts from that date
+ *  When `startDate` is provided, the first week starts from that date
  *  (partial week) and no days before it are rendered. */
 export function groupTimelineHorizontal(
   data: TimelineResponse,
-  registrationDate?: string,
+  startDate?: string,
 ): HorizontalTimelineWeek[] {
   const dayMap = new Map<string, TimelineDay>();
   for (const d of data.days) dayMap.set(d.date, d);
 
   // Determine the effective start of the range
-  const rangeStart = registrationDate ?? data.from;
+  const rangeStart = startDate ?? data.from;
   const rangeEnd = data.to;
 
   if (!rangeStart || !rangeEnd || rangeStart > rangeEnd) return [];
@@ -175,7 +175,7 @@ export function groupTimelineHorizontal(
   // otherwise align to Monday
   const start = new Date(rangeStart);
   let cursor: Date;
-  if (registrationDate) {
+  if (startDate) {
     // Start from registration date — first week may be partial
     cursor = new Date(start);
   } else {
@@ -186,14 +186,14 @@ export function groupTimelineHorizontal(
   }
 
   const weeks: HorizontalTimelineWeek[] = [];
-  let isFirstWeek = !!registrationDate;
+  let isFirstWeek = !!startDate;
 
   while (cursor <= endSun) {
     const weekDays: HorizontalTimelineDay[] = [];
     const weekDates: string[] = [];
 
     if (isFirstWeek) {
-      // Partial first week: from registrationDate to end of that week (Sunday)
+      // Partial first week: from startDate to end of that week (Sunday)
       const dayOfWeek = (cursor.getDay() + 6) % 7; // 0=Mon..6=Sun
       const daysRemaining = 7 - dayOfWeek;
       for (let d = 0; d < daysRemaining; d++) {

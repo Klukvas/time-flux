@@ -73,20 +73,21 @@ export function DayPage({ date }: DayPageProps) {
   const timelineMode = useViewStore((s) => s.timelineMode);
   const user = useAuthStore((s) => s.user);
 
-  const registrationDate = useMemo(() => {
+  const startDate = useMemo(() => {
+    if (user?.birthDate) return user.birthDate;
     if (!user?.createdAt) return undefined;
     return (
       DateTime.fromISO(user.createdAt).setZone(user.timezone).toISODate() ??
       undefined
     );
-  }, [user?.createdAt, user?.timezone]);
+  }, [user?.birthDate, user?.createdAt, user?.timezone]);
 
-  // Redirect to registration date if navigating before it
+  // Redirect to start date if navigating before it
   useEffect(() => {
-    if (registrationDate && date < registrationDate) {
-      router.replace(`/timeline/day/${registrationDate}`);
+    if (startDate && date < startDate) {
+      router.replace(`/timeline/day/${startDate}`);
     }
-  }, [date, registrationDate, router]);
+  }, [date, startDate, router]);
 
   const { data: dayStates } = useDayStates();
   const { data: allGroups } = useEventGroups();
@@ -332,7 +333,7 @@ export function DayPage({ date }: DayPageProps) {
 
   const navigateDay = (offset: number) => {
     const newDate = addDays(date, offset);
-    if (registrationDate && newDate < registrationDate) return;
+    if (startDate && newDate < startDate) return;
     router.push(`/timeline/day/${newDate}`);
   };
 
@@ -426,7 +427,7 @@ export function DayPage({ date }: DayPageProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigateDay(-1)}
-              disabled={!!registrationDate && date <= registrationDate}
+              disabled={!!startDate && date <= startDate}
               className="rounded-lg border border-edge px-3 py-1.5 text-sm text-content hover:bg-surface-secondary disabled:opacity-40 disabled:cursor-default"
               title={t('day_form.previous_day')}
             >
@@ -457,7 +458,7 @@ export function DayPage({ date }: DayPageProps) {
             <CalendarPopover
               value={date}
               onChange={handleDatePick}
-              minDate={registrationDate}
+              minDate={startDate}
             />
           </div>
           {today && (

@@ -645,7 +645,7 @@ describe('groupTimelineHorizontal', () => {
     }
   });
 
-  it('uses registrationDate as range start when provided', () => {
+  it('uses startDate as range start when provided', () => {
     // Registration date is a Wednesday
     const days: TimelineDay[] = [];
     for (let d = 12; d <= 16; d++) {

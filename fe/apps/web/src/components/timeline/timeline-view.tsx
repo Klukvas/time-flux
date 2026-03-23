@@ -33,13 +33,19 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
 import type { TimelineMode } from '@/stores/view-store';
 
-/** Derive registration date (YYYY-MM-DD) from user's createdAt ISO string, in their timezone. */
-function getRegistrationDate(
-  createdAt: string | undefined,
-  timezone: string,
+/** Derive start date (YYYY-MM-DD): birthDate if set, otherwise registration date. */
+function getStartDate(
+  user: {
+    birthDate?: string | null;
+    createdAt?: string;
+    timezone?: string;
+  } | null,
 ): string | undefined {
-  if (!createdAt) return undefined;
-  return DateTime.fromISO(createdAt).setZone(timezone).toISODate() ?? undefined;
+  if (!user) return undefined;
+  const tz = user.timezone ?? 'UTC';
+  if (user.birthDate) return user.birthDate;
+  if (!user.createdAt) return undefined;
+  return DateTime.fromISO(user.createdAt).setZone(tz).toISODate() ?? undefined;
 }
 
 export function TimelineView() {
@@ -58,9 +64,9 @@ export function TimelineView() {
     [t],
   );
 
-  const registrationDate = useMemo(
-    () => getRegistrationDate(user?.createdAt, user?.timezone ?? 'UTC'),
-    [user?.createdAt, user?.timezone],
+  const startDate = useMemo(
+    () => getStartDate(user),
+    [user?.birthDate, user?.createdAt, user?.timezone],
   );
 
   const [currentDate, setCurrentDate] = useState(todayISO());
@@ -87,8 +93,8 @@ export function TimelineView() {
   const navigateWeek = (offset: number) => {
     setActiveMemoryDate(null);
     const next = addDays(currentDate, offset * 7);
-    if (registrationDate && next < registrationDate) {
-      setCurrentDate(registrationDate);
+    if (startDate && next < startDate) {
+      setCurrentDate(startDate);
     } else {
       setCurrentDate(next);
     }
@@ -160,7 +166,7 @@ export function TimelineView() {
                 type="date"
                 className="rounded-lg border border-edge bg-surface-elevated px-3 py-1.5 text-base sm:text-sm text-content"
                 value={dateRange.from ?? ''}
-                min={registrationDate}
+                min={startDate}
                 onChange={(e) =>
                   setDateRange((p) => ({
                     ...p,
@@ -173,7 +179,7 @@ export function TimelineView() {
                 type="date"
                 className="rounded-lg border border-edge bg-surface-elevated px-3 py-1.5 text-base sm:text-sm text-content"
                 value={dateRange.to ?? ''}
-                min={registrationDate}
+                min={startDate}
                 onChange={(e) =>
                   setDateRange((p) => ({
                     ...p,
@@ -200,14 +206,15 @@ export function TimelineView() {
         <HorizontalMode
           dateRange={dateRange}
           onDayClick={navigateToDayPage}
-          registrationDate={registrationDate}
+          startDate={startDate}
+          hasBirthDate={!!user?.birthDate}
         />
       )}
       {timelineMode === 'week' && (
         <WeekMode
           currentDate={currentDate}
           onDayClick={navigateToDayPage}
-          registrationDate={registrationDate}
+          startDate={startDate}
         />
       )}
     </div>
@@ -235,18 +242,20 @@ function getMainImageUrl(
 function HorizontalMode({
   dateRange,
   onDayClick,
-  registrationDate,
+  startDate,
+  hasBirthDate,
 }: {
   dateRange: { from?: string; to?: string };
   onDayClick: DayClickHandler;
-  registrationDate?: string;
+  startDate?: string;
+  hasBirthDate: boolean;
 }) {
   const { t, language } = useTranslation();
   const { data, isLoading, error } = useTimeline(dateRange);
 
   const horizontalWeeks = useMemo(
-    () => (data ? groupTimelineHorizontal(data, registrationDate) : []),
-    [data, registrationDate],
+    () => (data ? groupTimelineHorizontal(data, startDate) : []),
+    [data, startDate],
   );
 
   if (isLoading) return <TimelineSkeleton />;
@@ -264,7 +273,8 @@ function HorizontalMode({
         <HorizontalTimeline
           weeks={horizontalWeeks}
           onDayClick={onDayClick}
-          registrationDate={registrationDate}
+          startDate={startDate}
+          hasBirthDate={hasBirthDate}
         />
       </div>
     );
@@ -276,11 +286,13 @@ function HorizontalMode({
 function HorizontalTimeline({
   weeks,
   onDayClick,
-  registrationDate,
+  startDate,
+  hasBirthDate,
 }: {
   weeks: HorizontalTimelineWeek[];
   onDayClick: DayClickHandler;
-  registrationDate?: string;
+  startDate?: string;
+  hasBirthDate: boolean;
 }) {
   const { t, language } = useTranslation();
 
@@ -371,7 +383,7 @@ function HorizontalTimeline({
 
                   {week.days.map((day) => {
                     const disabled = isBeyondTomorrow(day.date);
-                    const isRegistrationDay = registrationDate === day.date;
+                    const isStartDay = startDate === day.date;
                     return (
                       <div
                         key={day.date}
@@ -399,9 +411,11 @@ function HorizontalTimeline({
                         >
                           {day.dayNumber}
                         </span>
-                        {isRegistrationDay && (
+                        {isStartDay && (
                           <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium text-accent">
-                            {t('timeline.journey_begins')}
+                            {hasBirthDate
+                              ? t('timeline.birth_date_label')
+                              : t('timeline.journey_begins')}
                           </span>
                         )}
                       </div>
@@ -430,11 +444,11 @@ function HorizontalTimeline({
 function WeekMode({
   currentDate,
   onDayClick,
-  registrationDate,
+  startDate,
 }: {
   currentDate: string;
   onDayClick: DayClickHandler;
-  registrationDate?: string;
+  startDate?: string;
 }) {
   const { t, language } = useTranslation();
   const { data: weekData, isLoading } = useWeekTimeline({ date: currentDate });
@@ -443,11 +457,11 @@ function WeekMode({
     if (!weekData) return [];
     const grid = buildWeekGrid(weekData);
     // Filter out days before registration
-    if (registrationDate) {
-      return grid.filter((day) => day.date >= registrationDate);
+    if (startDate) {
+      return grid.filter((day) => day.date >= startDate);
     }
     return grid;
-  }, [weekData, registrationDate]);
+  }, [weekData, startDate]);
 
   if (isLoading) return <TimelineSkeleton />;
 
