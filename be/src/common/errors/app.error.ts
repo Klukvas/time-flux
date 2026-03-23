@@ -182,6 +182,17 @@ export class FutureDateError extends AppError {
   }
 }
 
+export class DateBeforeStartError extends AppError {
+  constructor(details?: Record<string, unknown>) {
+    super(
+      'DATE_BEFORE_START',
+      HttpStatus.BAD_REQUEST,
+      'Cannot create or modify entries for dates before your birth date',
+      details,
+    );
+  }
+}
+
 export class RecommendationNotFoundError extends AppError {
   constructor(details?: Record<string, unknown>) {
     super(

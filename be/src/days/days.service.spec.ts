@@ -50,7 +50,10 @@ describe('DaysService', () => {
   let service: DaysService;
   let daysRepo: Record<string, jest.Mock>;
   let dayStatesRepo: Record<string, jest.Mock>;
-  let prismaMock: { dayMedia: { findFirst: jest.Mock } };
+  let prismaMock: {
+    dayMedia: { findFirst: jest.Mock };
+    user: { findUnique: jest.Mock };
+  };
 
   beforeEach(async () => {
     daysRepo = {
@@ -78,6 +81,9 @@ describe('DaysService', () => {
           provide: PrismaService,
           useValue: {
             dayMedia: { findFirst: jest.fn().mockResolvedValue(null) },
+            user: {
+              findUnique: jest.fn().mockResolvedValue({ birthDate: null }),
+            },
           },
         },
       ],

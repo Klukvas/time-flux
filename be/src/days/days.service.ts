@@ -12,6 +12,7 @@ import {
   InvalidDateRangeError,
   MediaNotFoundError,
   ValidationError,
+  DateBeforeStartError,
 } from '../common/errors/app.error.js';
 import { parseISODateToUTC } from '../common/utils/parse-date.js';
 import { formatDay } from '../common/utils/format-day.js';
@@ -42,6 +43,22 @@ export class DaysService {
     }
   }
 
+  private async assertNotBeforeBirthDate(userId: string, dateStr: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { birthDate: true },
+    });
+    if (user?.birthDate) {
+      const birthDateStr = user.birthDate.toISOString().split('T')[0];
+      if (dateStr < birthDateStr) {
+        throw new DateBeforeStartError({
+          date: dateStr,
+          birthDate: birthDateStr,
+        });
+      }
+    }
+  }
+
   async upsert(
     userId: string,
     dateStr: string,
@@ -53,6 +70,7 @@ export class DaysService {
     );
 
     this.assertNotTooFarInFuture(dateStr, timezone);
+    await this.assertNotBeforeBirthDate(userId, dateStr);
 
     const date = parseISODateToUTC(dateStr);
 
@@ -99,6 +117,7 @@ export class DaysService {
     );
 
     this.assertNotTooFarInFuture(dateStr, timezone);
+    await this.assertNotBeforeBirthDate(userId, dateStr);
 
     const date = parseISODateToUTC(dateStr);
 
