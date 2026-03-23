@@ -54,6 +54,8 @@ const en: TranslationDictionary = {
       week: 'Week',
     },
     journey_begins: 'Your journey begins',
+    birth_date_label: 'Born',
+    load_earlier: 'Load earlier year',
     showing_range: 'Showing {from} — {to}',
     no_mood: 'No mood',
     more_periods: '+{count} more',
@@ -221,6 +223,16 @@ const en: TranslationDictionary = {
     theme_system: 'System',
     account: 'Account',
     danger_zone: 'Danger Zone',
+    birth_date: 'Birth Date',
+    birth_date_description:
+      'Set your birth date to see your entire life timeline and fill in past days.',
+    birth_date_locked:
+      'Set your birth date to unlock your entire life timeline.',
+    birth_date_upgrade_hint: 'Available on Pro and Premium plans.',
+    birth_date_saved: 'Birth date updated',
+    birth_date_cleared: 'Birth date removed',
+    birth_date_invalid: 'Please enter a valid date in YYYY-MM-DD format',
+    birth_date_error: 'Failed to update birth date. Please try again.',
   },
 
   subscription: {
@@ -264,6 +276,8 @@ const en: TranslationDictionary = {
     success_title: 'Welcome to {plan}!',
     success_description:
       'Your subscription is now active. Enjoy all the premium features.',
+    success_birth_date_tip:
+      'You can now set your birth date in Settings to see your entire life timeline.',
     success_renews: 'Your plan renews on {date}.',
     success_cta: 'Start Exploring',
     popular: 'Most Popular',

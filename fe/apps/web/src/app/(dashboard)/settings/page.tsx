@@ -7,6 +7,7 @@ import type { ThemePreference } from '@timeflux/theme';
 import { useAuthStore } from '@/stores/auth-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { SubscriptionSection } from '@/components/settings/subscription-section';
+import { BirthDateSection } from '@/components/settings/birth-date-section';
 import { UsageSection } from '@/components/settings/usage-section';
 
 export default function SettingsPage() {
@@ -73,6 +74,9 @@ export default function SettingsPage() {
 
         {/* Subscription Section */}
         <SubscriptionSection />
+
+        {/* Birth Date Section */}
+        <BirthDateSection />
 
         {/* Usage Section */}
         <UsageSection />

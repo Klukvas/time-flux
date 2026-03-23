@@ -55,6 +55,8 @@ const uk: TranslationDictionary = {
       week: 'Тиждень',
     },
     journey_begins: 'Ваша подорож починається',
+    birth_date_label: 'Народження',
+    load_earlier: 'Завантажити раніший рік',
     showing_range: 'Показ {from} — {to}',
     no_mood: 'Без настрою',
     more_periods: 'ще +{count}',
@@ -222,6 +224,16 @@ const uk: TranslationDictionary = {
     theme_system: 'Системна',
     account: 'Акаунт',
     danger_zone: 'Небезпечна зона',
+    birth_date: 'Дата народження',
+    birth_date_description:
+      'Вкажіть дату народження, щоб бачити таймлайн всього життя і заповнювати минулі дні.',
+    birth_date_locked:
+      'Вкажіть дату народження, щоб розблокувати таймлайн всього життя.',
+    birth_date_upgrade_hint: 'Доступно на планах Pro та Premium.',
+    birth_date_saved: 'Дата народження оновлена',
+    birth_date_cleared: 'Дата народження видалена',
+    birth_date_invalid: 'Введіть дату у форматі РРРР-ММ-ДД',
+    birth_date_error: 'Не вдалося оновити дату народження. Спробуйте ще раз.',
   },
 
   subscription: {
@@ -264,6 +276,8 @@ const uk: TranslationDictionary = {
     success_title: 'Ласкаво просимо до {plan}!',
     success_description:
       'Ваша підписка тепер активна. Насолоджуйтесь усіма преміум-функціями.',
+    success_birth_date_tip:
+      'Тепер ви можете вказати дату народження в Налаштуваннях, щоб бачити таймлайн всього життя.',
     success_renews: 'Ваш план поновлюється {date}.',
     success_cta: 'Почати',
     popular: 'Найпопулярніший',
