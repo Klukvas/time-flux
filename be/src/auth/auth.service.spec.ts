@@ -739,6 +739,7 @@ describe('AuthService', () => {
         timezone: 'UTC',
         onboardingCompleted: false,
         tier: 'FREE',
+        birthDate: null,
         createdAt: new Date().toISOString(),
       },
     };

@@ -37,7 +37,7 @@ interface AuthUserData {
   timezone: string;
   onboardingCompleted: boolean;
   tier: string;
-  birthDate?: string | null;
+  birthDate: string | null;
   createdAt: string;
 }
 
