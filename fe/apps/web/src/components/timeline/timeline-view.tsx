@@ -251,12 +251,32 @@ function HorizontalMode({
   hasBirthDate: boolean;
 }) {
   const { t, language } = useTranslation();
-  const { data, isLoading, error } = useTimeline(dateRange);
+  const [loadedYears, setLoadedYears] = useState(1);
+
+  // Compute effective date range: manual override or year-based pagination
+  const effectiveRange = useMemo(() => {
+    if (dateRange.from || dateRange.to) return dateRange;
+    const today = DateTime.now().startOf('day');
+    const computedFrom = today.minus({ years: loadedYears }).toISODate()!;
+    const from =
+      startDate && computedFrom < startDate ? startDate : computedFrom;
+    return { from, to: today.toISODate()! };
+  }, [dateRange, loadedYears, startDate]);
+
+  const { data, isLoading, error } = useTimeline(effectiveRange);
 
   const horizontalWeeks = useMemo(
     () => (data ? groupTimelineHorizontal(data, startDate) : []),
     [data, startDate],
   );
+
+  // Can load more if startDate exists and we haven't reached it yet
+  const canLoadMore = useMemo(() => {
+    if (!startDate || dateRange.from || dateRange.to) return false;
+    const today = DateTime.now().startOf('day');
+    const computedFrom = today.minus({ years: loadedYears }).toISODate()!;
+    return computedFrom > startDate;
+  }, [startDate, loadedYears, dateRange]);
 
   if (isLoading) return <TimelineSkeleton />;
   if (error) return <ErrorMessage />;
@@ -276,6 +296,16 @@ function HorizontalMode({
           startDate={startDate}
           hasBirthDate={hasBirthDate}
         />
+        {canLoadMore && (
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => setLoadedYears((y) => y + 1)}
+              className="rounded-lg border border-edge px-4 py-2 text-sm font-medium text-content transition-colors hover:bg-surface-secondary"
+            >
+              {t('timeline.load_earlier')}
+            </button>
+          </div>
+        )}
       </div>
     );
   }
