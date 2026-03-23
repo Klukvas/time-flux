@@ -37,6 +37,7 @@ interface AuthUserData {
   timezone: string;
   onboardingCompleted: boolean;
   tier: string;
+  birthDate?: string | null;
   createdAt: string;
 }
 
@@ -76,6 +77,7 @@ export class AuthService {
     avatarUrl?: string | null;
     timezone: string;
     onboardingCompleted: boolean;
+    birthDate?: Date | null;
     createdAt: Date;
   }): Promise<AuthUserData> {
     const tier = await this.subscriptionsService.getTier(user.id);
@@ -86,6 +88,9 @@ export class AuthService {
       timezone: user.timezone,
       onboardingCompleted: user.onboardingCompleted,
       tier,
+      birthDate: user.birthDate
+        ? user.birthDate.toISOString().split('T')[0]
+        : null,
       createdAt: user.createdAt.toISOString(),
     };
   }

@@ -19,6 +19,9 @@ export class AuthUserDto {
   @ApiProperty({ enum: ['FREE', 'PRO', 'PREMIUM'], example: 'FREE' })
   tier: string;
 
+  @ApiProperty({ type: String, nullable: true, example: '1990-05-15' })
+  birthDate: string | null;
+
   @ApiProperty()
   createdAt: string;
 }

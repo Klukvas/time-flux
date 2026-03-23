@@ -32,10 +32,11 @@ model User {
   googleId     String?      @unique @map("google_id")
   provider     AuthProvider @default(LOCAL)
   avatarUrl    String?      @map("avatar_url")
-  timezone            String   @default("UTC")
-  onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  timezone            String    @default("UTC")
+  onboardingCompleted Boolean   @default(false) @map("onboarding_completed")
+  birthDate           DateTime? @map("birth_date") @db.Date
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
 
   categories    Category[]
   dayStates     DayState[]

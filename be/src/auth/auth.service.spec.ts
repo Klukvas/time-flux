@@ -29,6 +29,7 @@ describe('AuthService', () => {
     avatarUrl: null,
     timezone: 'UTC',
     onboardingCompleted: false,
+    birthDate: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -49,6 +50,7 @@ describe('AuthService', () => {
           googleId: data.googleId ?? null,
           avatarUrl: data.avatarUrl ?? null,
           onboardingCompleted: false,
+          birthDate: null,
           createdAt: new Date(),
         })),
       },
@@ -290,6 +292,37 @@ describe('AuthService', () => {
       expect(result.refresh_token).toBeDefined();
       expect(result.user.id).toBe('user-1');
       expect(result.user.email).toBe('test@example.com');
+    });
+
+    it('should serialize birthDate as YYYY-MM-DD string when set', async () => {
+      const realHash = await bcrypt.hash('Password1', 12);
+      authRepository.findUserByEmail.mockResolvedValue({
+        ...mockUser,
+        passwordHash: realHash,
+        birthDate: new Date('1990-05-15T00:00:00.000Z'),
+      });
+
+      const result = await service.login({
+        email: 'test@example.com',
+        password: 'Password1',
+      });
+
+      expect(result.user.birthDate).toBe('1990-05-15');
+    });
+
+    it('should return birthDate as null when not set', async () => {
+      const realHash = await bcrypt.hash('Password1', 12);
+      authRepository.findUserByEmail.mockResolvedValue({
+        ...mockUser,
+        passwordHash: realHash,
+      });
+
+      const result = await service.login({
+        email: 'test@example.com',
+        password: 'Password1',
+      });
+
+      expect(result.user.birthDate).toBeNull();
     });
 
     it('should normalize email on login', async () => {
@@ -613,6 +646,7 @@ describe('AuthService', () => {
         avatarUrl: mockGoogleProfile.avatarUrl,
         timezone: 'UTC',
         onboardingCompleted: false,
+        birthDate: null,
         createdAt: new Date(),
       };
 
