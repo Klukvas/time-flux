@@ -272,8 +272,12 @@ function SuccessModal({
           {t('subscription.success_title', { plan: planName })}
         </h2>
 
-        <p className="mb-6 text-sm text-content-secondary">
+        <p className="mb-4 text-sm text-content-secondary">
           {t('subscription.success_description')}
+        </p>
+
+        <p className="mb-6 rounded-lg bg-violet-50 px-3 py-2 text-sm text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+          {t('subscription.success_birth_date_tip')}
         </p>
 
         <button
