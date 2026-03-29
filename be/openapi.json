@@ -1676,6 +1676,76 @@
           "Health"
         ]
       }
+    },
+    "/api/v1/users/profile": {
+      "patch": {
+        "operationId": "UsersController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update user profile (birth date)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/support": {
+      "post": {
+        "operationId": "SupportController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupportRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Support request sent"
+          },
+          "429": {
+            "description": "Too many requests"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a support request via Telegram",
+        "tags": [
+          "Support"
+        ]
+      }
     }
   },
   "info": {
@@ -1796,6 +1866,11 @@
             ],
             "example": "FREE"
           },
+          "birthDate": {
+            "type": "string",
+            "nullable": true,
+            "example": "1990-05-15"
+          },
           "createdAt": {
             "type": "string"
           }
@@ -1806,6 +1881,7 @@
           "timezone",
           "onboardingCompleted",
           "tier",
+          "birthDate",
           "createdAt"
         ]
       },
@@ -3600,6 +3676,52 @@
         "required": [
           "status",
           "database"
+        ]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "birthDate": {
+            "type": "object",
+            "example": "1990-05-15",
+            "description": "Birth date (YYYY-MM-DD) or null to clear"
+          }
+        }
+      },
+      "CreateSupportRequestDto": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "example": "Bug report",
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "example": "I found an issue with...",
+            "maxLength": 2000
+          },
+          "page": {
+            "type": "string",
+            "example": "/timeline",
+            "description": "Page URL where user was"
+          },
+          "platform": {
+            "type": "string",
+            "example": "web",
+            "enum": [
+              "web",
+              "ios",
+              "android"
+            ],
+            "description": "Client platform"
+          }
+        },
+        "required": [
+          "subject",
+          "body",
+          "page",
+          "platform"
         ]
       }
     }
