@@ -12,6 +12,7 @@ import { MobileDrawer } from './mobile-drawer';
 import { OnboardingOverlay } from '@/components/onboarding/onboarding-overlay';
 import { useSidebarStore } from '@/stores/sidebar-store';
 import { Logo } from '@/components/ui/logo';
+import { SupportButton } from '@/components/support/support-button';
 
 /**
  * Dashboard shell orchestrates the sidebar, onboarding overlay, and main content.
@@ -75,6 +76,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <div className="mx-auto max-w-5xl p-4 md:p-6 lg:p-8">{children}</div>
         </main>
       </div>
+
+      <SupportButton />
 
       {/* Onboarding overlay — shown for non-DayForm steps only */}
       {onboarding.shouldShow && onboarding.step !== 'first-memory' && (

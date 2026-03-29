@@ -656,6 +656,18 @@ const en: TranslationDictionary = {
     },
   },
 
+  support: {
+    title: 'Contact Support',
+    subject_label: 'Subject',
+    subject_placeholder: 'What do you need help with?',
+    body_label: 'Message',
+    body_placeholder: 'Describe your issue or question...',
+    send: 'Send',
+    success: 'Your message has been sent. We will get back to you soon.',
+    subject_required: 'Subject is required.',
+    body_required: 'Message is required.',
+  },
+
   validation: {
     email: {
       required: 'Email is required.',

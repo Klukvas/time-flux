@@ -1,8 +1,14 @@
+import path from 'node:path';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'apps/web/src'),
+    },
+  },
   test: {
     globals: true,
     environment: 'happy-dom',
@@ -19,7 +25,13 @@ export default defineConfig({
         'packages/api/src/client.ts',
         'packages/i18n/src/**/*.ts',
       ],
-      exclude: ['**/*.test.ts', '**/*.test.tsx', '**/index.ts', '**/*.d.ts', '**/geocode.ts'],
+      exclude: [
+        '**/*.test.ts',
+        '**/*.test.tsx',
+        '**/index.ts',
+        '**/*.d.ts',
+        '**/geocode.ts',
+      ],
       thresholds: {
         lines: 80,
         functions: 80,

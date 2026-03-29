@@ -12,6 +12,7 @@ import { createRecommendationsApi } from './endpoints/recommendations';
 import { createAnalyticsApi } from './endpoints/analytics';
 import { createSubscriptionsApi } from './endpoints/subscriptions';
 import { createUsersApi } from './endpoints/users';
+import { createSupportApi } from './endpoints/support';
 
 export { createApiClient, extractApiError } from './client';
 export type {
@@ -37,6 +38,7 @@ export interface Api {
   analytics: ReturnType<typeof createAnalyticsApi>;
   subscriptions: ReturnType<typeof createSubscriptionsApi>;
   users: ReturnType<typeof createUsersApi>;
+  support: ReturnType<typeof createSupportApi>;
 }
 
 export function createApi(client: AxiosInstance): Api {
@@ -54,5 +56,6 @@ export function createApi(client: AxiosInstance): Api {
     analytics: createAnalyticsApi(client),
     subscriptions: createSubscriptionsApi(client),
     users: createUsersApi(client),
+    support: createSupportApi(client),
   };
 }

@@ -18,6 +18,7 @@ import { AnalyticsModule } from './analytics/analytics.module.js';
 import { HealthModule } from './health/health.module.js';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
 import { UsersModule } from './users/users.module.js';
+import { SupportModule } from './support/support.module.js';
 import { SentryModule } from '@sentry/nestjs/setup';
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -53,6 +54,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     HealthModule,
     SubscriptionsModule,
     UsersModule,
+    SupportModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

@@ -659,6 +659,19 @@ const uk: TranslationDictionary = {
     },
   },
 
+  support: {
+    title: 'Звʼязатися з підтримкою',
+    subject_label: 'Тема',
+    subject_placeholder: 'З чим вам потрібна допомога?',
+    body_label: 'Повідомлення',
+    body_placeholder: 'Опишіть вашу проблему або питання...',
+    send: 'Надіслати',
+    success:
+      'Ваше повідомлення надіслано. Ми звʼяжемося з вами найближчим часом.',
+    subject_required: 'Тема обовʼязкова.',
+    body_required: 'Повідомлення обовʼязкове.',
+  },
+
   validation: {
     email: {
       required: 'Електронна пошта обовʼязкова.',
