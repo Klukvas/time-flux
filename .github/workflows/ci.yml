@@ -422,6 +422,8 @@ jobs:
           PADDLE_API_KEY=${{ secrets.PADDLE_API_KEY }}
           PADDLE_WEBHOOK_SECRET=${{ secrets.PADDLE_WEBHOOK_SECRET }}
           PADDLE_ENVIRONMENT=${{ secrets.PADDLE_ENVIRONMENT }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_SUPPORT_CHAT_ID=${{ secrets.TELEGRAM_SUPPORT_CHAT_ID }}
           ENVEOF
           # Remove leading whitespace from heredoc
           sed -i 's/^          //' .env.prod
