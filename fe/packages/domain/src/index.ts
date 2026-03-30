@@ -1,4 +1,10 @@
-export { getErrorTranslationKey, getUserMessage, isAuthError, isConflictError, isErrorCode } from './errors';
+export {
+  getErrorTranslationKey,
+  getUserMessage,
+  isAuthError,
+  isConflictError,
+  isErrorCode,
+} from './errors';
 export {
   buildDayColorMap,
   buildWeekGrid,
@@ -18,6 +24,12 @@ export type {
   TimelineMonth,
   WeekDay,
 } from './timeline';
+export {
+  buildMonthCards,
+  buildYearCards,
+  groupTimelineByWeeksForMonth,
+} from './timeline-zoom';
+export type { MonthCard, YearCard } from './timeline-zoom';
 export {
   validateColor,
   validateComment,

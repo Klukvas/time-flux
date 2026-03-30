@@ -13,26 +13,80 @@ import {
   FeatureLockedError,
   SubscriptionNotFoundError,
   PaddleCancelError,
+  PaddleUpgradeError,
+  InvalidUpgradeError,
 } from '../common/errors/app.error.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { ConfigService } from '@nestjs/config';
+import { buildTierToPriceMap } from './paddle-price-map.js';
 
 const TIER_CACHE_TTL_MS = 60_000;
+
+const TIER_ORDER: Record<string, number> = { FREE: 0, PRO: 1, PREMIUM: 2 };
+const UPGRADEABLE_STATUSES = new Set(['ACTIVE', 'TRIALING']);
 
 interface TierCacheEntry {
   readonly tier: string;
   readonly expiresAt: number;
 }
 
+interface PriceInfo {
+  readonly tier: string;
+  readonly amount: string;
+  readonly currency: string;
+  readonly interval: string;
+}
+
+interface PricesCache {
+  readonly data: PriceInfo[];
+  readonly expiresAt: number;
+}
+
+const PRICES_CACHE_TTL_MS = 3_600_000; // 1 hour
+
 @Injectable()
 export class SubscriptionsService {
   private readonly logger = new Logger(SubscriptionsService.name);
   private readonly tierCache = new Map<string, TierCacheEntry>();
+  private readonly tierToPriceMap: ReadonlyMap<'PRO' | 'PREMIUM', string>;
+  private pricesCache: PricesCache | null = null;
 
   constructor(
     private readonly repo: SubscriptionsRepository,
     private readonly paddleService: PaddleService,
     private readonly prisma: PrismaService,
-  ) {}
+    private readonly config: ConfigService,
+  ) {
+    this.tierToPriceMap = buildTierToPriceMap(config);
+  }
+
+  async getPrices(): Promise<PriceInfo[]> {
+    if (this.pricesCache && this.pricesCache.expiresAt > Date.now()) {
+      return this.pricesCache.data;
+    }
+
+    const entries = Array.from(this.tierToPriceMap.entries());
+    const prices = await Promise.all(
+      entries.map(async ([tier, priceId]) => {
+        const price = await this.paddleService.getPrice(priceId);
+        return {
+          tier,
+          amount: price.unitPrice.amount,
+          currency: price.unitPrice.currencyCode,
+          interval: price.billingCycle
+            ? `${price.billingCycle.interval}`
+            : 'one-time',
+        };
+      }),
+    );
+
+    this.pricesCache = {
+      data: prices,
+      expiresAt: Date.now() + PRICES_CACHE_TTL_MS,
+    };
+
+    return prices;
+  }
 
   invalidateTierCache(userId: string): void {
     this.tierCache.delete(userId);
@@ -138,6 +192,122 @@ export class SubscriptionsService {
     return {
       message: 'Subscription will be canceled at the end of the billing period',
       canceledAt: canceledAt.toISOString(),
+    };
+  }
+
+  async reactivateSubscription(userId: string) {
+    const sub = await this.repo.findByUserId(userId);
+    if (!sub || !sub.paddleSubscriptionId) {
+      throw new SubscriptionNotFoundError();
+    }
+
+    if (!sub.canceledAt) {
+      throw new InvalidUpgradeError({
+        reason: 'Subscription is not canceled',
+      });
+    }
+
+    try {
+      await this.paddleService.clearScheduledChange(sub.paddleSubscriptionId);
+    } catch (err) {
+      this.logger.error('Paddle reactivation failed', err);
+      throw new PaddleUpgradeError({
+        paddleMessage: (err as Error).message,
+      });
+    }
+
+    await this.repo.updateByUserId(userId, { canceledAt: null });
+    this.invalidateTierCache(userId);
+
+    return { message: 'Subscription reactivated' };
+  }
+
+  async changePlan(userId: string, targetTier: 'PRO' | 'PREMIUM') {
+    const sub = await this.repo.findByUserId(userId);
+    if (!sub || !sub.paddleSubscriptionId) {
+      throw new SubscriptionNotFoundError();
+    }
+
+    // Only ACTIVE or TRIALING subscriptions can change plan
+    if (!UPGRADEABLE_STATUSES.has(sub.status)) {
+      throw new InvalidUpgradeError({
+        currentStatus: sub.status,
+        reason: `Cannot change plan for a subscription in ${sub.status} status`,
+      });
+    }
+
+    // Cannot switch to the same tier
+    const currentOrder = TIER_ORDER[sub.tier] ?? 0;
+    const targetOrder = TIER_ORDER[targetTier] ?? 0;
+    if (targetOrder === currentOrder) {
+      throw new InvalidUpgradeError({
+        currentTier: sub.tier,
+        targetTier,
+        reason: 'Already on this tier',
+      });
+    }
+
+    const priceId = this.tierToPriceMap.get(targetTier);
+    if (!priceId) {
+      throw new InvalidUpgradeError({
+        targetTier,
+        reason: 'Price ID not configured for target tier',
+      });
+    }
+
+    // Upgrade → charge difference now; Downgrade → apply at next billing cycle
+    const isUpgrade = targetOrder > currentOrder;
+    const prorationMode = isUpgrade
+      ? 'prorated_immediately'
+      : 'prorated_next_billing_period';
+
+    // If subscription has a pending cancellation, clear it first.
+    // (Paddle doesn't allow combining scheduledChange with other fields.)
+    // Separate try/catch so DB stays consistent with Paddle on partial failure.
+    if (sub.canceledAt) {
+      try {
+        await this.paddleService.clearScheduledChange(sub.paddleSubscriptionId);
+        await this.repo.updateByUserId(userId, { canceledAt: null });
+      } catch (err) {
+        this.logger.error('Paddle clear-scheduled-change failed', err);
+        throw new PaddleUpgradeError({
+          paddleMessage: (err as Error).message,
+        });
+      }
+    }
+
+    try {
+      await this.paddleService.updateSubscription(
+        sub.paddleSubscriptionId,
+        priceId,
+        prorationMode,
+      );
+    } catch (err) {
+      this.logger.error('Paddle plan change failed', err);
+      throw new PaddleUpgradeError({
+        paddleMessage: (err as Error).message,
+      });
+    }
+
+    if (isUpgrade) {
+      // Upgrade takes effect immediately — safe to update tier now.
+      // Webhook will confirm.
+      await this.repo.updateByUserId(userId, {
+        tier: targetTier,
+        canceledAt: null,
+      });
+    } else {
+      // Downgrade takes effect at next billing cycle.
+      // Keep current tier until webhook confirms the actual change.
+      await this.repo.updateByUserId(userId, { canceledAt: null });
+    }
+    this.invalidateTierCache(userId);
+
+    return {
+      message: isUpgrade
+        ? `Subscription upgraded to ${targetTier}`
+        : `Subscription will downgrade to ${targetTier} at the end of the billing period`,
+      tier: targetTier,
     };
   }
 }

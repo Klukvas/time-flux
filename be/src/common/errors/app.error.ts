@@ -283,3 +283,25 @@ export class PaddleCancelError extends AppError {
     );
   }
 }
+
+export class PaddleUpgradeError extends AppError {
+  constructor(details?: Record<string, unknown>) {
+    super(
+      'PADDLE_UPGRADE_ERROR',
+      HttpStatus.BAD_GATEWAY,
+      'Failed to update subscription via Paddle',
+      details,
+    );
+  }
+}
+
+export class InvalidUpgradeError extends AppError {
+  constructor(details?: Record<string, unknown>) {
+    super(
+      'INVALID_UPGRADE',
+      HttpStatus.BAD_REQUEST,
+      'Invalid subscription upgrade',
+      details,
+    );
+  }
+}

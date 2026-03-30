@@ -6,6 +6,8 @@ import {
   useTranslation,
   useSubscription,
   useCancelSubscription,
+  useReactivateSubscription,
+  useChangePlan,
 } from '@timeflux/hooks';
 import type { SubscriptionTier } from '@timeflux/api';
 import { useAuthStore } from '@/stores/auth-store';
@@ -30,12 +32,25 @@ const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 export function SubscriptionSection() {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
   const { data: subscription, refetch } = useSubscription();
   const cancelMutation = useCancelSubscription();
+  const changePlanMutation = useChangePlan();
+  const reactivateMutation = useReactivateSubscription();
   const [showPlans, setShowPlans] = useState(false);
   const [successInfo, setSuccessInfo] = useState<SuccessInfo | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Sync subscription tier to auth store so other components (BirthDateSection) see it
+  const subscriptionTier = subscription?.tier;
+  useEffect(() => {
+    if (!subscriptionTier) return;
+    const currentUser = useAuthStore.getState().user;
+    if (currentUser && subscriptionTier !== currentUser.tier) {
+      setUser({ ...currentUser, tier: subscriptionTier });
+    }
+  }, [subscriptionTier, setUser]);
 
   // Clean up polling on unmount
   useEffect(() => {
@@ -62,12 +77,12 @@ export function SubscriptionSection() {
   };
 
   const startPolling = useCallback(() => {
-    if (pollRef.current) return;
+    if (pollRef.current) clearInterval(pollRef.current);
     let elapsed = 0;
     pollRef.current = setInterval(() => {
       elapsed += 3000;
       refetch();
-      if (elapsed >= 60000 && pollRef.current) {
+      if (elapsed >= 60_000 && pollRef.current) {
         clearInterval(pollRef.current);
         pollRef.current = null;
       }
@@ -77,9 +92,28 @@ export function SubscriptionSection() {
   const handleUpgrade = useCallback(
     async (targetTier: 'PRO' | 'PREMIUM') => {
       if (!user) return;
+      setShowPlans(false);
+
+      // Existing paid subscriber with active subscription → server-side upgrade (no checkout overlay)
+      const canServerUpgrade =
+        subscription?.paddleSubscriptionId &&
+        tier !== 'FREE' &&
+        (status === 'ACTIVE' || status === 'TRIALING');
+
+      if (canServerUpgrade) {
+        try {
+          await changePlanMutation.mutateAsync({ tier: targetTier });
+          setSuccessInfo({ tier: targetTier });
+          startPolling();
+        } catch {
+          toast.error(t('subscription.upgrade_failed'));
+        }
+        return;
+      }
+
+      // New subscriber (FREE → paid) → Paddle checkout overlay
       const priceId = PADDLE_PRICES[targetTier];
       if (!priceId) return;
-      setShowPlans(false);
       const result = await openCheckout(priceId, user.email, user.id);
       if (result === 'completed') {
         setSuccessInfo({ tier: targetTier });
@@ -87,7 +121,16 @@ export function SubscriptionSection() {
         startPolling();
       }
     },
-    [user, refetch, startPolling],
+    [
+      user,
+      tier,
+      status,
+      subscription?.paddleSubscriptionId,
+      refetch,
+      startPolling,
+      changePlanMutation,
+      t,
+    ],
   );
 
   const handleCancel = useCallback(() => {
@@ -188,6 +231,25 @@ export function SubscriptionSection() {
               {t('subscription.cancel')}
             </button>
           )}
+
+          {tier !== 'FREE' &&
+            subscription?.canceledAt &&
+            status !== 'CANCELED' && (
+              <button
+                onClick={() => {
+                  reactivateMutation.mutate(undefined, {
+                    onSuccess: () =>
+                      toast.success(t('subscription.reactivated')),
+                    onError: () =>
+                      toast.error(t('subscription.reactivate_failed')),
+                  });
+                }}
+                disabled={reactivateMutation.isPending}
+                className="rounded-lg border border-green-200 px-4 py-2 text-sm font-medium text-green-600 transition-colors hover:bg-green-50 disabled:opacity-50"
+              >
+                {t('subscription.reactivate')}
+              </button>
+            )}
         </div>
       )}
 
@@ -199,7 +261,11 @@ export function SubscriptionSection() {
           title={t('subscription.compare_plans')}
           size="xl"
         >
-          <PricingCards currentTier={tier} onUpgrade={handleUpgrade} />
+          <PricingCards
+            currentTier={tier}
+            onUpgrade={handleUpgrade}
+            isUpgrading={changePlanMutation.isPending}
+          />
         </Modal>
       )}
 

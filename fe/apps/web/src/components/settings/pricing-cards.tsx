@@ -1,21 +1,34 @@
 'use client';
 
-import { useTranslation } from '@timeflux/hooks';
+import { useMemo } from 'react';
+import { usePlanPrices, useTranslation } from '@timeflux/hooks';
 import { TIER_LIMITS } from '@timeflux/constants';
-import type { SubscriptionTier } from '@timeflux/api';
+import type { PlanPrice, SubscriptionTier } from '@timeflux/api';
 
 interface PricingCardsProps {
   currentTier: SubscriptionTier;
   onUpgrade: (tier: 'PRO' | 'PREMIUM') => void;
+  isUpgrading?: boolean;
 }
 
-const PRICES: Record<SubscriptionTier, string> = {
-  FREE: '',
-  PRO: '$6',
-  PREMIUM: '$12',
-};
+function formatPrice(
+  prices: PlanPrice[] | undefined,
+  tier: SubscriptionTier,
+): string {
+  if (tier === 'FREE' || !prices) return '';
+  const p = prices.find((pr) => pr.tier === tier);
+  if (!p) return '';
+  const amount = (parseInt(p.amount, 10) / 100).toFixed(0);
+  const symbol = p.currency === 'USD' ? '$' : p.currency;
+  return `${symbol}${amount}`;
+}
 
 const TIERS: SubscriptionTier[] = ['FREE', 'PRO', 'PREMIUM'];
+const TIER_ORDER: Record<SubscriptionTier, number> = {
+  FREE: 0,
+  PRO: 1,
+  PREMIUM: 2,
+};
 
 function CheckIcon() {
   return (
@@ -53,8 +66,13 @@ function LockIcon() {
   );
 }
 
-export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
+export function PricingCards({
+  currentTier,
+  onUpgrade,
+  isUpgrading,
+}: PricingCardsProps) {
   const { t } = useTranslation();
+  const { data: prices } = usePlanPrices();
 
   const planNames: Record<SubscriptionTier, string> = {
     FREE: t('subscription.free_plan'),
@@ -74,6 +92,7 @@ export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
         const limits = TIER_LIMITS[tier];
         const isCurrent = tier === currentTier;
         const isPopular = tier === 'PRO';
+        const isUpgrade = TIER_ORDER[tier] > TIER_ORDER[currentTier];
 
         return (
           <div
@@ -114,7 +133,7 @@ export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
               ) : (
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold text-content">
-                    {PRICES[tier]}
+                    {formatPrice(prices, tier)}
                   </span>
                   <span className="text-sm text-content-tertiary">
                     {t('subscription.per_month')}
@@ -168,10 +187,11 @@ export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
               <div className="rounded-xl bg-accent/10 py-2.5 text-center text-sm font-semibold text-accent">
                 {t('subscription.current_plan')}
               </div>
-            ) : tier !== 'FREE' ? (
+            ) : tier !== 'FREE' && isUpgrade ? (
               <button
                 onClick={() => onUpgrade(tier as 'PRO' | 'PREMIUM')}
-                className={`group relative w-full overflow-hidden rounded-xl py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl ${
+                disabled={isUpgrading}
+                className={`group relative w-full overflow-hidden rounded-xl py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-default ${
                   isPopular ? 'hover:scale-[1.02]' : ''
                 }`}
               >
@@ -192,6 +212,14 @@ export function PricingCards({ currentTier, onUpgrade }: PricingCardsProps) {
                     />
                   </svg>
                 </span>
+              </button>
+            ) : tier !== 'FREE' ? (
+              <button
+                onClick={() => onUpgrade(tier as 'PRO' | 'PREMIUM')}
+                disabled={isUpgrading}
+                className="w-full rounded-xl border border-edge py-2.5 text-sm font-semibold text-content transition-colors hover:bg-surface-hover disabled:opacity-50 disabled:cursor-default"
+              >
+                {t('subscription.downgrade')}
               </button>
             ) : null}
           </div>

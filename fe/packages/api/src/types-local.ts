@@ -43,7 +43,9 @@ export type ErrorCode =
   | 'FEATURE_LOCKED'
   | 'SUBSCRIPTION_NOT_FOUND'
   | 'PADDLE_NOT_CONFIGURED'
-  | 'PADDLE_CANCEL_ERROR';
+  | 'PADDLE_CANCEL_ERROR'
+  | 'PADDLE_UPGRADE_ERROR'
+  | 'INVALID_UPGRADE';
 
 // ─── Query Params (frontend-only) ───────────────────────────
 
@@ -74,6 +76,22 @@ export interface MemoriesContextParams {
 }
 
 // ─── Subscription Tier/Status (convenience re-exports) ──────
+
+export interface ChangePlanRequest {
+  tier: 'PRO' | 'PREMIUM';
+}
+
+export interface ChangePlanResponse {
+  message: string;
+  tier: 'PRO' | 'PREMIUM';
+}
+
+export interface PlanPrice {
+  tier: string;
+  amount: string;
+  currency: string;
+  interval: string;
+}
 
 export type SubscriptionTier = 'FREE' | 'PRO' | 'PREMIUM';
 export type SubscriptionStatus =

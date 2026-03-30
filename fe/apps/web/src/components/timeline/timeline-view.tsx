@@ -2,104 +2,81 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  useOnboarding,
-  useTimeline,
-  useTranslation,
-  useWeekTimeline,
-} from '@timeflux/hooks';
-import { buildWeekGrid, groupTimelineHorizontal } from '@timeflux/domain';
-import type { HorizontalTimelineWeek } from '@timeflux/domain';
-import type { DayMedia } from '@timeflux/api';
-import {
-  addDays,
-  formatDate,
-  formatDayNumber,
-  formatDayShort,
-  getStartDate,
-  hexToRgba,
-  isBeyondTomorrow,
-  isImageType,
-  isToday,
-  todayISO,
-} from '@timeflux/utils';
-import { DateTime } from 'luxon';
-import { EmptyState } from '@/components/ui/empty-state';
-import { Button } from '@/components/ui/button';
-import { DayCircle } from '@/components/ui/day-circle';
+import { useOnboarding, useTranslation } from '@timeflux/hooks';
+import { addDays, getStartDate, todayISO } from '@timeflux/utils';
 import { SegmentedControl } from '@/components/ui/segmented-control';
-import { TimelineSkeleton } from '@/components/ui/skeleton';
 import { OnThisDaySection } from '@/components/timeline/on-this-day';
+import { TimelineBreadcrumb } from '@/components/timeline/timeline-breadcrumb';
+import { YearView } from '@/components/timeline/year-view';
+import { MonthView } from '@/components/timeline/month-view';
+import { WeekRowsView } from '@/components/timeline/week-rows-view';
+import { WeekDetailView } from '@/components/timeline/week-detail-view';
 import { useAuthStore } from '@/stores/auth-store';
 import { useViewStore } from '@/stores/view-store';
 import type { TimelineMode } from '@/stores/view-store';
 
 export function TimelineView() {
   const router = useRouter();
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const timelineMode = useViewStore((s) => s.timelineMode);
   const setTimelineMode = useViewStore((s) => s.setTimelineMode);
+  const zoomLevel = useViewStore((s) => s.zoomLevel);
+  const selectedYear = useViewStore((s) => s.selectedYear);
+  const selectedMonth = useViewStore((s) => s.selectedMonth);
   const onboarding = useOnboarding();
   const user = useAuthStore((s) => s.user);
 
   const modeOptions: { value: TimelineMode; label: string }[] = useMemo(
     () => [
-      { value: 'horizontal', label: t('timeline.modes.horizontal') },
+      { value: 'zoom', label: t('timeline.modes.zoom') },
       { value: 'week', label: t('timeline.modes.week') },
     ],
     [t],
   );
 
-  const startDate = useMemo(
-    () => getStartDate(user),
-    [user?.birthDate, user?.createdAt, user?.timezone],
-  );
+  const startDate = useMemo(() => getStartDate(user), [user]);
 
   const [currentDate, setCurrentDate] = useState(todayISO());
-  const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>(
-    {},
-  );
+  const [activeMemoryDate, setActiveMemoryDate] = useState<string | null>(null);
 
   const navigateToDayPage = useCallback(
-    (date: string) => {
-      router.push(`/timeline/day/${date}`);
-    },
+    (date: string) => router.push(`/timeline/day/${date}`),
     [router],
   );
 
-  // When the onboarding "day" step advances to first-memory, navigate to day page for today
+  // Onboarding: navigate to day page when first-memory step activates
   useEffect(() => {
     if (onboarding.step === 'first-memory') {
       navigateToDayPage(todayISO());
       onboarding.complete();
     }
-  }, [onboarding.step]);
+  }, [onboarding.step, navigateToDayPage, onboarding]);
 
-  // Clamp week navigation so user can't go before registration week
-  const navigateWeek = (offset: number) => {
-    setActiveMemoryDate(null);
-    const next = addDays(currentDate, offset * 7);
-    if (startDate && next < startDate) {
-      setCurrentDate(startDate);
-    } else {
-      setCurrentDate(next);
-    }
-  };
+  // Week navigation (for week detail mode)
+  const navigateWeek = useCallback(
+    (offset: number) => {
+      setActiveMemoryDate(null);
+      const next = addDays(currentDate, offset * 7);
+      if (startDate && next < startDate) {
+        setCurrentDate(startDate);
+      } else {
+        setCurrentDate(next);
+      }
+    },
+    [currentDate, startDate],
+  );
 
-  const goToToday = () => setCurrentDate(todayISO());
-
-  const showNavigation = timelineMode === 'week';
-
-  const [activeMemoryDate, setActiveMemoryDate] = useState<string | null>(null);
-
-  const handleMemoryClick = (date: string) => {
-    setActiveMemoryDate(date);
-    navigateToDayPage(date);
-  };
+  const handleMemoryClick = useCallback(
+    (date: string) => {
+      setActiveMemoryDate(date);
+      navigateToDayPage(date);
+    },
+    [navigateToDayPage],
+  );
 
   return (
     <div>
-      {/* On This Day — memory resurfacing */}
+      {/* On This Day */}
       <OnThisDaySection
         onMemoryClick={handleMemoryClick}
         selectedDate={activeMemoryDate}
@@ -112,8 +89,8 @@ export function TimelineView() {
             {t('timeline.title')}
           </h1>
 
-          {/* Navigation for Week */}
-          {showNavigation && (
+          {/* Week navigation (week detail mode only) */}
+          {timelineMode === 'week' && (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigateWeek(-1)}
@@ -122,7 +99,7 @@ export function TimelineView() {
                 &larr;
               </button>
               <button
-                onClick={goToToday}
+                onClick={() => setCurrentDate(todayISO())}
                 className="rounded-lg border border-edge px-3 py-1.5 text-sm text-content hover:bg-surface-secondary"
               >
                 {t('week.today')}
@@ -137,435 +114,43 @@ export function TimelineView() {
           )}
         </div>
 
-        {/* Controls row — wraps on mobile */}
-        <div className="flex flex-wrap items-center gap-3">
-          <SegmentedControl
-            value={timelineMode}
-            onChange={setTimelineMode}
-            options={modeOptions}
-          />
-
-          {/* Date range filter for Horizontal mode */}
-          {timelineMode === 'horizontal' && (
-            <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="date"
-                className="rounded-lg border border-edge bg-surface-elevated px-3 py-1.5 text-base sm:text-sm text-content"
-                value={dateRange.from ?? ''}
-                min={startDate}
-                onChange={(e) =>
-                  setDateRange((p) => ({
-                    ...p,
-                    from: e.target.value || undefined,
-                  }))
-                }
-              />
-              <span className="text-content-tertiary">—</span>
-              <input
-                type="date"
-                className="rounded-lg border border-edge bg-surface-elevated px-3 py-1.5 text-base sm:text-sm text-content"
-                value={dateRange.to ?? ''}
-                min={startDate}
-                onChange={(e) =>
-                  setDateRange((p) => ({
-                    ...p,
-                    to: e.target.value || undefined,
-                  }))
-                }
-              />
-              {(dateRange.from || dateRange.to) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setDateRange({})}
-                >
-                  {t('common.clear')}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
+        <SegmentedControl
+          value={timelineMode}
+          onChange={setTimelineMode}
+          options={modeOptions}
+        />
       </div>
 
-      {/* Mode content */}
-      {timelineMode === 'horizontal' && (
-        <HorizontalMode
-          dateRange={dateRange}
-          onDayClick={navigateToDayPage}
-          startDate={startDate}
-          hasBirthDate={!!user?.birthDate}
-        />
+      {/* Zoom mode */}
+      {timelineMode === 'zoom' && (
+        <>
+          <TimelineBreadcrumb />
+          {startDate && zoomLevel === 'year' && (
+            <YearView startDate={startDate} />
+          )}
+          {startDate && zoomLevel === 'month' && selectedYear && (
+            <MonthView year={selectedYear} startDate={startDate} />
+          )}
+          {startDate && zoomLevel === 'weeks' && selectedYear && selectedMonth && (
+            <WeekRowsView
+              year={selectedYear}
+              month={selectedMonth}
+              startDate={startDate}
+              hasBirthDate={!!user?.birthDate}
+              onDayClick={navigateToDayPage}
+            />
+          )}
+        </>
       )}
+
+      {/* Week detail mode */}
       {timelineMode === 'week' && (
-        <WeekMode
+        <WeekDetailView
           currentDate={currentDate}
           onDayClick={navigateToDayPage}
           startDate={startDate}
         />
       )}
-    </div>
-  );
-}
-
-// ─── Helpers ──────────────────────────────────────────────
-
-type DayClickHandler = (date: string) => void;
-
-/** Get the URL of the main (cover) image, falling back to the first image. */
-function getMainImageUrl(
-  media: DayMedia[],
-  mainMediaId?: string | null,
-): string | undefined {
-  if (mainMediaId) {
-    const main = media.find((m) => m.id === mainMediaId);
-    if (main?.url) return main.url;
-  }
-  return media.find((m) => isImageType(m.contentType))?.url ?? undefined;
-}
-
-// ─── Horizontal Mode ───────────────────────────────────────
-
-function HorizontalMode({
-  dateRange,
-  onDayClick,
-  startDate,
-  hasBirthDate,
-}: {
-  dateRange: { from?: string; to?: string };
-  onDayClick: DayClickHandler;
-  startDate?: string;
-  hasBirthDate: boolean;
-}) {
-  const { t, language } = useTranslation();
-  const [loadedYears, setLoadedYears] = useState(1);
-
-  // Compute effective date range: manual override or year-based pagination
-  const effectiveRange = useMemo(() => {
-    if (dateRange.from || dateRange.to) return dateRange;
-    const today = DateTime.now().startOf('day');
-    const computedFrom = today.minus({ years: loadedYears }).toISODate()!;
-    const from =
-      startDate && computedFrom < startDate ? startDate : computedFrom;
-    return { from, to: today.toISODate()! };
-  }, [dateRange, loadedYears, startDate]);
-
-  const { data, isLoading, error } = useTimeline(effectiveRange);
-
-  const horizontalWeeks = useMemo(
-    () => (data ? groupTimelineHorizontal(data, startDate) : []),
-    [data, startDate],
-  );
-
-  // Can load more if startDate exists and we haven't reached it yet
-  const canLoadMore = useMemo(() => {
-    if (!startDate || dateRange.from || dateRange.to) return false;
-    const today = DateTime.now().startOf('day');
-    const computedFrom = today.minus({ years: loadedYears }).toISODate()!;
-    return computedFrom > startDate;
-  }, [startDate, loadedYears, dateRange]);
-
-  if (isLoading) return <TimelineSkeleton />;
-  if (error) return <ErrorMessage />;
-
-  if (data) {
-    return (
-      <div>
-        <p className="mb-4 text-sm text-content-secondary">
-          {t('timeline.showing_range', {
-            from: formatDate(data.from, undefined, language),
-            to: formatDate(data.to, undefined, language),
-          })}
-        </p>
-        <HorizontalTimeline
-          weeks={horizontalWeeks}
-          onDayClick={onDayClick}
-          startDate={startDate}
-          hasBirthDate={hasBirthDate}
-        />
-        {canLoadMore && (
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={() => setLoadedYears((y) => y + 1)}
-              disabled={isLoading}
-              className="rounded-lg border border-edge px-4 py-2 text-sm font-medium text-content transition-colors hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-default"
-            >
-              {t('timeline.load_earlier')}
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return null;
-}
-
-function HorizontalTimeline({
-  weeks,
-  onDayClick,
-  startDate,
-  hasBirthDate,
-}: {
-  weeks: HorizontalTimelineWeek[];
-  onDayClick: DayClickHandler;
-  startDate?: string;
-  hasBirthDate: boolean;
-}) {
-  const { t, language } = useTranslation();
-
-  if (weeks.length === 0) {
-    return (
-      <EmptyState
-        title={t('timeline.empty.title')}
-        description={t('timeline.empty.description')}
-      />
-    );
-  }
-
-  // Generate locale-aware weekday labels from a known Monday (2024-01-01 is a Monday)
-  const dayLabels = Array.from({ length: 7 }, (_, i) => {
-    const date = DateTime.fromISO('2024-01-01').plus({ days: i });
-    return (language ? date.reconfigure({ locale: language }) : date).toFormat(
-      'ccc',
-    );
-  });
-
-  return (
-    <div>
-      <div>
-        {/* Day headers */}
-        <div className="mb-3 grid grid-cols-7 gap-1 sm:gap-2 px-1">
-          {dayLabels.map((label, i) => (
-            <div
-              key={i}
-              className="text-center text-xs font-medium font-mono text-content-tertiary"
-            >
-              <span className="hidden sm:inline">{label}</span>
-              <span className="sm:hidden">{label[0]}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Week rows */}
-        <div className="space-y-6">
-          {weeks.map((week) => {
-            const colCount = week.days.length;
-            const isPartialWeek = colCount < 7;
-            // For partial first week, offset columns to align to the right (end of week)
-            const colOffset = isPartialWeek ? 7 - colCount : 0;
-
-            return (
-              <div key={week.weekStart}>
-                {/* Period bars above day circles */}
-                {week.periods.length > 0 && (
-                  <div
-                    className="relative mb-1.5"
-                    style={{
-                      minHeight: `${Math.max(1, week.periods.length) * 22}px`,
-                    }}
-                  >
-                    {week.periods.map((wp, idx) => (
-                      <div
-                        key={wp.period.id}
-                        className="absolute rounded-full truncate px-2 text-xs font-medium font-mono"
-                        style={{
-                          left: `${((wp.startCol + colOffset) / 7) * 100}%`,
-                          width: `${(wp.span / 7) * 100}%`,
-                          top: `${idx * 22}px`,
-                          backgroundColor: hexToRgba(
-                            wp.period.category.color,
-                            0.2,
-                          ),
-                          color: wp.period.category.color,
-                          height: '18px',
-                          lineHeight: '18px',
-                        }}
-                        title={`${wp.period.eventGroup.title}${wp.period.comment ? `: ${wp.period.comment}` : ''}`}
-                      >
-                        {wp.span > 1 ? wp.period.eventGroup.title : ''}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Day circles row with connecting line */}
-                <div className="relative grid grid-cols-7 gap-1 sm:gap-2">
-                  <div className="absolute top-1/2 left-[7%] right-[7%] h-px bg-edge-light -translate-y-2" />
-
-                  {/* Empty spacer cells for partial first week */}
-                  {isPartialWeek &&
-                    Array.from({ length: colOffset }).map((_, i) => (
-                      <div key={`spacer-${i}`} />
-                    ))}
-
-                  {week.days.map((day) => {
-                    const disabled = isBeyondTomorrow(day.date);
-                    const isStartDay = startDate === day.date;
-                    return (
-                      <div
-                        key={day.date}
-                        className="relative flex flex-col items-center gap-1"
-                      >
-                        <DayCircle
-                          date={day.date}
-                          color={day.dayState?.color}
-                          imageUrl={getMainImageUrl(day.media, day.mainMediaId)}
-                          size="md"
-                          label={`${formatDate(day.date, undefined, language)} — ${day.dayState?.name ?? t('timeline.no_mood')}`}
-                          onClick={
-                            disabled ? undefined : () => onDayClick(day.date)
-                          }
-                          disabled={disabled}
-                        />
-                        <span
-                          className={`text-xs ${
-                            isToday(day.date)
-                              ? 'font-bold text-accent'
-                              : disabled
-                                ? 'text-content-tertiary/50'
-                                : 'text-content-tertiary'
-                          }`}
-                        >
-                          {day.dayNumber}
-                        </span>
-                        {isStartDay && (
-                          <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium text-accent">
-                            {hasBirthDate
-                              ? t('timeline.birth_date_label')
-                              : t('timeline.journey_begins')}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Week date range label */}
-                <div
-                  className={`mt-1 text-right text-xs font-mono text-content-tertiary ${week.days.length < 7 ? 'mt-5' : ''}`}
-                >
-                  {formatDate(week.weekStart, 'MMM d', language)} —{' '}
-                  {formatDate(week.weekEnd, 'MMM d', language)}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Week Mode ─────────────────────────────────────────────
-
-function WeekMode({
-  currentDate,
-  onDayClick,
-  startDate,
-}: {
-  currentDate: string;
-  onDayClick: DayClickHandler;
-  startDate?: string;
-}) {
-  const { t, language } = useTranslation();
-  const { data: weekData, isLoading } = useWeekTimeline({ date: currentDate });
-
-  const weekDays = useMemo(() => {
-    if (!weekData) return [];
-    const grid = buildWeekGrid(weekData);
-    // Filter out days before registration
-    if (startDate) {
-      return grid.filter((day) => day.date >= startDate);
-    }
-    return grid;
-  }, [weekData, startDate]);
-
-  if (isLoading) return <TimelineSkeleton />;
-
-  if (weekData) {
-    return (
-      <div>
-        <p className="mb-4 text-sm text-content-secondary">
-          {formatDate(weekData.weekStart, undefined, language)} —{' '}
-          {formatDate(weekData.weekEnd, undefined, language)}
-        </p>
-
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7">
-          {weekDays.map((day) => {
-            const disabled = isBeyondTomorrow(day.date);
-            return (
-              <button
-                key={day.date}
-                onClick={disabled ? undefined : () => onDayClick(day.date)}
-                disabled={disabled}
-                className={`rounded-xl border border-edge p-3 md:p-4 text-center transition-all ${
-                  disabled ? 'opacity-40 cursor-default' : 'hover:shadow-md'
-                } ${
-                  isToday(day.date) ? 'ring-2 ring-accent' : ''
-                } bg-surface-elevated`}
-              >
-                <p className="text-xs font-medium font-mono text-content-secondary">
-                  {formatDayShort(day.date, language)}
-                </p>
-                <p className="text-xl font-bold text-content md:text-2xl">
-                  {formatDayNumber(day.date)}
-                </p>
-
-                <div className="mt-2 flex justify-center">
-                  <DayCircle
-                    date={day.date}
-                    color={day.dayState?.color}
-                    imageUrl={getMainImageUrl(day.media, day.mainMediaId)}
-                    size="lg"
-                    label={day.dayState?.name ?? t('timeline.no_mood')}
-                  />
-                </div>
-
-                {day.periods.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {day.periods.slice(0, 3).map((period) => (
-                      <div
-                        key={period.id}
-                        className="rounded-md px-2 py-0.5 text-xs font-medium font-mono truncate"
-                        style={{
-                          backgroundColor: hexToRgba(
-                            period.category.color,
-                            0.15,
-                          ),
-                          color: period.category.color,
-                        }}
-                        title={`${period.eventGroup.title}${period.comment ? `: ${period.comment}` : ''}`}
-                      >
-                        {period.eventGroup.title}
-                      </div>
-                    ))}
-                    {day.periods.length > 3 && (
-                      <p className="text-center text-xs text-content-tertiary">
-                        {t('timeline.more_periods', {
-                          count: day.periods.length - 3,
-                        })}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  return <EmptyState title={t('timeline.no_week_data')} />;
-}
-
-// ─── Shared UI Helpers ─────────────────────────────────────
-
-function ErrorMessage() {
-  const { t } = useTranslation();
-  return (
-    <div className="py-16 text-center text-sm text-danger">
-      {t('timeline.failed_to_load')}
     </div>
   );
 }

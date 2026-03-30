@@ -32,4 +32,6 @@ export const ERROR_TRANSLATION_KEYS: Record<ErrorCode, string> = {
   SUBSCRIPTION_NOT_FOUND: 'errors.subscription_not_found',
   PADDLE_NOT_CONFIGURED: 'errors.paddle_not_configured',
   PADDLE_CANCEL_ERROR: 'errors.paddle_cancel_error',
+  PADDLE_UPGRADE_ERROR: 'errors.paddle_upgrade_error',
+  INVALID_UPGRADE: 'errors.invalid_upgrade',
 };

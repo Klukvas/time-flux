@@ -32,4 +32,6 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   SUBSCRIPTION_NOT_FOUND: 'No active subscription found.',
   PADDLE_NOT_CONFIGURED: 'Billing is temporarily unavailable.',
   PADDLE_CANCEL_ERROR: 'Failed to cancel subscription. Please try again.',
+  PADDLE_UPGRADE_ERROR: 'Failed to upgrade subscription. Please try again.',
+  INVALID_UPGRADE: 'Invalid subscription upgrade.',
 };

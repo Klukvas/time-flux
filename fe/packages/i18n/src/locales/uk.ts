@@ -50,13 +50,21 @@ const uk: TranslationDictionary = {
         'Створюйте розділи та відмічайте дні, щоб побачити хронологію.',
     },
     modes: {
-      horizontal: 'Весь час',
+      zoom: 'Хронологія',
       day: 'День',
       week: 'Тиждень',
     },
+    breadcrumb: {
+      all_years: 'Усі роки',
+    },
+    zoom: {
+      select_year: 'Оберіть рік для перегляду',
+      select_month: 'Оберіть місяць для перегляду',
+      days_in_month: '{count} днів',
+      future: 'Майбутнє',
+    },
     journey_begins: 'Ваша подорож починається',
     birth_date_label: 'Народження',
-    load_earlier: 'Завантажити раніший рік',
     showing_range: 'Показ {from} — {to}',
     no_mood: 'Без настрою',
     more_periods: 'ще +{count}',
@@ -241,6 +249,7 @@ const uk: TranslationDictionary = {
     current_plan: 'Поточний план',
     compare_plans: 'Порівняти плани',
     upgrade: 'Покращити',
+    downgrade: 'Знизити план',
     cancel: 'Скасувати підписку',
     cancel_confirm:
       'Ви впевнені, що хочете скасувати підписку? Доступ збережеться до кінця розрахункового періоду.',
@@ -290,6 +299,10 @@ const uk: TranslationDictionary = {
     usage_chapters: 'Розділи',
     usage_categories: 'Категорії',
     usage_moods: 'Настрої',
+    reactivate: 'Відновити',
+    reactivated: 'Підписку відновлено!',
+    reactivate_failed: 'Не вдалося відновити підписку. Спробуйте ще раз.',
+    upgrade_failed: 'Не вдалося оновити підписку. Спробуйте ще раз.',
     payments_coming_soon:
       'Платні плани зʼявляться незабаром. Наразі всі функції доступні безкоштовно.',
   },

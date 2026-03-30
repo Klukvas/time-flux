@@ -35,7 +35,11 @@ export {
   useUpdateEventGroup,
   useUpdatePeriod,
 } from './use-event-groups';
-export { useTimeline, useWeekTimeline } from './use-timeline';
+export {
+  useTimeline,
+  useInfiniteTimeline,
+  useWeekTimeline,
+} from './use-timeline';
 export { useMemoriesContext, useOnThisDay } from './use-memories';
 export { OnboardingContext, useOnboardingStorage } from './onboarding-context';
 export type { OnboardingStorage } from './onboarding-context';
@@ -49,5 +53,11 @@ export {
   useCreateDayStateFromRecommendation,
 } from './use-recommendations';
 export { useMoodOverview } from './use-analytics';
-export { useSubscription, useCancelSubscription } from './use-subscriptions';
+export {
+  usePlanPrices,
+  useSubscription,
+  useCancelSubscription,
+  useReactivateSubscription,
+  useChangePlan,
+} from './use-subscriptions';
 export { useUpdateProfile } from './use-users';

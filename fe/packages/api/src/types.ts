@@ -115,6 +115,11 @@ export type SubscriptionLimits = Schemas['SubscriptionLimitsDto'];
 export type SubscriptionUsage = Schemas['SubscriptionUsageDto'];
 export type SubscriptionResponse = Schemas['SubscriptionResponseDto'];
 export type CancelSubscriptionResponse = Schemas['CancelResponseDto'];
+export type {
+  ChangePlanRequest,
+  ChangePlanResponse,
+  PlanPrice,
+} from './types-local';
 
 // ─── API Error (not in OpenAPI — frontend-only) ─────────────
 // See types-local.ts for ErrorCode and other frontend-only types

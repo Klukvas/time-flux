@@ -49,13 +49,21 @@ const en: TranslationDictionary = {
       description: 'Create chapters and mark days to see your timeline.',
     },
     modes: {
-      horizontal: 'All Time',
+      zoom: 'Timeline',
       day: 'Day',
       week: 'Week',
     },
+    breadcrumb: {
+      all_years: 'All Years',
+    },
+    zoom: {
+      select_year: 'Select a year to explore',
+      select_month: 'Select a month to explore',
+      days_in_month: '{count} days',
+      future: 'Future',
+    },
     journey_begins: 'Your journey begins',
     birth_date_label: 'Born',
-    load_earlier: 'Load earlier year',
     showing_range: 'Showing {from} — {to}',
     no_mood: 'No mood',
     more_periods: '+{count} more',
@@ -240,6 +248,7 @@ const en: TranslationDictionary = {
     current_plan: 'Current Plan',
     compare_plans: 'Compare Plans',
     upgrade: 'Upgrade',
+    downgrade: 'Downgrade',
     cancel: 'Cancel Subscription',
     cancel_confirm:
       'Are you sure you want to cancel your subscription? You will keep access until the end of the billing period.',
@@ -290,6 +299,10 @@ const en: TranslationDictionary = {
     usage_chapters: 'Chapters',
     usage_categories: 'Categories',
     usage_moods: 'Moods',
+    reactivate: 'Reactivate',
+    reactivated: 'Subscription reactivated!',
+    reactivate_failed: 'Failed to reactivate subscription. Please try again.',
+    upgrade_failed: 'Failed to upgrade subscription. Please try again.',
     payments_coming_soon:
       'Paid plans are coming soon. For now, all features are available for free.',
   },
