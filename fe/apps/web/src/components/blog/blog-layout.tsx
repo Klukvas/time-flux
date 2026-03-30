@@ -37,6 +37,10 @@ export function BlogLayout({ children }: BlogLayoutProps) {
       <footer className="border-t border-edge px-4 py-8 text-center text-xs text-content-tertiary">
         TimeFlux &copy; {new Date().getFullYear()}
         {' · '}
+        <Link href="/" className="underline hover:text-content-secondary">
+          Home
+        </Link>
+        {' · '}
         <Link href="/blog" className="underline hover:text-content-secondary">
           Blog
         </Link>
@@ -50,6 +54,10 @@ export function BlogLayout({ children }: BlogLayoutProps) {
           className="underline hover:text-content-secondary"
         >
           Privacy Policy
+        </Link>
+        {' · '}
+        <Link href="/refund" className="underline hover:text-content-secondary">
+          Refund Policy
         </Link>
       </footer>
     </div>

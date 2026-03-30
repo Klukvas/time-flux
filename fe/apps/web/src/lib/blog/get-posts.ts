@@ -20,6 +20,7 @@ export function getAllPosts(): BlogPost[] {
       slug,
       frontmatter: data as BlogFrontmatter,
       readingTime: stats.text,
+      wordCount: stats.words,
     };
   });
 
@@ -48,6 +49,7 @@ export async function getPostBySlug(
     slug,
     frontmatter: data as BlogFrontmatter,
     readingTime: stats.text,
+    wordCount: stats.words,
     content: html,
   };
 }

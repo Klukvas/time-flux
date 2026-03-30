@@ -14,6 +14,7 @@ export interface BlogPost {
   slug: string;
   frontmatter: BlogFrontmatter;
   readingTime: string;
+  wordCount: number;
 }
 
 export interface BlogPostWithContent extends BlogPost {

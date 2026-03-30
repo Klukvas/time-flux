@@ -241,7 +241,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
               <p className="text-xl font-bold text-content">
                 {details.analytics.averageMoodScore != null
                   ? details.analytics.averageMoodScore.toFixed(1)
-                  : '—'}
+                  : '–'}
               </p>
               <p className="text-xs text-content-tertiary">
                 {t('insights.average_mood_score')}
@@ -306,7 +306,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                     >
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-content-secondary">
-                          {d.start} — {d.end}
+                          {d.start} – {d.end}
                         </span>
                         <span className="text-content-tertiary">
                           {t('insights.active_days', { count: d.activeDays })} (

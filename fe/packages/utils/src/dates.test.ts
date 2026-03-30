@@ -72,7 +72,7 @@ describe('formatDayShort', () => {
 
   it('returns localized short day name', () => {
     const result = formatDayShort('2025-06-18', 'de');
-    // German short for Wednesday — may be "Mi" or "Mi." depending on locale data
+    // German short for Wednesday – may be "Mi" or "Mi." depending on locale data
     expect(result.startsWith('Mi')).toBe(true);
   });
 
@@ -226,17 +226,17 @@ describe('formatRelative', () => {
 describe('formatDateRange', () => {
   it('formats range with both start and end', () => {
     const result = formatDateRange('2025-01-01', '2025-06-30');
-    expect(result).toBe('Jan 1, 2025 — Jun 30, 2025');
+    expect(result).toBe('Jan 1, 2025 – Jun 30, 2025');
   });
 
   it('shows "Present" when end is null', () => {
     const result = formatDateRange('2025-01-01', null);
-    expect(result).toBe('Jan 1, 2025 — Present');
+    expect(result).toBe('Jan 1, 2025 – Present');
   });
 
   it('uses custom presentLabel when end is null', () => {
     const result = formatDateRange('2025-01-01', null, undefined, 'Ongoing');
-    expect(result).toBe('Jan 1, 2025 — Ongoing');
+    expect(result).toBe('Jan 1, 2025 – Ongoing');
   });
 
   it('respects locale parameter', () => {
@@ -248,7 +248,7 @@ describe('formatDateRange', () => {
 
   it('handles same start and end date', () => {
     const result = formatDateRange('2025-03-15', '2025-03-15');
-    expect(result).toBe('Mar 15, 2025 — Mar 15, 2025');
+    expect(result).toBe('Mar 15, 2025 – Mar 15, 2025');
   });
 });
 

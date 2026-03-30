@@ -135,7 +135,7 @@ export function HorizontalTimeline({
                           color={day.dayState?.color}
                           imageUrl={getMainImageUrl(day.media, day.mainMediaId)}
                           size="md"
-                          label={`${formatDate(day.date, undefined, language)} — ${day.dayState?.name ?? t('timeline.no_mood')}`}
+                          label={`${formatDate(day.date, undefined, language)} – ${day.dayState?.name ?? t('timeline.no_mood')}`}
                           onClick={
                             disabled ? undefined : () => onDayClick(day.date)
                           }
@@ -168,7 +168,7 @@ export function HorizontalTimeline({
                 <div
                   className={`mt-1 text-right text-xs font-mono text-content-tertiary ${week.days.length < 7 ? 'mt-5' : ''}`}
                 >
-                  {formatDate(week.weekStart, 'MMM d', language)} —{' '}
+                  {formatDate(week.weekStart, 'MMM d', language)} –{' '}
                   {formatDate(week.weekEnd, 'MMM d', language)}
                 </div>
               </div>

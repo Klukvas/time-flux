@@ -73,7 +73,7 @@ export function HeroSection({ isAuthenticated, onStart }: HeroSectionProps) {
         }}
       >
         Track moods, document chapters, revisit memories. TimeFlux turns your
-        daily moments into a living map of who you&rsquo;ve been — and who
+        daily moments into a living map of who you&rsquo;ve been – and who
         you&rsquo;re becoming.
       </p>
 

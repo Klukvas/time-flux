@@ -1,7 +1,7 @@
 export const SEO = {
   siteName: 'TimeFlux',
   titleTemplate: '%s | TimeFlux',
-  defaultTitle: 'TimeFlux — Visualize Your Life Timeline',
+  defaultTitle: 'TimeFlux – Visualize Your Life Timeline',
   description:
     'Track your life journey with an interactive visual timeline. Log daily moods, organize life chapters, capture memories, and gain insights into your personal history.',
   keywords: [
@@ -24,4 +24,10 @@ export const SEO = {
 
 export function getBaseUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+}
+
+export function buildHreflangAlternates(path: string): Record<string, string> {
+  const baseUrl = getBaseUrl();
+  const url = `${baseUrl}${path}`;
+  return { 'x-default': url, en: url };
 }

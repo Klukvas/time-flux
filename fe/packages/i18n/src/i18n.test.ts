@@ -70,9 +70,9 @@ describe('createTranslate', () => {
     });
 
     it('replaces multiple placeholders in a single string', () => {
-      // "timeline.showing_range" = "Showing {from} — {to}"
+      // "timeline.showing_range" = "Showing {from} – {to}"
       expect(t('timeline.showing_range', { from: 'Jan', to: 'Mar' })).toBe(
-        'Showing Jan — Mar',
+        'Showing Jan – Mar',
       );
     });
 
@@ -85,7 +85,7 @@ describe('createTranslate', () => {
 
     it('leaves unmatched placeholders intact when param is missing', () => {
       expect(t('timeline.showing_range', { from: 'Jan' })).toBe(
-        'Showing Jan — {to}',
+        'Showing Jan – {to}',
       );
     });
 

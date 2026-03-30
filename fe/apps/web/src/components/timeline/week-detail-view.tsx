@@ -26,7 +26,11 @@ export function WeekDetailView({
   startDate?: string;
 }) {
   const { t, language } = useTranslation();
-  const { data: weekData, isLoading, error } = useWeekTimeline({ date: currentDate });
+  const {
+    data: weekData,
+    isLoading,
+    error,
+  } = useWeekTimeline({ date: currentDate });
 
   const weekDays = useMemo(() => {
     if (!weekData) return [];
@@ -51,7 +55,7 @@ export function WeekDetailView({
     return (
       <div>
         <p className="mb-4 text-sm text-content-secondary">
-          {formatDate(weekData.weekStart, undefined, language)} —{' '}
+          {formatDate(weekData.weekStart, undefined, language)} –{' '}
           {formatDate(weekData.weekEnd, undefined, language)}
         </p>
 

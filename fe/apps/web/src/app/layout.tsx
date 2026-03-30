@@ -4,11 +4,12 @@ import { Toaster } from 'react-hot-toast';
 import { ApiProvider } from '@/lib/api-provider';
 import { I18nProvider } from '@/lib/i18n-provider';
 import { ThemeProvider } from '@/lib/theme-provider';
-import { SEO, getBaseUrl } from '@/lib/constants/seo';
+import { SEO, getBaseUrl, buildHreflangAlternates } from '@/lib/constants/seo';
 import {
-  WebApplicationJsonLd,
+  SoftwareApplicationJsonLd,
   OrganizationJsonLd,
 } from '@/components/seo/json-ld';
+import { WebVitalsReporter } from '@/components/seo/web-vitals';
 import './globals.css';
 
 const dmSans = DM_Sans({
@@ -43,12 +44,21 @@ export const metadata: Metadata = {
     siteName: SEO.siteName,
     title: SEO.defaultTitle,
     description: SEO.description,
+    images: [
+      {
+        url: `${baseUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: SEO.defaultTitle,
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: SEO.defaultTitle,
     description: SEO.description,
     site: SEO.twitterHandle,
+    images: [`${baseUrl}/opengraph-image`],
   },
   robots: {
     index: true,
@@ -63,6 +73,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: baseUrl,
+    languages: buildHreflangAlternates(''),
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? undefined,
@@ -106,8 +117,9 @@ export default function RootLayout({
             </ApiProvider>
           </I18nProvider>
         </ThemeProvider>
-        <WebApplicationJsonLd />
+        <SoftwareApplicationJsonLd />
         <OrganizationJsonLd />
+        <WebVitalsReporter />
       </body>
     </html>
   );

@@ -64,7 +64,7 @@ const en: TranslationDictionary = {
     },
     journey_begins: 'Your journey begins',
     birth_date_label: 'Born',
-    showing_range: 'Showing {from} — {to}',
+    showing_range: 'Showing {from} – {to}',
     no_mood: 'No mood',
     more_periods: '+{count} more',
     no_week_data: 'No data for this week',
@@ -387,7 +387,7 @@ const en: TranslationDictionary = {
     today: 'Today',
     previous_day: 'Previous day',
     next_day: 'Next day',
-    future_read_only: 'Future date — read only',
+    future_read_only: 'Future date – read only',
     media_hint: 'Drop photos or videos here, or click to browse',
     tag_to_period: 'Tag new uploads to a period',
     all_periods: 'No period',
@@ -446,23 +446,23 @@ const en: TranslationDictionary = {
   onboarding: {
     welcome: 'TimeFlux helps you see your life as it flows over time.',
     navigation: "Here's what each section is for:",
-    navigation_timeline: 'Timeline — your visual life map',
-    navigation_chapters: 'Chapters — reusable life events',
-    navigation_categories: 'Categories — organize by type',
-    navigation_day_states: 'Moods — your mood palette',
-    navigation_settings: 'Settings — preferences & account',
-    timeline: 'This is your timeline — a visual map of your days and periods.',
+    navigation_timeline: 'Timeline – your visual life map',
+    navigation_chapters: 'Chapters – reusable life events',
+    navigation_categories: 'Categories – organize by type',
+    navigation_day_states: 'Moods – your mood palette',
+    navigation_settings: 'Settings – preferences & account',
+    timeline: 'This is your timeline – a visual map of your days and periods.',
     day: 'Tap any day to add a mood, photo, or memory.',
     first_memory:
-      'You can start small — even one photo or a feeling is enough.',
+      'You can start small – even one photo or a feeling is enough.',
     next: 'Next',
     try_it: 'Try it',
     save_finish: 'Save & Finish',
     skip: 'Skip',
     highlight_timeline:
-      'This is the Timeline — where your life flows over time.',
+      'This is the Timeline – where your life flows over time.',
     highlight_chapters:
-      'Here you can manage Chapters — reusable groups of life events.',
+      'Here you can manage Chapters – reusable groups of life events.',
     highlight_categories: 'Categories help you organize chapters by type.',
     highlight_moods: 'Moods let you color each day with how you felt.',
     highlight_settings: 'Settings let you customize TimeFlux.',
@@ -598,7 +598,7 @@ const en: TranslationDictionary = {
         'You must provide accurate information when creating an account. You are responsible for maintaining the confidentiality of your credentials and for all activity under your account. Notify us immediately of any unauthorized use.',
       subscriptions_title: '4. Subscriptions & Billing',
       subscriptions_text:
-        'Some features require a paid subscription. Payments are processed by Paddle.com Market Limited ("Paddle"), our Merchant of Record. Paddle handles all billing, invoicing, tax collection, and refund processing. By subscribing, you also agree to Paddle\'s Terms of Use (https://www.paddle.com/legal/terms) and Privacy Policy (https://www.paddle.com/legal/privacy). Subscriptions renew automatically unless canceled before the end of the billing period. You can cancel your subscription at any time from the Settings page in your account — cancellation takes effect at the end of the current billing period and you will retain access to paid features until then.',
+        'Some features require a paid subscription. Payments are processed by Paddle.com Market Limited ("Paddle"), our Merchant of Record. Paddle handles all billing, invoicing, tax collection, and refund processing. By subscribing, you also agree to Paddle\'s Terms of Use (https://www.paddle.com/legal/terms) and Privacy Policy (https://www.paddle.com/legal/privacy). Subscriptions renew automatically unless canceled before the end of the billing period. You can cancel your subscription at any time from the Settings page in your account – cancellation takes effect at the end of the current billing period and you will retain access to paid features until then.',
       content_title: '5. User Content',
       content_text:
         'You retain ownership of all content you upload (photos, text, media). By using the Service, you grant us a limited license to store, process, and display your content solely for providing the Service. We do not sell or share your content with third parties for advertising purposes.',
@@ -633,7 +633,7 @@ const en: TranslationDictionary = {
         'Your data is stored on secure servers with encryption at rest and in transit. Media files are stored in encrypted cloud storage (Amazon S3). We implement industry-standard security measures, but no system is 100% secure.',
       third_parties_title: '5. Third Parties',
       third_parties_text:
-        'We share data only with essential service providers: Paddle.com — payment processing (receives your email and billing info); Amazon Web Services — cloud infrastructure and media storage; Google — authentication (only if you use Google Sign-In). These providers are bound by their own privacy policies and data protection obligations.',
+        'We share data only with essential service providers: Paddle.com – payment processing (receives your email and billing info); Amazon Web Services – cloud infrastructure and media storage; Google – authentication (only if you use Google Sign-In). These providers are bound by their own privacy policies and data protection obligations.',
       cookies_title: '6. Cookies & Local Storage',
       cookies_text:
         'We use local storage and cookies to maintain your session, remember language and theme preferences, and improve the user experience. We do not use third-party tracking cookies.',
@@ -659,7 +659,7 @@ const en: TranslationDictionary = {
         'Approved refunds are processed by Paddle and returned to the original payment method. Depending on your bank or payment provider, it may take 5–10 business days for the refund to appear on your statement. Once a refund is issued, your subscription will be immediately downgraded to the free plan.',
       cancellation_title: '5. Cancellation vs. Refund',
       cancellation_text:
-        'Cancelling your subscription is different from requesting a refund. When you cancel, your subscription remains active until the end of the current billing period — no refund is issued for the remaining time. You can cancel anytime from the Settings page in your account. If you believe you were charged in error or have special circumstances, please contact us.',
+        'Cancelling your subscription is different from requesting a refund. When you cancel, your subscription remains active until the end of the current billing period – no refund is issued for the remaining time. You can cancel anytime from the Settings page in your account. If you believe you were charged in error or have special circumstances, please contact us.',
       changes_title: '6. Policy Changes',
       changes_text:
         'We may update this Refund Policy from time to time. Any changes will be posted on this page with an updated date. Continued use of the Service after changes constitutes acceptance of the revised policy.',

@@ -66,8 +66,8 @@ export function formatDateRange(
   presentLabel?: string,
 ): string {
   const startFormatted = formatDate(start, undefined, locale);
-  if (!end) return `${startFormatted} — ${presentLabel ?? 'Present'}`;
-  return `${startFormatted} — ${formatDate(end, undefined, locale)}`;
+  if (!end) return `${startFormatted} – ${presentLabel ?? 'Present'}`;
+  return `${startFormatted} – ${formatDate(end, undefined, locale)}`;
 }
 
 /** Calculate duration in days between two dates. Returns null if end is null (ongoing). */

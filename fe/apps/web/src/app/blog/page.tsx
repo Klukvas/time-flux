@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
 import { getAllPosts } from '@/lib/blog/get-posts';
+import { buildHreflangAlternates } from '@/lib/constants/seo';
 import { BlogCard } from '@/components/blog/blog-card';
 
 export const metadata: Metadata = {
   title: 'Blog',
   description:
     'Tips and insights on life tracking, mood journaling, personal growth, and organizing your life story.',
+  alternates: {
+    languages: buildHreflangAlternates('/blog'),
+  },
 };
 
 export default function BlogPage() {
