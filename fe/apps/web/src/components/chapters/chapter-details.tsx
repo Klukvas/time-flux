@@ -478,6 +478,7 @@ export function ChapterDetails({ groupId }: ChapterDetailsProps) {
                   <img
                     src={m.url ?? undefined}
                     alt={m.fileName}
+                    loading="lazy"
                     className="h-full w-full object-cover"
                   />
                 ) : (

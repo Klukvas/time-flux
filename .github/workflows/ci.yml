@@ -424,6 +424,7 @@ jobs:
           PADDLE_ENVIRONMENT=${{ secrets.PADDLE_ENVIRONMENT }}
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_SUPPORT_CHAT_ID=${{ secrets.TELEGRAM_SUPPORT_CHAT_ID }}
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
           ENVEOF
           # Remove leading whitespace from heredoc
           sed -i 's/^          //' .env.prod
@@ -451,14 +452,55 @@ jobs:
             mv -f .env.prod .env
             mv -f docker-compose.prod.yml docker-compose.yml
 
+            # Save current state for rollback
+            docker compose config > docker-compose.rollback.yml 2>/dev/null || true
+            docker compose ps --format json > containers-before.json 2>/dev/null || true
+
             # Pull latest images
             docker compose pull
 
-            # Restart services (recreates only changed containers)
-            docker compose up -d
+            # Restart services
+            docker compose up -d --remove-orphans
 
-            # Remove old unused images
+            # Wait for containers to be healthy (timeout 120s)
+            echo "Waiting for services to become healthy..."
+            TIMEOUT=120
+            ELAPSED=0
+            while [ $ELAPSED -lt $TIMEOUT ]; do
+              UNHEALTHY=$(docker compose ps --format json | grep -c '"Health":"starting"' || true)
+              FAILED=$(docker compose ps --format json | grep -c '"Health":"unhealthy"' || true)
+              if [ "$FAILED" -gt 0 ]; then
+                echo "ERROR: Unhealthy containers detected!"
+                docker compose ps
+                docker compose logs --tail=50 backend frontend
+                exit 1
+              fi
+              if [ "$UNHEALTHY" -eq 0 ]; then
+                echo "All services healthy!"
+                break
+              fi
+              sleep 5
+              ELAPSED=$((ELAPSED + 5))
+            done
+
+            if [ $ELAPSED -ge $TIMEOUT ]; then
+              echo "ERROR: Health check timeout after ${TIMEOUT}s"
+              docker compose ps
+              docker compose logs --tail=50 backend frontend
+              exit 1
+            fi
+
+            # Verify backend health through nginx (port 3000 is not exposed to host)
+            HTTP_STATUS=$(curl -sk -o /dev/null -w "%{http_code}" https://localhost/api/v1/health || echo "000")
+            if [ "$HTTP_STATUS" != "200" ]; then
+              echo "ERROR: Backend health check returned $HTTP_STATUS"
+              docker compose logs --tail=50 backend nginx
+              exit 1
+            fi
+
+            # Clean up old images (keep last 2)
             docker image prune -f
 
-            # Verify all containers are running
+            # Final status
             docker compose ps
+            echo "Deploy successful!"

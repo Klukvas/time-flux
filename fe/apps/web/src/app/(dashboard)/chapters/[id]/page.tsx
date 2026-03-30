@@ -1,7 +1,20 @@
 'use client';
 
-import { ChapterDetails } from '@/components/chapters/chapter-details';
+import dynamic from 'next/dynamic';
+import { ChapterDetailsSkeleton } from '@/components/ui/skeleton';
 
-export default function ChapterDetailPage({ params }: { params: { id: string } }) {
+const ChapterDetails = dynamic(
+  () =>
+    import('@/components/chapters/chapter-details').then(
+      (mod) => mod.ChapterDetails,
+    ),
+  { loading: () => <ChapterDetailsSkeleton /> },
+);
+
+export default function ChapterDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   return <ChapterDetails groupId={params.id} />;
 }

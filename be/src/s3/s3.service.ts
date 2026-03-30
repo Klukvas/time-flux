@@ -6,6 +6,7 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   DeleteObjectsCommand,
+  HeadBucketCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { v4 as uuidv4 } from 'uuid';
@@ -111,5 +112,12 @@ export class S3Service {
       },
     });
     await this.s3Client.send(command);
+  }
+
+  async checkConnection(): Promise<void> {
+    const command = new HeadBucketCommand({ Bucket: this.bucket });
+    await this.s3Client.send(command, {
+      abortSignal: AbortSignal.timeout(5_000),
+    });
   }
 }

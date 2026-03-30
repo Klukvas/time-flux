@@ -14,6 +14,7 @@ import {
 } from '../common/errors/app.error.js';
 import type { GoogleProfile } from './strategies/google.strategy.js';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
+import { AuditLoggerService } from '../common/services/audit-logger.service.js';
 
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 const OAUTH_CODE_TTL_MS = 60_000;
@@ -55,6 +56,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private readonly subscriptionsService: SubscriptionsService,
+    private readonly audit: AuditLoggerService,
   ) {
     // Periodically clean up expired OAuth codes
     this.cleanupInterval = setInterval(() => {
@@ -129,6 +131,12 @@ export class AuthService {
     );
     const refreshToken = await this.createRefreshToken(user.id);
 
+    this.audit.log({
+      event: 'USER_REGISTERED',
+      userId: user.id,
+      email: dto.email,
+    });
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
@@ -156,6 +164,12 @@ export class AuthService {
       user.timezone,
     );
     const refreshToken = await this.createRefreshToken(user.id);
+
+    this.audit.log({
+      event: 'USER_LOGGED_IN',
+      userId: user.id,
+      email: dto.email,
+    });
 
     return {
       access_token: accessToken,
@@ -222,6 +236,12 @@ export class AuthService {
       );
       const refreshToken = await this.createRefreshToken(result.user.id);
 
+      this.audit.log({
+        event: 'GOOGLE_LOGIN',
+        userId: result.user.id,
+        email: profile.email,
+      });
+
       return {
         access_token: accessToken,
         refresh_token: refreshToken,
@@ -265,6 +285,8 @@ export class AuthService {
     );
     const newRefreshToken = await this.createRefreshToken(stored.user.id);
 
+    this.audit.log({ event: 'TOKEN_REFRESHED', userId: stored.user.id });
+
     return {
       access_token: accessToken,
       refresh_token: newRefreshToken,
@@ -272,9 +294,10 @@ export class AuthService {
     };
   }
 
-  async logout(rawToken: string) {
+  async logout(rawToken: string, userId: string) {
     const tokenHash = this.hashToken(rawToken);
     await this.prisma.refreshToken.deleteMany({ where: { tokenHash } });
+    this.audit.log({ event: 'USER_LOGGED_OUT', userId });
   }
 
   storeOAuthCode(data: OAuthTokenData): string {

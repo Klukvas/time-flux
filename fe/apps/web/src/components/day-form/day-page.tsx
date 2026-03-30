@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -41,7 +42,16 @@ import type { MediaItem } from '@timeflux/utils';
 import { MAX_COMMENT_LENGTH } from '@timeflux/constants';
 import { Button } from '@/components/ui/button';
 import { MediaUploader } from '@/components/ui/media-uploader';
-import { MediaCarousel } from '@/components/ui/media-carousel';
+
+const MediaCarousel = dynamic(
+  () =>
+    import('@/components/ui/media-carousel').then((mod) => mod.MediaCarousel),
+  {
+    loading: () => (
+      <div className="h-[120px] animate-pulse rounded-lg bg-surface-secondary" />
+    ),
+  },
+);
 import { DayCircle } from '@/components/ui/day-circle';
 import { CalendarPopover } from '@/components/ui/calendar-popover';
 import { ChapterSelector } from '@/components/ui/chapter-selector';

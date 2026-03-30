@@ -153,8 +153,11 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout — revoke refresh token' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
-  async logout(@Body() dto: RefreshTokenDto): Promise<void> {
-    await this.authService.logout(dto.refresh_token);
+  async logout(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: RefreshTokenDto,
+  ): Promise<void> {
+    await this.authService.logout(dto.refresh_token, user.sub);
   }
 
   @Patch('onboarding')

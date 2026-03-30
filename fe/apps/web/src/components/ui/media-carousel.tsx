@@ -49,6 +49,7 @@ export function MediaCarousel({
                   <img
                     src={item.previewUrl}
                     alt=""
+                    loading="lazy"
                     className={`h-full w-full cursor-pointer rounded-lg object-cover border-2 transition-all ${
                       isCover ? 'border-accent' : 'border-edge'
                     }`}
@@ -63,6 +64,7 @@ export function MediaCarousel({
                       <img
                         src={item.thumbnailUrl}
                         alt=""
+                        loading="lazy"
                         className="h-full w-full rounded-lg object-cover"
                       />
                     ) : item.previewUrl ? (

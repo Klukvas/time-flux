@@ -19,7 +19,11 @@ interface MediaPeriodAssignProps {
   date: string;
 }
 
-export function MediaPeriodAssign({ media, periods, date }: MediaPeriodAssignProps) {
+export function MediaPeriodAssign({
+  media,
+  periods,
+  date,
+}: MediaPeriodAssignProps) {
   const { t } = useTranslation();
   const updateMediaPeriod = useUpdateDayMediaPeriod();
 
@@ -66,11 +70,26 @@ export function MediaPeriodAssign({ media, periods, date }: MediaPeriodAssignPro
             >
               <div className="h-9 w-9 shrink-0 overflow-hidden rounded-md bg-surface-secondary">
                 {m.url ? (
-                  <img src={m.url} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={m.url}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-content-tertiary">
-                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3 3h18" />
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3 3h18"
+                      />
                     </svg>
                   </div>
                 )}
@@ -92,7 +111,10 @@ export function MediaPeriodAssign({ media, periods, date }: MediaPeriodAssignPro
                   const newPeriodId = e.target.value || null;
                   updateMediaPeriod.mutate(
                     { id: m.id, date, data: { periodId: newPeriodId } },
-                    { onError: (err) => toast.error(getUserMessage(extractApiError(err))) },
+                    {
+                      onError: (err) =>
+                        toast.error(getUserMessage(extractApiError(err))),
+                    },
                   );
                 }}
                 className="shrink-0 rounded-md border border-edge bg-surface-secondary px-2 py-1 text-xs text-content transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
@@ -100,7 +122,9 @@ export function MediaPeriodAssign({ media, periods, date }: MediaPeriodAssignPro
               >
                 <option value="">{t('day_form.all_periods')}</option>
                 {periods.map((p) => (
-                  <option key={p.id} value={p.id}>{p.eventGroup.title}</option>
+                  <option key={p.id} value={p.id}>
+                    {p.eventGroup.title}
+                  </option>
                 ))}
               </select>
             </div>

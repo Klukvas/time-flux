@@ -75,6 +75,7 @@ export function MediaUploader({
                   <img
                     src={item.previewUrl}
                     alt=""
+                    loading="lazy"
                     className={`h-16 w-16 rounded-lg object-cover border-2 ${
                       isCover ? 'border-accent' : 'border-edge'
                     } ${canSetCover ? 'cursor-pointer' : ''}`}

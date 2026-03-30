@@ -10,29 +10,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter.
 import { buildSwaggerConfig } from './common/swagger/swagger.config.js';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 
-const REQUIRED_ENV_VARS = ['DATABASE_URL', 'JWT_SECRET'];
-const PRODUCTION_REQUIRED_ENV_VARS = [
-  'FRONTEND_URL',
-  'S3_ENDPOINT',
-  'S3_REGION',
-  'S3_BUCKET',
-  'S3_ACCESS_KEY_ID',
-  'S3_SECRET_ACCESS_KEY',
-  'PADDLE_WEBHOOK_SECRET',
-];
-
-function validateEnv() {
-  const required =
-    process.env.NODE_ENV === 'production'
-      ? [...REQUIRED_ENV_VARS, ...PRODUCTION_REQUIRED_ENV_VARS]
-      : REQUIRED_ENV_VARS;
-  const missing = required.filter((key) => !process.env[key]);
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(', ')}`,
-    );
-  }
-}
+import { validateEnv } from './common/config/env.schema.js';
 
 async function bootstrap() {
   validateEnv();
@@ -81,7 +59,8 @@ async function bootstrap() {
     origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id'],
+    exposedHeaders: ['x-request-id'],
     maxAge: 86400,
   });
 

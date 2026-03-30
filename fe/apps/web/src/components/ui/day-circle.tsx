@@ -11,6 +11,7 @@ interface DayCircleProps {
   size?: 'sm' | 'md' | 'lg';
   label?: string;
   onClick?: () => void;
+  imageLoading?: 'lazy' | 'eager';
 }
 
 const sizeClasses = {
@@ -28,6 +29,7 @@ export function DayCircle({
   size = 'md',
   label,
   onClick,
+  imageLoading = 'lazy',
 }: DayCircleProps) {
   const today = isToday(date);
   const hasImage = !!imageUrl;
@@ -49,7 +51,12 @@ export function DayCircle({
       : undefined;
 
   const content = hasImage ? (
-    <img src={imageUrl!} alt="" className="h-full w-full object-cover" />
+    <img
+      src={imageUrl!}
+      alt=""
+      loading={imageLoading}
+      className="h-full w-full object-cover"
+    />
   ) : null;
 
   if (!onClick) {

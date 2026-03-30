@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -20,6 +20,8 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module.js';
 import { UsersModule } from './users/users.module.js';
 import { SupportModule } from './support/support.module.js';
 import { SentryModule } from '@sentry/nestjs/setup';
+import { CommonModule } from './common/common.module.js';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -34,11 +36,15 @@ const isProduction = process.env.NODE_ENV === 'production';
       pinoHttp: {
         level: isProduction ? 'info' : 'debug',
         transport: isProduction ? undefined : { target: 'pino-pretty' },
+        customProps: (req: any) => ({
+          correlationId: req.headers?.['x-request-id'],
+        }),
         autoLogging: true,
         quietReqLogger: true,
         redact: ['req.headers.authorization'],
       },
     }),
+    CommonModule,
     PrismaModule,
     AuthModule,
     CategoriesModule,
@@ -58,4 +64,8 @@ const isProduction = process.env.NODE_ENV === 'production';
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(CorrelationIdMiddleware).forRoutes('*');
+  }
+}

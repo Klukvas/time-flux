@@ -13,6 +13,7 @@ import {
 } from '../common/errors/app.error.js';
 import type { GoogleProfile } from './strategies/google.strategy.js';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service.js';
+import { AuditLoggerService } from '../common/services/audit-logger.service.js';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -103,6 +104,12 @@ describe('AuthService', () => {
           provide: SubscriptionsService,
           useValue: {
             getTier: jest.fn().mockResolvedValue('FREE'),
+          },
+        },
+        {
+          provide: AuditLoggerService,
+          useValue: {
+            log: jest.fn(),
           },
         },
       ],
@@ -518,7 +525,7 @@ describe('AuthService', () => {
       const rawToken = 'logout-token';
       const expectedHash = createHash('sha256').update(rawToken).digest('hex');
 
-      await service.logout(rawToken);
+      await service.logout(rawToken, 'user-1');
 
       expect(prisma.refreshToken.deleteMany).toHaveBeenCalledWith({
         where: { tokenHash: expectedHash },
