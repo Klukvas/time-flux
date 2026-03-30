@@ -61,7 +61,7 @@ export function SupportModal({ open, onClose }: SupportModalProps) {
         subject: subject.trim(),
         body: body.trim(),
         page: window.location.pathname,
-        platform: 'web',
+        platform: 'time-flux::web',
       });
       toast.success(t('support.success'));
       resetForm();

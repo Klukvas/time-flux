@@ -61,14 +61,12 @@ vi.mock('@timeflux/domain', async () => {
 
 // Mock Radix Portal to render inline for testing
 vi.mock('@radix-ui/react-dialog', async () => {
-  const actual = await vi.importActual<
-    typeof import('@radix-ui/react-dialog')
-  >('@radix-ui/react-dialog');
+  const actual = await vi.importActual<typeof import('@radix-ui/react-dialog')>(
+    '@radix-ui/react-dialog',
+  );
   return {
     ...actual,
-    Portal: ({ children }: { children: React.ReactNode }) => (
-      <>{children}</>
-    ),
+    Portal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   };
 });
 
@@ -175,7 +173,7 @@ describe('SupportModal', () => {
       subject: 'Bug report',
       body: 'Something is broken',
       page: '/',
-      platform: 'web',
+      platform: 'time-flux::web',
     });
   });
 
