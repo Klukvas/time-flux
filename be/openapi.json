@@ -247,6 +247,26 @@
         ]
       }
     },
+    "/api/v1/subscriptions/prices": {
+      "get": {
+        "operationId": "SubscriptionsController_getPrices",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get subscription tier prices from Paddle",
+        "tags": [
+          "Subscriptions"
+        ]
+      }
+    },
     "/api/v1/subscriptions/cancel": {
       "post": {
         "operationId": "SubscriptionsController_cancelSubscription",
@@ -269,6 +289,63 @@
           }
         ],
         "summary": "Cancel current subscription",
+        "tags": [
+          "Subscriptions"
+        ]
+      }
+    },
+    "/api/v1/subscriptions/reactivate": {
+      "post": {
+        "operationId": "SubscriptionsController_reactivateSubscription",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reactivate a canceled subscription",
+        "tags": [
+          "Subscriptions"
+        ]
+      }
+    },
+    "/api/v1/subscriptions/change-plan": {
+      "post": {
+        "operationId": "SubscriptionsController_changePlan",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangePlanResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change subscription plan (upgrade or downgrade) via Paddle",
         "tags": [
           "Subscriptions"
         ]
@@ -1652,6 +1729,53 @@
         ]
       }
     },
+    "/api/v1/health/live": {
+      "get": {
+        "operationId": "HealthController_live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Process is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Liveness probe",
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "operationId": "HealthController_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is not ready"
+          }
+        },
+        "summary": "Readiness probe",
+        "tags": [
+          "Health"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "HealthController_check",
@@ -2111,6 +2235,43 @@
         },
         "required": [
           "message"
+        ]
+      },
+      "ChangePlanDto": {
+        "type": "object",
+        "properties": {
+          "tier": {
+            "type": "string",
+            "enum": [
+              "PRO",
+              "PREMIUM"
+            ],
+            "example": "PREMIUM"
+          }
+        },
+        "required": [
+          "tier"
+        ]
+      },
+      "ChangePlanResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Subscription upgraded to PREMIUM"
+          },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "PRO",
+              "PREMIUM"
+            ],
+            "example": "PREMIUM"
+          }
+        },
+        "required": [
+          "message",
+          "tier"
         ]
       },
       "CategoryResponseDto": {
@@ -3659,6 +3820,51 @@
           "averageMoodScore",
           "moodDistribution",
           "trendLast30Days"
+        ]
+      },
+      "LiveResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "ComponentsDto": {
+        "type": "object",
+        "properties": {
+          "database": {
+            "type": "string",
+            "example": "connected"
+          },
+          "s3": {
+            "type": "string",
+            "example": "connected"
+          }
+        },
+        "required": [
+          "database",
+          "s3"
+        ]
+      },
+      "ReadyResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "components": {
+            "$ref": "#/components/schemas/ComponentsDto"
+          }
+        },
+        "required": [
+          "status",
+          "components"
         ]
       },
       "HealthResponseDto": {
