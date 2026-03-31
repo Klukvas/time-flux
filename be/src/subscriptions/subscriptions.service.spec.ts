@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionsService } from './subscriptions.service.js';
 import { SubscriptionsRepository } from './subscriptions.repository.js';
 import { PaddleService } from './paddle.service.js';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   QuotaExceededError,
@@ -61,6 +62,18 @@ describe('SubscriptionsService', () => {
         { provide: SubscriptionsRepository, useValue: repo },
         { provide: PaddleService, useValue: paddleService },
         { provide: PrismaService, useValue: prisma },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: (key: string) => {
+              const map: Record<string, string> = {
+                PADDLE_PRO_PRICE_ID: 'pri_pro_test',
+                PADDLE_PREMIUM_PRICE_ID: 'pri_premium_test',
+              };
+              return map[key];
+            },
+          },
+        },
       ],
     }).compile();
 
