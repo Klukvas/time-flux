@@ -30,7 +30,7 @@ interface TierCacheEntry {
   readonly expiresAt: number;
 }
 
-interface PriceInfo {
+export interface PriceInfo {
   readonly tier: string;
   readonly amount: string;
   readonly currency: string;
