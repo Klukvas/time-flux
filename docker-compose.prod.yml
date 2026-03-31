@@ -107,8 +107,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:80/ || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 3
+      timeout: 10s
+      retries: 5
+      start_period: 15s
     mem_limit: 128m
     cpus: 0.25
     logging:
