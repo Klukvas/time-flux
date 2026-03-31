@@ -9,6 +9,8 @@ import {
   FeatureLockedError,
   SubscriptionNotFoundError,
   PaddleCancelError,
+  PaddleUpgradeError,
+  InvalidUpgradeError,
 } from '../common/errors/app.error.js';
 
 const USER_ID = 'user-1';
@@ -47,6 +49,12 @@ describe('SubscriptionsService', () => {
       isEnabled: true,
       cancelSubscription: jest.fn().mockResolvedValue(undefined),
       getSubscription: jest.fn(),
+      updateSubscription: jest.fn().mockResolvedValue(undefined),
+      clearScheduledChange: jest.fn().mockResolvedValue(undefined),
+      getPrice: jest.fn().mockResolvedValue({
+        unitPrice: { amount: '600', currencyCode: 'USD' },
+        billingCycle: { interval: 'month' },
+      }),
     };
 
     prisma = {
@@ -317,6 +325,194 @@ describe('SubscriptionsService', () => {
       await expect(service.cancelSubscription(USER_ID)).rejects.toThrow(
         PaddleCancelError,
       );
+    });
+  });
+
+  // ─── changePlan ───────────────────────────────────────────
+
+  describe('changePlan', () => {
+    const proSub = () =>
+      makeSub({
+        tier: 'PRO',
+        paddleSubscriptionId: 'sub_abc',
+        status: 'ACTIVE',
+      });
+
+    it('should upgrade PRO to PREMIUM via Paddle', async () => {
+      repo.findByUserId.mockResolvedValue(proSub());
+      repo.updateByUserId.mockResolvedValue(undefined);
+
+      const result = await service.changePlan(USER_ID, 'PREMIUM');
+
+      expect(paddleService.updateSubscription).toHaveBeenCalledWith(
+        'sub_abc',
+        'pri_premium_test',
+        'prorated_immediately',
+      );
+      expect(repo.updateByUserId).toHaveBeenCalledWith(
+        USER_ID,
+        expect.objectContaining({ tier: 'PREMIUM', canceledAt: null }),
+      );
+      expect(result.tier).toBe('PREMIUM');
+    });
+
+    it('should downgrade PREMIUM to PRO with next billing proration', async () => {
+      repo.findByUserId.mockResolvedValue(
+        makeSub({
+          tier: 'PREMIUM',
+          paddleSubscriptionId: 'sub_abc',
+          status: 'ACTIVE',
+        }),
+      );
+      repo.updateByUserId.mockResolvedValue(undefined);
+
+      const result = await service.changePlan(USER_ID, 'PRO');
+
+      expect(paddleService.updateSubscription).toHaveBeenCalledWith(
+        'sub_abc',
+        'pri_pro_test',
+        'prorated_next_billing_period',
+      );
+      // Downgrade does not change tier optimistically
+      expect(repo.updateByUserId).toHaveBeenCalledWith(USER_ID, {
+        canceledAt: null,
+      });
+      expect(result.tier).toBe('PRO');
+    });
+
+    it('should clear scheduled cancellation before changing plan', async () => {
+      repo.findByUserId.mockResolvedValue(
+        makeSub({
+          tier: 'PRO',
+          paddleSubscriptionId: 'sub_abc',
+          status: 'ACTIVE',
+          canceledAt: new Date(),
+        }),
+      );
+      repo.updateByUserId.mockResolvedValue(undefined);
+
+      await service.changePlan(USER_ID, 'PREMIUM');
+
+      expect(paddleService.clearScheduledChange).toHaveBeenCalledWith(
+        'sub_abc',
+      );
+      expect(paddleService.updateSubscription).toHaveBeenCalled();
+    });
+
+    it('should throw InvalidUpgradeError for same tier', async () => {
+      repo.findByUserId.mockResolvedValue(proSub());
+
+      await expect(service.changePlan(USER_ID, 'PRO')).rejects.toThrow(
+        InvalidUpgradeError,
+      );
+    });
+
+    it('should throw InvalidUpgradeError for non-active subscription', async () => {
+      repo.findByUserId.mockResolvedValue(
+        makeSub({
+          tier: 'PRO',
+          paddleSubscriptionId: 'sub_abc',
+          status: 'PAUSED',
+        }),
+      );
+
+      await expect(service.changePlan(USER_ID, 'PREMIUM')).rejects.toThrow(
+        InvalidUpgradeError,
+      );
+    });
+
+    it('should throw SubscriptionNotFoundError when no subscription', async () => {
+      repo.findByUserId.mockResolvedValue(null);
+
+      await expect(service.changePlan(USER_ID, 'PREMIUM')).rejects.toThrow(
+        SubscriptionNotFoundError,
+      );
+    });
+
+    it('should throw PaddleUpgradeError when Paddle fails', async () => {
+      repo.findByUserId.mockResolvedValue(proSub());
+      (paddleService.updateSubscription as jest.Mock).mockRejectedValue(
+        new Error('Paddle error'),
+      );
+
+      await expect(service.changePlan(USER_ID, 'PREMIUM')).rejects.toThrow(
+        PaddleUpgradeError,
+      );
+    });
+  });
+
+  // ─── reactivateSubscription ────────────────────────────────
+
+  describe('reactivateSubscription', () => {
+    it('should clear scheduled change and canceledAt', async () => {
+      repo.findByUserId.mockResolvedValue(
+        makeSub({ paddleSubscriptionId: 'sub_abc', canceledAt: new Date() }),
+      );
+      repo.updateByUserId.mockResolvedValue(undefined);
+
+      const result = await service.reactivateSubscription(USER_ID);
+
+      expect(paddleService.clearScheduledChange).toHaveBeenCalledWith(
+        'sub_abc',
+      );
+      expect(repo.updateByUserId).toHaveBeenCalledWith(USER_ID, {
+        canceledAt: null,
+      });
+      expect(result.message).toContain('reactivated');
+    });
+
+    it('should throw InvalidUpgradeError when not canceled', async () => {
+      repo.findByUserId.mockResolvedValue(
+        makeSub({ paddleSubscriptionId: 'sub_abc', canceledAt: null }),
+      );
+
+      await expect(service.reactivateSubscription(USER_ID)).rejects.toThrow(
+        InvalidUpgradeError,
+      );
+    });
+
+    it('should throw SubscriptionNotFoundError when no subscription', async () => {
+      repo.findByUserId.mockResolvedValue(null);
+
+      await expect(service.reactivateSubscription(USER_ID)).rejects.toThrow(
+        SubscriptionNotFoundError,
+      );
+    });
+
+    it('should throw PaddleUpgradeError when Paddle fails', async () => {
+      repo.findByUserId.mockResolvedValue(
+        makeSub({ paddleSubscriptionId: 'sub_abc', canceledAt: new Date() }),
+      );
+      (paddleService.clearScheduledChange as jest.Mock).mockRejectedValue(
+        new Error('Paddle error'),
+      );
+
+      await expect(service.reactivateSubscription(USER_ID)).rejects.toThrow(
+        PaddleUpgradeError,
+      );
+    });
+  });
+
+  // ─── getPrices ─────────────────────────────────────────────
+
+  describe('getPrices', () => {
+    it('should fetch prices from Paddle', async () => {
+      const prices = await service.getPrices();
+
+      expect(paddleService.getPrice).toHaveBeenCalledTimes(2);
+      expect(prices).toHaveLength(2);
+      expect(prices[0]).toMatchObject({
+        amount: '600',
+        currency: 'USD',
+      });
+    });
+
+    it('should cache prices on second call', async () => {
+      await service.getPrices();
+      await service.getPrices();
+
+      // Only called during first fetch
+      expect(paddleService.getPrice).toHaveBeenCalledTimes(2);
     });
   });
 });
