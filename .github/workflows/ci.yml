@@ -459,7 +459,8 @@ jobs:
             # Pull latest images
             docker compose pull
 
-            # Restart services
+            # Restart services (force-recreate nginx to pick up config changes)
+            docker compose up -d --remove-orphans --force-recreate nginx
             docker compose up -d --remove-orphans
 
             # Wait for containers to be healthy (timeout 120s)
